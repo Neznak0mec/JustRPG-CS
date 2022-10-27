@@ -13,19 +13,19 @@ public class Profilecommands : InteractionModuleBase<SocketInteractionContext>
             _bases = service;
         }
 
-        [SlashCommand("profile", "da")]
+        [SlashCommand("profile", "Просмотреть профиль")]
         public async Task Profile(
             [Discord.Interactions.Summary(name: "user", description:"пользователь чей профиль хотете посмотерть")]
             Discord.IUser? needToFound = null)
         {
             if (needToFound == null)
                 needToFound = Context.User;
-            
+
             User? user = (User)_bases.GetFromDataBase(Bases.Users, needToFound.Id);
-            
+
             if (user == null)
                 await RespondAsync(embed: EmbedCreater.ErrorEmbed("Данный пользователь не найден"), ephemeral: true);
             else
-                await RespondAsync(embed: EmbedCreater.UserProfile(user, needToFound));
+                await RespondAsync(embed: EmbedCreater.UserProfile(user, needToFound), components:ButtonSets.ProfileButtonsSet());
         }
 }

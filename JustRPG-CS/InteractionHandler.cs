@@ -22,6 +22,7 @@ namespace JustRPG_CS
         {
             await _commands.AddModulesAsync(Assembly.GetEntryAssembly(), _services);
             _client.InteractionCreated += HandleInteraction;
+            _client.ButtonExecuted += MyButtonHandler;
         }
 
         private async Task HandleInteraction(SocketInteraction arg)
@@ -35,6 +36,11 @@ namespace JustRPG_CS
             {
                 Console.WriteLine(ex.ToString());
             }
+        }
+
+        public async Task MyButtonHandler(SocketMessageComponent component)
+        {
+           ButtonHandler.ButtonDistributor(component.Data.CustomId);
         }
         
     }

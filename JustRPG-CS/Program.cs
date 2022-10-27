@@ -3,9 +3,10 @@ using Discord.Interactions;
 using Discord.WebSocket;
 using JustRPG_CS;
 
-using MongoDB.Bson;
-using MongoDB.Driver;
+using Serilog;
+using Serilog.Events;
 
+using Microsoft.Extensions.Logging.Console;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
@@ -40,20 +41,44 @@ public class Program
         var _client = provider.GetRequiredService<DiscordSocketClient>();
         var sCommands = provider.GetRequiredService<InteractionService>();
         await provider.GetRequiredService<InteractionHandler>().InitializeAsync();
+        
+        Log.Logger = new LoggerConfiguration()
+            .MinimumLevel.Verbose()
+            .Enrich.FromLogContext()
+            .WriteTo.Console()
+            .CreateLogger();
+        
 
-        _client.Log += async (LogMessage msg) => { Console.WriteLine(msg.Message); };
+        // _client.Log += async (LogMessage msg) => { Console.WriteLine(msg.Message); };
+        _client.Log += LogAsync;
         sCommands.Log += async (LogMessage msg) => { Console.WriteLine(msg.Message); };
 
         _client.Ready += async () =>
         {
-            Console.WriteLine(_client.CurrentUser.Id + " is logined!");
+            Log.Fatal("{currentUserId} +  is logined!", _client.CurrentUser.Id);
             await sCommands.RegisterCommandsGloballyAsync();
-            Console.WriteLine("commands are loaded");
+            Log.Verbose("commands are loaded");
         };
 
         await _client.LoginAsync(Discord.TokenType.Bot, Environment.GetEnvironmentVariable("BotToken"));
         await _client.StartAsync();
 
         await Task.Delay(-1);
+    }
+    
+    private static async Task LogAsync(LogMessage message)
+    {
+        var severity = message.Severity switch
+        {
+            LogSeverity.Critical => LogEventLevel.Fatal,
+            LogSeverity.Error => LogEventLevel.Error,
+            LogSeverity.Warning => LogEventLevel.Warning,
+            LogSeverity.Info => LogEventLevel.Information,
+            LogSeverity.Verbose => LogEventLevel.Verbose,
+            LogSeverity.Debug => LogEventLevel.Debug,
+            _ => LogEventLevel.Information
+        };
+        Log.Write(severity, message.Exception, "[{Source}] {Message}", message.Source, message.Message);
+        await Task.CompletedTask;
     }
 }

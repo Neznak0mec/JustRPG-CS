@@ -40,7 +40,9 @@ namespace JustRPG_CS
 
         public async Task MyButtonHandler(SocketMessageComponent component)
         {
-           ButtonHandler.ButtonDistributor(component.Data.CustomId);
+            
+            var buttonHandler = new ButtonHandler(_client, component, _services.GetService(typeof(DataBase)));
+            await buttonHandler.ButtonDistributor();
         }
         
     }

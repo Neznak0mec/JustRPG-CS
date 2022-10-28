@@ -46,4 +46,20 @@ public class EmbedCreater
                                           $"| <:luck:997889165221957642> : {user.luck} | <:crit:997889163552628757> : {user.krit}");
         return emb.Build();
     }
+    
+    public Embed UserEqipment(User user, Discord.IUser member)
+    {
+        var emb = new EmbedBuilder();
+        emb.Title = $"Экипировка {member.Username}";
+        UserEquipment equipment = user.GetEquipmentAsItems(_dataBase);
+
+        emb.AddField(equipment.helmet == null ? "Шлем" : $"Шлем - {equipment.helmet!.name}", equipment.helmet == null ? "Не надето" :equipment.helmet!.GetStatsAsString(), true)
+            .AddField(equipment.armor == null ? "Нагрудник" : $"Нагрудник - {equipment.armor!.name}", equipment.armor == null ? "Не надето" :equipment.armor!.GetStatsAsString(), true)
+            .AddField(equipment.armor == null ? "Штаны" : $"Штаны - {equipment.pants!.name}", equipment.armor == null ? "Не надето" :equipment.pants!.GetStatsAsString(), true)
+            .AddField(equipment.shoes == null ? "Ботинки" : $"Ботинки - {equipment.shoes!.name}", equipment.shoes == null ? "Не надето" :equipment.shoes!.GetStatsAsString(), true)
+            .AddField(equipment.gloves == null ? "Перчатки" : $"Перчатки - {equipment.gloves!.name}", equipment.gloves == null ? "Не надето" : equipment.gloves!.GetStatsAsString(), true)
+            .AddField(equipment.weapon == null ? "Оружие" : $"Оружие - {equipment.weapon!.name}", equipment.weapon == null ? "Не надето" :equipment.weapon!.GetStatsAsString(), true);
+ 
+        return emb.Build();
+    }
 }

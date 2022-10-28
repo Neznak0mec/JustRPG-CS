@@ -1,7 +1,5 @@
-using Discord.Interactions;
 using Discord.WebSocket;
 using JustRPG_CS.Classes;
-using Serilog;
 
 namespace JustRPG_CS;
 
@@ -30,9 +28,10 @@ public class ButtonHandler
         switch (buttonInfo[0])
         {
             case "Profile":
-                await ProfileButtonRespod(buttonInfo[2]);
+                await ProfileButtonResponse(buttonInfo[2]);
                 break;
             case "Equipment":
+                await EquipmentButtonResponse(buttonInfo[2]);
                 break;
             case "Inventory":
                 break;
@@ -48,10 +47,26 @@ public class ButtonHandler
     }
 
 
-    private async Task ProfileButtonRespod( string memberID)
+    private async Task ProfileButtonResponse( string memberID)
     {
         var user = _client.GetUser(Convert.ToUInt64(memberID));
         var userDb = (User)_dataBase.GetFromDataBase(Bases.Users, memberID)!;
-        await _component.UpdateAsync(x => { x.Embed = EmbedCreater.UserProfile(userDb, user); });
+        await _component.UpdateAsync(x =>
+        {
+            x.Embed = EmbedCreater.UserProfile(userDb, user);
+            x.Components = ButtonSets.ProfileButtonsSet(_component.User.Id.ToString(), memberID, "Profile");
+        });
     }
+
+    private async Task EquipmentButtonResponse(string memberID)
+    {
+        var user = _client.GetUser(Convert.ToUInt64(memberID));
+        var userDb = (User)_dataBase.GetFromDataBase(Bases.Users, memberID)!;
+        await _component.UpdateAsync(x =>
+        {
+            x.Embed = new EmbedCreater(_dataBase).UserEqipment(userDb, user);
+            x.Components = ButtonSets.ProfileButtonsSet(_component.User.Id.ToString(), memberID, "Equipment");
+        });
+    }
+    
 }

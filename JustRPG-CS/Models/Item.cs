@@ -12,6 +12,7 @@ public record Item
     public GiveStats? give_stats { get; set; } = null;
     public bool generated { get; set; } = false;
     public string preset { get; set; } = "";
+    public int? heal { get; set; } = null;
     
     public class GiveStats
     {
@@ -22,4 +23,8 @@ public record Item
             public int speed { get; set; } = 0;
             public int krit { get; set; } = 0;
     }
+
+    public string GetStatsAsString() => $"Хп: {give_stats.hp} | Урон: {give_stats.damage} |Защита: {give_stats.defence} |" +
+                                        $"Скорость: {give_stats.luck} |Крит: {give_stats.speed} |Удача: {give_stats.krit}";
+
 }

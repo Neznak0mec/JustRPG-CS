@@ -48,16 +48,14 @@ public class Program
             .WriteTo.Console()
             .CreateLogger();
         
-
-        // _client.Log += async (LogMessage msg) => { Console.WriteLine(msg.Message); };
         _client.Log += LogAsync;
-        sCommands.Log += async (LogMessage msg) => { Console.WriteLine(msg.Message); };
+        sCommands.Log += async (LogMessage msg) => { Log.Information(msg.Message); };
 
         _client.Ready += async () =>
         {
-            Log.Fatal("{currentUserId} +  is logined!", _client.CurrentUser.Id);
+            Log.Information("{currentUserId} +  is logined!", _client.CurrentUser.Id);
             await sCommands.RegisterCommandsGloballyAsync();
-            Log.Verbose("commands are loaded");
+            Log.Information("commands are loaded");
         };
 
         await _client.LoginAsync(Discord.TokenType.Bot, Environment.GetEnvironmentVariable("BotToken"));
@@ -66,7 +64,7 @@ public class Program
         await Task.Delay(-1);
     }
     
-    private static async Task LogAsync(LogMessage message)
+    private async static Task LogAsync(LogMessage message)
     {
         var severity = message.Severity switch
         {

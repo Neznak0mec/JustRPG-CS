@@ -4,19 +4,8 @@ using MongoDB.Bson;
 using MongoDB.Driver;
 
 
-class MyType
-{
-    public IMongoCollection<User> UserDB{get; set;}
-    public IMongoCollection<Guid> GuildDB{get; set;}
-    public IMongoCollection<Item> ItemDB {get; set;}
-    private readonly IMongoCollection<BsonDocument> InfoDB;
-}
-
-
 namespace JustRPG_CS
 {
-    using MongoDB.Bson;
-    using MongoDB.Driver;
 
     public enum Bases
     {

@@ -53,12 +53,12 @@ public class EmbedCreater
         emb.Title = $"Экипировка {member.Username}";
         UserEquipment equipment = user.GetEquipmentAsItems(_dataBase);
 
-        emb.AddField(equipment.helmet == null ? "Шлем" : $"Шлем - {equipment.helmet!.name}", equipment.helmet == null ? "Не надето" :equipment.helmet!.GetStatsAsString(), true)
-            .AddField(equipment.armor == null ? "Нагрудник" : $"Нагрудник - {equipment.armor!.name}", equipment.armor == null ? "Не надето" :equipment.armor!.GetStatsAsString(), true)
-            .AddField(equipment.armor == null ? "Штаны" : $"Штаны - {equipment.pants!.name}", equipment.armor == null ? "Не надето" :equipment.pants!.GetStatsAsString(), true)
-            .AddField(equipment.shoes == null ? "Ботинки" : $"Ботинки - {equipment.shoes!.name}", equipment.shoes == null ? "Не надето" :equipment.shoes!.GetStatsAsString(), true)
+        emb.AddField(equipment.helmet == null ? "Шлем" : $"Шлем - {equipment.helmet!.name}", equipment.helmet == null ? "Не надето" : equipment.helmet!.GetStatsAsString(), true)
+            .AddField(equipment.armor == null ? "Нагрудник" : $"Нагрудник - {equipment.armor!.name}", equipment.armor == null ? "Не надето" : equipment.armor!.GetStatsAsString(), true)
+            .AddField(equipment.pants == null ? "Штаны" : $"Штаны - {equipment.pants!.name}", equipment.pants == null ? "Не надето" : equipment.pants!.GetStatsAsString(), true)
+            .AddField(equipment.shoes == null ? "Ботинки" : $"Ботинки - {equipment.shoes!.name}", equipment.shoes == null ? "Не надето" : equipment.shoes!.GetStatsAsString(), true)
             .AddField(equipment.gloves == null ? "Перчатки" : $"Перчатки - {equipment.gloves!.name}", equipment.gloves == null ? "Не надето" : equipment.gloves!.GetStatsAsString(), true)
-            .AddField(equipment.weapon == null ? "Оружие" : $"Оружие - {equipment.weapon!.name}", equipment.weapon == null ? "Не надето" :equipment.weapon!.GetStatsAsString(), true);
+            .AddField(equipment.weapon == null ? "Оружие" : $"Оружие - {equipment.weapon!.name}", equipment.weapon == null ? "Не надето" : equipment.weapon!.GetStatsAsString(), true);
  
         return emb.Build();
     }

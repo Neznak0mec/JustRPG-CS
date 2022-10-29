@@ -24,7 +24,7 @@ public record Item
             public int krit { get; set; } = 0;
     }
 
-    public string GetStatsAsString() => $"Хп: {give_stats.hp} | Урон: {give_stats.damage} |Защита: {give_stats.defence} |" +
-                                        $"Скорость: {give_stats.luck} |Крит: {give_stats.speed} |Удача: {give_stats.krit}";
+    public string GetStatsAsString() => $"<:health:997889169567260714>: {give_stats.hp} | <:strength:997889205684420718>: {give_stats.damage} | <:armor:997889166673186987>: {give_stats.defence} \n" +
+                                        $"<:dexterity:997889168216694854>: {give_stats.luck} | <:crit:997889163552628757>: {give_stats.speed} | <:crit:997889163552628757>: {give_stats.krit}";
 
 }

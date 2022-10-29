@@ -50,7 +50,7 @@ public class ButtonHandler
     private async Task ProfileButtonResponse( string memberID)
     {
         var user = _client.GetUser(Convert.ToUInt64(memberID));
-        var userDb = (User)_dataBase.GetFromDataBase(Bases.Users, memberID)!;
+        var userDb = (User)_dataBase.GetFromDataBase(Bases.Users, "id",memberID)!;
         await _component.UpdateAsync(x =>
         {
             x.Embed = EmbedCreater.UserProfile(userDb, user);
@@ -61,7 +61,7 @@ public class ButtonHandler
     private async Task EquipmentButtonResponse(string memberID)
     {
         var user = _client.GetUser(Convert.ToUInt64(memberID));
-        var userDb = (User)_dataBase.GetFromDataBase(Bases.Users, memberID)!;
+        var userDb = (User)_dataBase.GetFromDataBase(Bases.Users, "id",memberID)!;
         await _component.UpdateAsync(x =>
         {
             x.Embed = new EmbedCreater(_dataBase).UserEqipment(userDb, user);

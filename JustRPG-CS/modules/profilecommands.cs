@@ -21,7 +21,7 @@ public class Profilecommands : InteractionModuleBase<SocketInteractionContext>
             if (needToFound == null)
                 needToFound = Context.User;
 
-            User? user = (User)_bases.GetFromDataBase(Bases.Users, needToFound.Id);
+            User? user = (User)_bases.GetFromDataBase(Bases.Users, "id",needToFound.Id);
 
             if (user == null)
                 await RespondAsync(embed: EmbedCreater.ErrorEmbed("Данный пользователь не найден"), ephemeral: true);

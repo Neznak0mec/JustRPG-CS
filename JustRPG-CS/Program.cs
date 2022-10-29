@@ -2,7 +2,7 @@
 using Discord.Interactions;
 using Discord.WebSocket;
 using JustRPG_CS;
-
+using JustRPG_CS.Classes;
 using Serilog;
 using Serilog.Events;
 

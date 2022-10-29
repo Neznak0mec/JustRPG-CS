@@ -40,16 +40,20 @@ namespace JustRPG_CS
 
         }
 
-        public object? GetFromDataBase<T>(T bas, object val)
+        public object? GetFromDataBase<T>(T bas,string key ,object val)
         {
+            
             switch (bas)
             {
                 case Bases.Users:
-                    return _userbd.Find(x => x.id == Convert.ToInt64( val)).FirstOrDefault();
+                    var filterUser =Builders<User>.Filter.Eq(key, val);  
+                    return _userbd.Find(filterUser).FirstOrDefault();
                 case Bases.Guilds:
-                    return _guildsb.Find(x => x.id == Convert.ToInt64(val)).FirstOrDefault();
+                    var filterGuild =Builders<Guild>.Filter.Eq(key, val);  
+                    return _guildsb.Find(filterGuild).FirstOrDefault();
                 case Bases.Items:
-                    return _itemsbd.Find(x => x.id == val.ToString()).FirstOrDefault();
+                    var filterItem =Builders<Item>.Filter.Eq(key, val);  
+                    return _itemsbd.Find(filterItem).FirstOrDefault();
             }
 
             throw new InvalidOperationException();

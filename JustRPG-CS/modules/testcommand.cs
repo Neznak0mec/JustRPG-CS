@@ -29,7 +29,7 @@ namespace JustRPG_CS.modules
             components.WithButton(buttin);
 
             Console.WriteLine("получаю");
-            var a = (User)_bases.GetFromDataBase(Bases.Users, ctx.User.Id)!;
+            var a = (User)_bases.GetFromDataBase(Bases.Users, "id",ctx.User.Id)!;
             Console.WriteLine("получил");
 
             await RespondAsync($"{ctx.User.Id} баба {a.cash}", components: components.Build());

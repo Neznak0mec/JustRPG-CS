@@ -51,7 +51,7 @@ public class EmbedCreater
     {
         var emb = new EmbedBuilder();
         emb.Title = $"Экипировка {member.Username}";
-        UserEquipment equipment = user.GetEquipmentAsItems(_dataBase);
+        UserEquipment equipment = user.GetEquipmentAsItems(_dataBase!);
 
         emb.AddField(equipment.helmet == null ? "Шлем" : $"Шлем - {equipment.helmet!.name}", equipment.helmet == null ? "Не надето" : equipment.helmet!.GetStatsAsString(), true)
             .AddField(equipment.armor == null ? "Нагрудник" : $"Нагрудник - {equipment.armor!.name}", equipment.armor == null ? "Не надето" : equipment.armor!.GetStatsAsString(), true)

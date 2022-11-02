@@ -59,5 +59,13 @@ namespace JustRPG_CS
             throw new InvalidOperationException();
         }
 
+        public User CreateUser(long id)
+        {
+            User newUser = new User();
+            newUser.id = id;
+            _userbd.InsertOne(newUser);
+            return newUser;
+        }
+
     }
 }

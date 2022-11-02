@@ -17,7 +17,7 @@ public class User
     public int speed { get; set; }= 1;
     public int krit { get; set; }= 1;
     public int luck { get; set; }= 1;
-    public Equipment? equipment { get; set; }= null;
+    public Equipment? equipment { get; set; }
     public List<string> inventory { get; set; }= new List<string>();
     public int hp { get; set; }= 100;
     

@@ -2,11 +2,9 @@
 using Discord.Interactions;
 using Discord.WebSocket;
 using JustRPG_CS;
-using JustRPG_CS.Classes;
 using Serilog;
 using Serilog.Events;
 
-using Microsoft.Extensions.Logging.Console;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 

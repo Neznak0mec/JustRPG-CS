@@ -1,10 +1,6 @@
-using System.ComponentModel;
 using Discord;
-using Discord.Commands;
 using Discord.Interactions;
-using Discord.WebSocket;
 using JustRPG_CS.Classes;
-using IResult = Discord.Commands.IResult;
 
 namespace JustRPG_CS.modules
 {

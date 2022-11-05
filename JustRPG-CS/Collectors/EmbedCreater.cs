@@ -1,6 +1,5 @@
 using Discord;
 using JustRPG_CS.Classes;
-using Serilog;
 
 namespace JustRPG_CS;
 

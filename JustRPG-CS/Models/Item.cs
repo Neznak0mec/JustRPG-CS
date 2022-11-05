@@ -9,7 +9,7 @@ public record Item
     public int price { get; set; } = 0;
     public string description { get; set; } = "";
     public string rarity { get; set; } = "";
-    public GiveStats? give_stats { get; set; } = null;
+    public GiveStats? give_stats { get; set; }
     public bool generated { get; set; } = false;
     public string preset { get; set; } = "";
     public int? heal { get; set; } = null;

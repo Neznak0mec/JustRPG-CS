@@ -39,7 +39,7 @@ namespace JustRPG_CS
 
         }
 
-        public object? GetFromDataBase<T>(T bas,string key ,object val)
+        public object? GetFromDataBase(Bases bas,string key ,object val)
         {
             
             switch (bas)
@@ -66,5 +66,44 @@ namespace JustRPG_CS
             return newUser;
         }
 
+        public object? Add(Bases bas,string key ,object val, string field, int add)
+        {
+            switch (bas)
+            {
+                case Bases.Users:
+                    var filterUser =Builders<User>.Filter.Eq(key, val);
+                    var updateUser = Builders<User>.Update.Inc(field, add);
+                    return _userbd.UpdateOne(filterUser,updateUser);
+                case Bases.Guilds:
+                    var filterGuild =Builders<Guild>.Filter.Eq(key, val);  
+                    var updateGuild = Builders<Guild>.Update.Inc(field, add);
+                    return _guildsb.UpdateOne(filterGuild,updateGuild);
+                case Bases.Items:
+                    var filterItem =Builders<Item>.Filter.Eq(key, val);  
+                    var updateItem = Builders<Item>.Update.Inc(field, add);
+                    return _itemsbd.UpdateOne(filterItem,updateItem);
+            }
+            throw new InvalidOperationException();
+        }
+
+        public object? Set(Bases bas,string key ,object val, string field, int add)
+        {
+            switch (bas)
+            {
+                case Bases.Users:
+                    var filterUser =Builders<User>.Filter.Eq(key, val);
+                    var updateUser = Builders<User>.Update.Set(field, add);
+                    return _userbd.UpdateOne(filterUser,updateUser);
+                case Bases.Guilds:
+                    var filterGuild =Builders<Guild>.Filter.Eq(key, val);  
+                    var updateGuild = Builders<Guild>.Update.Set(field, add);
+                    return _guildsb.UpdateOne(filterGuild,updateGuild);
+                case Bases.Items:
+                    var filterItem =Builders<Item>.Filter.Eq(key, val);  
+                    var updateItem = Builders<Item>.Update.Set(field, add);
+                    return _itemsbd.UpdateOne(filterItem,updateItem);
+            }
+            throw new InvalidOperationException();
+        }
     }
 }

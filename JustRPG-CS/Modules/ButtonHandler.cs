@@ -1,5 +1,6 @@
 using Discord.WebSocket;
 using JustRPG_CS.Classes;
+using Serilog;
 
 namespace JustRPG_CS;
 
@@ -36,6 +37,10 @@ public class ButtonHandler
             case "Inventory":
                 break;
             case "UpSkills":
+                await UpSkillsButtonResponse(buttonInfo[1]);
+                break;
+            case "UpSkill":
+                await UpSkill(buttonInfo[1], buttonInfo[2]);
                 break;
         }
         
@@ -47,26 +52,57 @@ public class ButtonHandler
     }
 
 
-    private async Task ProfileButtonResponse( string memberID)
+    private async Task ProfileButtonResponse(string memberId)
     {
-        var user = _client.GetUser(Convert.ToUInt64(memberID));
-        var userDb = (User)_dataBase.GetFromDataBase(Bases.Users, "id",memberID)!;
+        var user = _client.GetUser(Convert.ToUInt64(memberId));
+        var userDb = (User)_dataBase.GetFromDataBase(Bases.Users, "id",memberId)!;
         await _component.UpdateAsync(x =>
         {
             x.Embed = EmbedCreater.UserProfile(userDb, user);
-            x.Components = ButtonSets.ProfileButtonsSet(_component.User.Id.ToString(), memberID, "Profile");
+            x.Components = ButtonSets.ProfileButtonsSet(_component.User.Id.ToString(), memberId, "Profile");
         });
     }
 
-    private async Task EquipmentButtonResponse(string memberID)
+    private async Task EquipmentButtonResponse(string memberId)
     {
-        var user = _client.GetUser(Convert.ToUInt64(memberID));
-        var userDb = (User)_dataBase.GetFromDataBase(Bases.Users, "id",memberID)!;
+        var user = _client.GetUser(Convert.ToUInt64(memberId));
+        var userDb = (User)_dataBase.GetFromDataBase(Bases.Users, "id",memberId)!;
         await _component.UpdateAsync(x =>
         {
-            x.Embed = new EmbedCreater(_dataBase).UserEqipment(userDb, user);
-            x.Components = ButtonSets.ProfileButtonsSet(_component.User.Id.ToString(), memberID, "Equipment");
+            x.Embed = new EmbedCreater(_dataBase).UserEquipment(userDb, user);
+            x.Components = ButtonSets.ProfileButtonsSet(_component.User.Id.ToString(), memberId, "Equipment");
         });
+    }
+
+    private async Task UpSkillsButtonResponse(string memberId)
+    {
+        var userDb = (User)_dataBase.GetFromDataBase(Bases.Users, "id",memberId)!;
+        await _component.UpdateAsync(x =>
+        {
+            x.Embed = new EmbedCreater(_dataBase).UpSkills();
+            x.Components = ButtonSets.UpUserSkills(memberId,userDb);
+        });
+    }
+
+    private async Task UpSkill(string memberId, string skill)
+    {
+        
+        var userDb = (User)_dataBase.GetFromDataBase(Bases.Users, "id",memberId)!;
+        if (userDb.skill_points <= 0)
+        {
+            await _component.RespondAsync( embed: EmbedCreater.ErrorEmbed("У вас недостаточно скилл поинтов"), ephemeral: true);
+            return;
+        }
+
+        _dataBase.Add(Bases.Users, "id", memberId, skill, 1);
+        _dataBase.Add(Bases.Users, "id", memberId, "skill_points", -1);
+        userDb = (User)_dataBase.GetFromDataBase(Bases.Users, "id", memberId)!;
+        await _component.UpdateAsync(x =>
+        {
+            x.Embed = new EmbedCreater(_dataBase).UpSkills();
+            x.Components = ButtonSets.UpUserSkills(memberId, userDb);
+        });
+        
     }
     
 }

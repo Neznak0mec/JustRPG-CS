@@ -5,7 +5,7 @@ namespace JustRPG_CS;
 
 public class EmbedCreater
 {
-    private DataBase? _dataBase;
+    private readonly DataBase? _dataBase;
 
     public EmbedCreater(DataBase? dataBase = null)
     {
@@ -46,19 +46,32 @@ public class EmbedCreater
         return emb.Build();
     }
     
-    public Embed UserEqipment(User user, Discord.IUser member)
+    public Embed UserEquipment(User user, Discord.IUser member)
     {
-        var emb = new EmbedBuilder();
-        emb.Title = $"Экипировка {member.Username}";
+        var embed = new EmbedBuilder();
+        embed.Title = $"Экипировка {member.Username}";
         UserEquipment equipment = user.GetEquipmentAsItems(_dataBase!);
 
-        emb.AddField(equipment.helmet  == null ? "Шлем"      : $"Шлем - {equipment.helmet!.name}",     equipment.helmet == null ? "Не надето" : equipment.helmet!.GetStatsAsString(), true)
+        embed.AddField(equipment.helmet  == null ? "Шлем"      : $"Шлем - {equipment.helmet!.name}",     equipment.helmet == null ? "Не надето" : equipment.helmet!.GetStatsAsString(), true)
             .AddField(equipment.armor  == null ? "Нагрудник" : $"Нагрудник - {equipment.armor!.name}", equipment.armor  == null ? "Не надето" : equipment.armor!.GetStatsAsString(), true)
             .AddField(equipment.pants  == null ? "Штаны"     : $"Штаны - {equipment.pants!.name}",     equipment.pants  == null ? "Не надето" : equipment.pants!.GetStatsAsString(), true)
             .AddField(equipment.shoes  == null ? "Ботинки"   : $"Ботинки - {equipment.shoes!.name}",   equipment.shoes  == null ? "Не надето" : equipment.shoes!.GetStatsAsString(), true)
             .AddField(equipment.gloves == null ? "Перчатки"  : $"Перчатки - {equipment.gloves!.name}", equipment.gloves == null ? "Не надето" : equipment.gloves!.GetStatsAsString(), true)
             .AddField(equipment.weapon == null ? "Оружие"    : $"Оружие - {equipment.weapon!.name}",   equipment.weapon == null ? "Не надето" : equipment.weapon!.GetStatsAsString(), true);
  
-        return emb.Build();
+        return embed.Build();
+    }
+
+    public Embed UpSkills()
+    {
+        var embed = new EmbedBuilder();
+        embed.Title = "Прокачка навыков";
+        embed.Description = "Уровень навыка не может превышать уровень персонажа\n" +
+                            "<:health:997889169567260714> - увеличивается только за счёт экипировки\n" +
+                            "<:armor:997889166673186987> - принимают на себя весь урон с его частичным уменьшением\n" +
+                            "<:dexterity:997889168216694854> - увеличивает вероятность уклонения\n" +
+                            "<:luck:997889165221957642> - увеличивает получаемый опыт и монеты\n" +
+                            "<:crit:997889163552628757> - вероятность критического удара\n";
+        return embed.Build();
     }
 }

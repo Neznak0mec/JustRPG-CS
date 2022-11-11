@@ -1,7 +1,7 @@
 using Discord;
-using JustRPG_CS.Classes;
+using JustRPG.Classes;
 
-namespace JustRPG_CS;
+namespace JustRPG;
 
 public static class ButtonSets
 {

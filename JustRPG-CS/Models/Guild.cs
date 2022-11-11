@@ -1,4 +1,4 @@
-namespace JustRPG_CS.Classes;
+namespace JustRPG.Classes;
 
 public record Guild
 {

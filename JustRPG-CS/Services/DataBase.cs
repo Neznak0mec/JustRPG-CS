@@ -1,9 +1,9 @@
-using JustRPG_CS.Classes;
+using JustRPG.Classes;
 using MongoDB.Bson;
 using MongoDB.Driver;
 
 
-namespace JustRPG_CS
+namespace JustRPG
 {
 
     public enum Bases
@@ -11,7 +11,8 @@ namespace JustRPG_CS
         Users,
         Guilds,
         Items,
-        Info
+        Info,
+        Interactions
     }
 
     public class DataBase
@@ -24,6 +25,7 @@ namespace JustRPG_CS
         private readonly IMongoCollection<Guild> _guildsb;
         private readonly IMongoCollection<Item> _itemsbd;
         private readonly IMongoCollection<BsonDocument> _infodb;
+        private readonly IMongoCollection<Inventory> _inventoryInteraction;
 
 
         public DataBase()
@@ -36,6 +38,7 @@ namespace JustRPG_CS
             _guildsb = _database.GetCollection<Guild>("servers");
             _itemsbd =  _database.GetCollection<Item>("items");
             _infodb = _database.GetCollection<BsonDocument>("info");
+            _inventoryInteraction = _database.GetCollection<Inventory>("interactions");
 
         }
 
@@ -66,6 +69,20 @@ namespace JustRPG_CS
             return newUser;
         }
 
+        public Inventory CreateInventory(User user,string finder)
+        {
+            Inventory newInventory = new Inventory();
+            newInventory.id = $"Inventory_{finder}_{user.id}";
+            newInventory.Reload(user.inventory);
+            
+            if (_inventoryInteraction.CountDocuments(x => x.id == newInventory.id) > 0)
+                _inventoryInteraction.ReplaceOne(x => x.id == newInventory.id, newInventory);
+            else
+                _inventoryInteraction.InsertOne(newInventory);
+            
+            return newInventory;
+        }
+
         public object? Add(Bases bas,string key ,object val, string field, int add)
         {
             switch (bas)
@@ -82,6 +99,7 @@ namespace JustRPG_CS
                     var filterItem =Builders<Item>.Filter.Eq(key, val);  
                     var updateItem = Builders<Item>.Update.Inc(field, add);
                     return _itemsbd.UpdateOne(filterItem,updateItem);
+                
             }
             throw new InvalidOperationException();
         }

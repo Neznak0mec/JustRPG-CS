@@ -1,5 +1,5 @@
 
-namespace JustRPG_CS.Classes;
+namespace JustRPG.Classes;
 
 public class User
 {
@@ -17,7 +17,7 @@ public class User
     public int krit { get; set; }= 1;
     public int luck { get; set; }= 1;
     public Equipment? equipment { get; set; }
-    public List<string> inventory { get; set; }= new List<string>();
+    public string[] inventory { get; set; }= {};
     public int hp { get; set; }= 100;
     
     public record Equipment
@@ -58,12 +58,12 @@ public class UserEquipment
 
     public UserEquipment(Item? helmet_, Item? armor_, Item? pants_, Item? shoes_, Item? gloves_, Item? weapon_)
     {
-        helmet = helmet_;
-        armor = armor_;
-        pants = pants_;
-        shoes = shoes_;
-        gloves = gloves_;
-        weapon = weapon_;
+        this.helmet = helmet;
+        this.armor = armor;
+        this.pants = pants;
+        this.shoes = shoes;
+        this.gloves = gloves;
+        this.weapon = weapon;
     }
     
 }

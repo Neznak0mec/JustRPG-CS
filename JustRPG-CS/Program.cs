@@ -1,7 +1,7 @@
 ﻿using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
-using JustRPG_CS;
+using JustRPG;
 using Serilog;
 using Serilog.Events;
 

@@ -2,7 +2,7 @@ using Discord.Interactions;
 using Discord.WebSocket;
 using System.Reflection;
 
-namespace JustRPG_CS
+namespace JustRPG
 {
     public class InteractionHandler
     {
@@ -39,9 +39,7 @@ namespace JustRPG_CS
 
         public async Task MyButtonHandler(SocketMessageComponent component)
         {
-            
-            var buttonHandler = new ButtonHandler(_client, component, _services.GetService(typeof(DataBase)));
-            await buttonHandler.ButtonDistributor();
+            await new ButtonHandler(_client, component, _services.GetService(typeof(DataBase))).ButtonDistributor();
         }
         
     }

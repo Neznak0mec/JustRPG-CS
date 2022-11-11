@@ -1,7 +1,7 @@
 using Discord;
-using JustRPG_CS.Classes;
+using JustRPG.Classes;
 
-namespace JustRPG_CS;
+namespace JustRPG;
 
 public class EmbedCreater
 {
@@ -34,8 +34,10 @@ public class EmbedCreater
 
     public static Embed UserProfile(User user, Discord.IUser member)
     {
-        var emb = new EmbedBuilder();
-        emb.Title = $"Профиль {member.Username}";
+        var emb = new EmbedBuilder
+        {
+            Title = $"Профиль {member.Username}"
+        };
         emb.AddField($"Уровень", $"{user.lvl}", inline: true)
             .AddField("Опыт", $"{Math.Round(user.exp_to_lvl,2)}\\{(int)user.exp}", inline: true)
             .AddField("Баланс", $"{user.cash}", inline: true)
@@ -48,8 +50,10 @@ public class EmbedCreater
     
     public Embed UserEquipment(User user, Discord.IUser member)
     {
-        var embed = new EmbedBuilder();
-        embed.Title = $"Экипировка {member.Username}";
+        var embed = new EmbedBuilder
+        {
+            Title = $"Экипировка {member.Username}"
+        };
         UserEquipment equipment = user.GetEquipmentAsItems(_dataBase!);
 
         embed.AddField(equipment.helmet  == null ? "Шлем"      : $"Шлем - {equipment.helmet!.name}",     equipment.helmet == null ? "Не надето" : equipment.helmet!.GetStatsAsString(), true)
@@ -62,16 +66,20 @@ public class EmbedCreater
         return embed.Build();
     }
 
-    public Embed UpSkills()
+    public static Embed UpSkills()
     {
-        var embed = new EmbedBuilder();
-        embed.Title = "Прокачка навыков";
-        embed.Description = "Уровень навыка не может превышать уровень персонажа\n" +
-                            "<:health:997889169567260714> - увеличивается только за счёт экипировки\n" +
-                            "<:armor:997889166673186987> - принимают на себя весь урон с его частичным уменьшением\n" +
-                            "<:dexterity:997889168216694854> - увеличивает вероятность уклонения\n" +
-                            "<:luck:997889165221957642> - увеличивает получаемый опыт и монеты\n" +
-                            "<:crit:997889163552628757> - вероятность критического удара\n";
+        var embed = new EmbedBuilder
+        {
+            Title = "Прокачка навыков",
+            Description = "Уровень навыка не может превышать уровень персонажа\n" +
+                          "<:health:997889169567260714> - увеличивается только за счёт экипировки\n" +
+                          "<:armor:997889166673186987> - принимают на себя весь урон с его частичным уменьшением\n" +
+                          "<:dexterity:997889168216694854> - увеличивает вероятность уклонения\n" +
+                          "<:luck:997889165221957642> - увеличивает получаемый опыт и монеты\n" +
+                          "<:crit:997889163552628757> - вероятность критического удара\n"
+        };
         return embed.Build();
     }
+    
+    
 }

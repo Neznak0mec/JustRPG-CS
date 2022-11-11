@@ -1,8 +1,8 @@
 using Discord;
 using Discord.Interactions;
-using JustRPG_CS.Classes;
+using JustRPG.Classes;
 
-namespace JustRPG_CS.modules
+namespace JustRPG.modules
 {
     public class InteractionModule : InteractionModuleBase<SocketInteractionContext>
     {

@@ -1,7 +1,8 @@
 using Discord;
-using JustRPG.Classes;
+using JustRPG.Models;
+using JustRPG.Services;
 
-namespace JustRPG;
+namespace JustRPG.Generators;
 
 public class EmbedCreater
 {

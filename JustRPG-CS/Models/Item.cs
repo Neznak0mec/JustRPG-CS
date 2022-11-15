@@ -1,4 +1,4 @@
-namespace JustRPG.Classes;
+namespace JustRPG.Models;
 
 public record Item
 {
@@ -24,7 +24,19 @@ public record Item
             public int krit { get; set; } = 0;
     }
 
-    public string GetStatsAsString() => $"<:health:997889169567260714>: {give_stats.hp} | <:strength:997889205684420718>: {give_stats.damage} | <:armor:997889166673186987>: {give_stats.defence} \n" +
-                                        $"<:dexterity:997889168216694854>: {give_stats.luck} | <:crit:997889163552628757>: {give_stats.speed} | <:crit:997889163552628757>: {give_stats.krit}";
+    public string GetStatsAsString()
+    {
+        if (generated)
+            return
+                $"<:health:997889169567260714>: {give_stats.hp} | <:strength:997889205684420718>: {give_stats.damage} | <:armor:997889166673186987>: {give_stats.defence} \n" +
+                $"<:dexterity:997889168216694854>: {give_stats.luck} | <:crit:997889163552628757>: {give_stats.speed} | <:crit:997889163552628757>: {give_stats.krit}";
+        else
+            return description;
+    }
+
+    public bool IsEquippable()
+    {
+        return type is "helmet" or "armor" or "gloves" or "pants" or "weapon";
+    }
 
 }

@@ -1,7 +1,9 @@
 using Discord.Interactions;
-using JustRPG.Classes;
+using JustRPG.Generators;
+using JustRPG.Models;
+using JustRPG.Services;
 
-namespace JustRPG.modules;
+namespace JustRPG.Modules;
 
 public class Profilecommands : InteractionModuleBase<SocketInteractionContext>
 {

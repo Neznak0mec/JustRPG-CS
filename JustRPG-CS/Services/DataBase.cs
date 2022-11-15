@@ -1,9 +1,9 @@
-using JustRPG.Classes;
+using JustRPG.Models;
 using MongoDB.Bson;
 using MongoDB.Driver;
+using Serilog;
 
-
-namespace JustRPG
+namespace JustRPG.Services
 {
 
     public enum Bases
@@ -30,7 +30,6 @@ namespace JustRPG
 
         public DataBase()
         {
-            
             _client = new MongoClient(Environment.GetEnvironmentVariable("DataBaseURL"));
             _database = _client.GetDatabase("testMMORPG");
 
@@ -56,6 +55,9 @@ namespace JustRPG
                 case Bases.Items:
                     var filterItem =Builders<Item>.Filter.Eq(key, val);  
                     return _itemsbd.Find(filterItem).FirstOrDefault();
+                case Bases.Interactions:
+                    var filretInteraction = Builders<Inventory>.Filter.Eq(key, val);
+                    return _inventoryInteraction.Find(filretInteraction).FirstOrDefault();
             }
 
             throw new InvalidOperationException();
@@ -63,16 +65,17 @@ namespace JustRPG
 
         public User CreateUser(long id)
         {
-            User newUser = new User();
-            newUser.id = id;
+            User newUser = new User{id  = id};
             _userbd.InsertOne(newUser);
             return newUser;
         }
 
         public Inventory CreateInventory(User user,string finder)
         {
-            Inventory newInventory = new Inventory();
-            newInventory.id = $"Inventory_{finder}_{user.id}";
+            Inventory newInventory = new Inventory()
+            {
+                id = $"Inventory_{user.id}_{finder}"
+            };
             newInventory.Reload(user.inventory);
             
             if (_inventoryInteraction.CountDocuments(x => x.id == newInventory.id) > 0)
@@ -99,9 +102,9 @@ namespace JustRPG
                     var filterItem =Builders<Item>.Filter.Eq(key, val);  
                     var updateItem = Builders<Item>.Update.Inc(field, add);
                     return _itemsbd.UpdateOne(filterItem,updateItem);
-                
+                default:
+                    return null;
             }
-            throw new InvalidOperationException();
         }
 
         public object? Set(Bases bas,string key ,object val, string field, int add)

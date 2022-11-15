@@ -1,6 +1,6 @@
 using Discord.WebSocket;
-using JustRPG.Classes;
-using JustRPG.Modules.ButtonsResponce;
+using JustRPG.Generators;
+using JustRPG.Modules.Responce;
 using Serilog;
 
 namespace JustRPG;

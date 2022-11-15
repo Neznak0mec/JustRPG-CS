@@ -1,10 +1,11 @@
+using JustRPG.Services;
 
-namespace JustRPG.Classes;
+namespace JustRPG.Models;
 
 public class User
 {
 
-    public long id { get; set; } = 0;
+    public long id { get; set; }
     public int cash { get; set; }= 0;
     public string cooldown { get; set; } = "";
     public int lvl { get; set; }= 0;
@@ -34,12 +35,12 @@ public class User
     {
         
         UserEquipment res = new UserEquipment(
-            helmet_: equipment?.helmet == null ? null :(Item)dataBase.GetFromDataBase(Bases.Items,"id" ,equipment.helmet)!,
-            armor_:  equipment?.armor == null ?  null :(Item)dataBase.GetFromDataBase(Bases.Items,"id" ,equipment.armor)!,
-            pants_:  equipment?.pants == null ?  null :(Item)dataBase.GetFromDataBase(Bases.Items,"id" ,equipment.pants)!,
-            shoes_:  equipment?.shoes == null ?  null :(Item)dataBase.GetFromDataBase(Bases.Items,"id" ,equipment.shoes)!,
-            gloves_: equipment?.gloves == null ? null :(Item)dataBase.GetFromDataBase(Bases.Items,"id" ,equipment.gloves)!,
-            weapon_: equipment?.weapon == null ? null :(Item)dataBase.GetFromDataBase(Bases.Items,"id" ,equipment.weapon)!
+            helmet: equipment?.helmet == null ? null :(Item)dataBase.GetFromDataBase(Bases.Items,"id" ,equipment.helmet)!,
+            armor:  equipment?.armor == null ?  null :(Item)dataBase.GetFromDataBase(Bases.Items,"id" ,equipment.armor)!,
+            pants:  equipment?.pants == null ?  null :(Item)dataBase.GetFromDataBase(Bases.Items,"id" ,equipment.pants)!,
+            shoes:  equipment?.shoes == null ?  null :(Item)dataBase.GetFromDataBase(Bases.Items,"id" ,equipment.shoes)!,
+            gloves: equipment?.gloves == null ? null :(Item)dataBase.GetFromDataBase(Bases.Items,"id" ,equipment.gloves)!,
+            weapon: equipment?.weapon == null ? null :(Item)dataBase.GetFromDataBase(Bases.Items,"id" ,equipment.weapon)!
             );
 
         return res;
@@ -56,7 +57,7 @@ public class UserEquipment
     public Item? gloves = null;
     public Item? weapon = null;
 
-    public UserEquipment(Item? helmet_, Item? armor_, Item? pants_, Item? shoes_, Item? gloves_, Item? weapon_)
+    public UserEquipment(Item? helmet, Item? armor, Item? pants, Item? shoes, Item? gloves, Item? weapon)
     {
         this.helmet = helmet;
         this.armor = armor;

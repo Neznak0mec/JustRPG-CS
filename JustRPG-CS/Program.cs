@@ -25,7 +25,7 @@ public class Program
                     .AddSingleton(x => new InteractionService(x.GetRequiredService<DiscordSocketClient>()))
                     .AddSingleton<InteractionHandler>()
                     .AddSingleton<DataBase>()
-                ).Build();
+            ).Build();
 
 
         await RunAsync(host);

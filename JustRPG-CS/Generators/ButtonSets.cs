@@ -1,7 +1,8 @@
 using Discord;
-using JustRPG.Classes;
+using JustRPG.Models;
+using JustRPG.Services;
 
-namespace JustRPG;
+namespace JustRPG.Generators;
 
 public static class ButtonSets
 {
@@ -30,6 +31,51 @@ public static class ButtonSets
             .WithButton(label: $"{user.krit} - крит",customId: $"UpSkill_{finder}_krit" , row: 2, disabled: user.krit >= lvl || !canUpSkills)
             .WithButton(label: "К профилю",customId:$"Profile_{finder}_{finder}" ,row: 3, emote: Emoji.Parse("🔙"));
 
+        return builder.Build();
+    }
+
+    public static MessageComponent InventoryButtonsSet(string finder, User user, Inventory inventory,Item?[] items)
+    {
+        
+        
+        var select = new SelectMenuBuilder()
+            .WithPlaceholder(
+                $"Тип взаимодействия: {(inventory.interactionType == "info" ? "информация" : inventory.interactionType == "sell" ? "продажа" : "экипировать")}")
+            .WithCustomId($"InvInteractionType_{finder}_{user.id}")
+            .AddOption("Информация", "info")
+            .AddOption("Экипировать", "equip")
+            .AddOption("Продать", "sell");
+
+        var builder = new ComponentBuilder()
+            .WithButton(label: "⮘", customId: $"InvPrewPage_{finder}_{user.id}", disabled: inventory.currentPage == 0, row: 0)
+            .WithButton(label: $"{inventory.currentPage+1}/{inventory.lastPage+1}", customId: "none1", disabled: true, row: 0)
+            .WithButton(label: "➣", customId: $"InvNextPage_{finder}_{user.id}", disabled: inventory.currentPage >= inventory.lastPage, row: 0)
+            .WithButton(label: "♺", customId: $"InvReload_{finder}_{user.id}")
+            .WithSelectMenu(select, row: 1);
+
+        ButtonStyle style = inventory.interactionType == "info" ? ButtonStyle.Primary : inventory.interactionType == "sell" ? ButtonStyle.Danger : ButtonStyle.Success;
+
+        for (int i = 0; i < items.Length; i++)
+        {
+            if (items[i] == null)
+            {
+                builder.WithButton(label: $"{i+1}", customId: $"null{Random.Shared.Next()}", style: style, disabled: true,row: 2);
+                continue;
+            }
+
+            if (finder == user.id.ToString())
+            {
+                if (inventory.interactionType == "equip")
+                    builder.WithButton(label: $"{i+1}", customId: $"InvEquip{i}_{finder}_{user.id}", style: style, disabled: !items[i].IsEquippable(),row: 2);
+                else
+                    builder.WithButton(label: $"{i+1}", customId: $"InvSell{i}_{finder}_{user.id}", style: style, disabled: false,row: 2);
+                continue;
+            }
+            builder.WithButton(label: $"{i+1}", customId: $"InvInfo{i}_{finder}_{user.id}", style: style, disabled: false,row: 2);
+            
+        }
+        builder.WithButton(label: "Назад к профилю",customId:$"Equipment_{finder}_{user.id}" ,row:3);
+        
         return builder.Build();
     }
 }

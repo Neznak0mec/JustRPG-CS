@@ -81,6 +81,20 @@ public class EmbedCreater
         };
         return embed.Build();
     }
+
+    public Embed UserInventory(IUser member,Item?[] items)
+    {
+        var emb = new EmbedBuilder{Title = $"Инвентарь {member.Username}"};
+        foreach (var item in items)
+        {
+            if (item == null)
+                emb.AddField("Пусто", "Слот не занят");
+            else
+                emb.AddField(item.name, item.GetStatsAsString());
+        }
+
+        return emb.Build();
+    }
     
     
 }

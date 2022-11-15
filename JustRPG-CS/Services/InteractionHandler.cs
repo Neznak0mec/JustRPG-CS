@@ -1,8 +1,8 @@
+using System.Reflection;
 using Discord.Interactions;
 using Discord.WebSocket;
-using System.Reflection;
 
-namespace JustRPG
+namespace JustRPG.Services
 {
     public class InteractionHandler
     {
@@ -21,7 +21,8 @@ namespace JustRPG
         {
             await _commands.AddModulesAsync(Assembly.GetEntryAssembly(), _services);
             _client.InteractionCreated += HandleInteraction;
-            _client.ButtonExecuted += MyButtonHandler;
+            _client.ButtonExecuted += ButtonInteraction;
+            _client.SelectMenuExecuted += SelectInteraction;
         }
 
         private async Task HandleInteraction(SocketInteraction arg)
@@ -37,10 +38,14 @@ namespace JustRPG
             }
         }
 
-        public async Task MyButtonHandler(SocketMessageComponent component)
+        private async Task ButtonInteraction(SocketMessageComponent component)
         {
-            await new ButtonHandler(_client, component, _services.GetService(typeof(DataBase))).ButtonDistributor();
+            await new ButtonHandler(_client, component, _services.GetService(typeof(DataBase))!).ButtonDistributor();
         }
-        
+
+        private async Task SelectInteraction(SocketMessageComponent component)
+        {
+            await new SelectHandler(_client, component, _services.GetService(typeof(DataBase))!).SelectDistributor();
+        }
     }
 } 

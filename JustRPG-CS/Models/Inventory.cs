@@ -1,14 +1,35 @@
-namespace JustRPG.Classes;
+using JustRPG.Services;
+using MongoDB.Bson.Serialization.Attributes;
+using Serilog;
+
+namespace JustRPG.Models;
 
 public class Inventory
 {
+    [BsonElement("_id")]
     public string id { get; set; }
+    
+    [BsonElement("interactionType")]
     public string interactionType { get; set; } = "info";
+    
+    [BsonElement("currentPage")]
     public int currentPage { get; set; } = -1;
+    
+    [BsonElement("items")]
     public string[] items { get; set; } = Array.Empty<string>();
+    
+    [BsonElement("currentPageItems")]
     public string?[] currentPageItems { get; set; } = { null , null, null, null, null };
+    
+    [BsonElement("lastPage")]
     public int lastPage { get; set; } = 0;
 
+    [BsonElement("lastUsage")]
+    public long lastUsage { get; set; } = DateTimeOffset.Now.ToUnixTimeSeconds();
+
+    [BsonIgnore] 
+    private DataBase _dataBase;
+    
     public void NextPage()
     {
         if (currentPage >= lastPage)
@@ -46,7 +67,8 @@ public class Inventory
         interactionType = "info";
         currentPage = 0;
         items = inventory;
-        
+        lastPage = items.Length / 5 ;
+        Log.Debug(lastPage.ToString());
         Array.Fill(currentPageItems, null);
         for (int i = 0; i < (items.Length > 5 ? 5 : items.Length); i++)
         {
@@ -56,15 +78,22 @@ public class Inventory
 
     public Item?[] GetItems(DataBase dataBase)
     {
-        Item?[] getItems = {(Item?)null, (Item?)null, (Item?)null, (Item?)null, (Item?)null };
+        _dataBase = dataBase;
+        Item?[] getItems = {null, null, null, null, null };
         for (int i = 0; i < currentPageItems.Length; i++)
         {
             if (currentPageItems[i] == null)
                 break;
 
-            getItems[i] = (Item)dataBase.GetFromDataBase(Bases.Items, "id", currentPageItems[i]!)!;
+            getItems[i] = (Item)_dataBase.GetFromDataBase(Bases.Items, "id", currentPageItems[i]!)!;
         }
 
         return getItems;
+    }
+    
+    ~Inventory()
+    {
+        Log.Debug("Destructed");
+        _dataBase.Update(Bases.Interactions,this);
     }
 }

@@ -28,38 +28,26 @@ public class Inventory
     public long lastUsage { get; set; } = DateTimeOffset.Now.ToUnixTimeSeconds();
 
     [BsonIgnore] 
-    private DataBase _dataBase;
-    
+    public DataBase? DataBase = null;
+
     public void NextPage()
     {
-        if (currentPage >= lastPage)
-        {
-            currentPage = lastPage;
-            return;
-        }
-
-        currentPage++;
-        int lastItem = (currentPage + 1) * 5 > items.Length ? items.Length : (currentPage + 1) * 5-1;
-        Array.Fill(currentPageItems, null);
-        for (int i = 0,itemIndex = currentPage*5-1; itemIndex < lastItem; i++, itemIndex++)
-        {
-            currentPageItems[i] = items[itemIndex];
-        }
         
+        currentPage++;
+        if (currentPage > lastPage)
+            currentPage = lastPage;
+        
+        Save();
     }
 
     public void PrewPage()
     {
-        if (currentPage == 0)
-            return;
-
         currentPage--;
-        int lastItem = (currentPage + 1) * 5 > items.Length ? items.Length : (currentPage + 1) * 5-1;
-        Array.Fill(currentPageItems, null);
-        for (int i = 0,itemIndex = currentPage*5; itemIndex < lastItem; i++, itemIndex++)
-        {
-            currentPageItems[i] = items[itemIndex];
-        }
+        
+        if (currentPage < 0)
+            currentPage = 0;
+        
+        Save();
     }
 
     public void Reload(string[] inventory)
@@ -68,32 +56,42 @@ public class Inventory
         currentPage = 0;
         items = inventory;
         lastPage = items.Length / 5 ;
-        Log.Debug(lastPage.ToString());
-        Array.Fill(currentPageItems, null);
-        for (int i = 0; i < (items.Length > 5 ? 5 : items.Length); i++)
-        {
-            currentPageItems[i] = items[i];
-        }
+        lastUsage = DateTimeOffset.Now.ToUnixTimeSeconds();
+        
+        Save();
     }
 
     public Item?[] GetItems(DataBase dataBase)
     {
-        _dataBase = dataBase;
         Item?[] getItems = {null, null, null, null, null };
         for (int i = 0; i < currentPageItems.Length; i++)
         {
             if (currentPageItems[i] == null)
                 break;
 
-            getItems[i] = (Item)_dataBase.GetFromDataBase(Bases.Items, "id", currentPageItems[i]!)!;
+            getItems[i] = (Item)dataBase.ItemDb.Get("id", currentPageItems[i]!)!;
         }
 
         return getItems;
     }
-    
-    ~Inventory()
+
+    private void UpdatePageItems()
     {
-        Log.Debug("Destructed");
-        _dataBase.Update(Bases.Interactions,this);
+        int lastItemIndex = currentPage * 5 + 5;
+        Array.Fill(currentPageItems, null);
+        for (int i = 0,itemIndex = currentPage*5; itemIndex < lastItemIndex; i++, itemIndex++)
+        {
+            if (itemIndex >= items.Length)
+                return;
+            currentPageItems[i] = items[itemIndex];
+        }
+    }
+    
+    private void Save(){
+        if (DataBase != null)
+        {
+            UpdatePageItems();
+            DataBase.InventoryDb.Update(this);
+        }
     }
 }

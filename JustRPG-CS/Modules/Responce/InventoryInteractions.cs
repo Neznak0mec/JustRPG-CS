@@ -1,3 +1,4 @@
+using Discord;
 using Discord.WebSocket;
 using JustRPG.Generators;
 using JustRPG.Models;
@@ -47,9 +48,20 @@ public class InventoryInteractions
             case "InvInteractionType":
                 await ChangeinteractionType(buttonInfo[1]);
                 break;
-            case "UpSkill":
-                // await UpSkill(buttonInfo[1], buttonInfo[2]);
-                break;
+        }
+
+        if (buttonInfo[0].StartsWith("InvInfo"))
+        {
+            await ItemInfo(buttonInfo[0]);
+        }
+        
+        else if (buttonInfo[0].StartsWith("InvEquip"))
+        {
+            
+        }
+        else
+        {
+            
         }
     }
 
@@ -78,6 +90,25 @@ public class InventoryInteractions
         await UpdateMessage(finder);
     }
 
+    private async Task ItemInfo(string buttonInfo)
+    {
+        var itemId = _inventory.currentPageItems[Convert.ToInt32(buttonInfo[^1].ToString())];
+        
+        Embed embed;
+        if (itemId == null)
+        {
+            embed = EmbedCreater.ErrorEmbed("Произошла ошибка, инвентрать будет обновлён");
+            _inventory.Reload(_dbUser.inventory);
+        }
+        else
+        {
+            var item = _dataBase.ItemDb.Get("id", itemId);
+            embed = item == null ? EmbedCreater.ErrorEmbed("Этот предмет не найден, странно 🤔") : EmbedCreater.ItemInfo((Item)item);
+        }
+
+        await _component.RespondAsync(embed: embed, ephemeral: true);
+    }
+
     private async Task UpdateMessage(string finder)
     {
         var items = _inventory!.GetItems(_dataBase);
@@ -88,6 +119,6 @@ public class InventoryInteractions
                 x.Components = ButtonSets.InventoryButtonsSet(finder, _dbUser, _inventory, items);
             }
         );
- 
+        
     }
 }

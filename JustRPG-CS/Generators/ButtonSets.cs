@@ -62,16 +62,19 @@ public static class ButtonSets
                 builder.WithButton(label: $"{i+1}", customId: $"null{Random.Shared.Next()}", style: style, disabled: true,row: 2);
                 continue;
             }
-
+            
+            if (inventory.interactionType == "info")
+            {
+                builder.WithButton(label: $"{i+1}", customId: $"InvInfo{i}_{finder}_{user.id}", style: style, disabled: false,row: 2);
+                continue;
+            }
             if (finder == user.id.ToString())
             {
                 if (inventory.interactionType == "equip")
-                    builder.WithButton(label: $"{i+1}", customId: $"InvEquip{i}_{finder}_{user.id}", style: style, disabled: !items[i].IsEquippable(),row: 2);
+                    builder.WithButton(label: $"{i+1}", customId: $"InvEquip{i}_{finder}_{user.id}", style: style, disabled: !items[i]!.IsEquippable(),row: 2);
                 else
                     builder.WithButton(label: $"{i+1}", customId: $"InvSell{i}_{finder}_{user.id}", style: style, disabled: false,row: 2);
-                continue;
             }
-            builder.WithButton(label: $"{i+1}", customId: $"InvInfo{i}_{finder}_{user.id}", style: style, disabled: false,row: 2);
             
         }
         builder.WithButton(label: "Назад к профилю",customId:$"Equipment_{finder}_{user.id}" ,row:3);

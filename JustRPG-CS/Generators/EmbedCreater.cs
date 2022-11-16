@@ -90,11 +90,39 @@ public class EmbedCreater
             if (item == null)
                 emb.AddField("Пусто", "Слот не занят");
             else
-                emb.AddField(item.name, item.GetStatsAsString());
+                emb.AddField($"{item.lvl} | {item.name}", item.GetStatsAsString());
         }
 
         return emb.Build();
     }
-    
+
+    public static Embed ItemInfo(Item item)
+    {
+        var emb = new EmbedBuilder { Title = "Информация о " + item.name }
+            .AddField("Тип", item.type, inline: true)
+            .AddField("Уровень", item.lvl.ToString(), inline: true)
+            .AddField("Редкость", item.rarity, inline: true)
+            .AddField("Описание", item.description != "" ? item.description : "Описания нет", inline: true)
+            .AddField("Статы", item.GetStatsAsString(), inline: true)
+            .AddField("uid", $"`{item.id}`", inline: true);
+
+        Color temp = item.rarity switch
+        {
+            "common" => 0xffffff,
+            "uncommon" => 0x0033cc,
+            "rare" => 0x6600ff,
+            "epic" => 0xffcc00,
+            "legendary" => 0xcc0000,
+            "impossible" => 0x000000,
+            "exotic" =>  0xcc0066,
+            "prize" => 0xcccc00,
+            "event" => 0x666600,
+            _ => 0xffffff
+        };
+
+        emb.Color = temp;
+            
+        return emb.Build();
+    }
     
 }

@@ -35,12 +35,12 @@ public class User
     {
         
         UserEquipment res = new UserEquipment(
-            helmet: equipment?.helmet == null ? null :(Item)dataBase.GetFromDataBase(Bases.Items,"id" ,equipment.helmet)!,
-            armor:  equipment?.armor == null ?  null :(Item)dataBase.GetFromDataBase(Bases.Items,"id" ,equipment.armor)!,
-            pants:  equipment?.pants == null ?  null :(Item)dataBase.GetFromDataBase(Bases.Items,"id" ,equipment.pants)!,
-            shoes:  equipment?.shoes == null ?  null :(Item)dataBase.GetFromDataBase(Bases.Items,"id" ,equipment.shoes)!,
-            gloves: equipment?.gloves == null ? null :(Item)dataBase.GetFromDataBase(Bases.Items,"id" ,equipment.gloves)!,
-            weapon: equipment?.weapon == null ? null :(Item)dataBase.GetFromDataBase(Bases.Items,"id" ,equipment.weapon)!
+            helmet: equipment?.helmet == null ? null :(Item)dataBase.ItemDb.Get("id",equipment.helmet)!,
+            armor:  equipment?.armor == null ?  null :(Item)dataBase.ItemDb.Get("id",equipment.armor)!,
+            pants:  equipment?.pants == null ?  null :(Item)dataBase.ItemDb.Get("id",equipment.pants)!,
+            shoes:  equipment?.shoes == null ?  null :(Item)dataBase.ItemDb.Get("id",equipment.shoes)!,
+            gloves: equipment?.gloves == null ? null :(Item)dataBase.ItemDb.Get("id",equipment.gloves)!,
+            weapon: equipment?.weapon == null ? null :(Item)dataBase.ItemDb.Get("id",equipment.weapon)!
             );
 
         return res;

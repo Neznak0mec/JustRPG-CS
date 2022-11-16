@@ -7,7 +7,7 @@ namespace JustRPG.Models;
 public class Inventory
 {
     [BsonElement("_id")]
-    public string id { get; set; }
+    public string? id { get; set; }
     
     [BsonElement("interactionType")]
     public string interactionType { get; set; } = "info";

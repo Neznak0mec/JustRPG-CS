@@ -33,6 +33,28 @@ public class EmbedCreater
         
     }
 
+    public static Embed WarningEmbed(string text)
+    {        
+        var emb = new EmbedBuilder
+        {
+            Title = "⚠ Внимание",
+            Color = Color.DarkOrange,
+            Description = text
+        };
+        return emb.Build();
+    }
+    
+    public static Embed SuccessEmbed(string text)
+    {        
+        var emb = new EmbedBuilder
+        {
+            Title = "✅ Успешно",
+            Color = Color.DarkOrange,
+            Description = text
+        };
+        return emb.Build();
+    } 
+
     public static Embed UserProfile(User user, Discord.IUser member)
     {
         var emb = new EmbedBuilder

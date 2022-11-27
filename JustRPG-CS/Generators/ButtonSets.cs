@@ -8,7 +8,6 @@ public static class ButtonSets
 {
     public static MessageComponent ProfileButtonsSet(string finder, string toFind, string currentButton = "Profile")
     {
-
         var builder = new ComponentBuilder()
             .WithButton(label: "Профиль", customId: $"Profile_{finder}_{toFind}", disabled: currentButton == "Profile")
             .WithButton(label: "Экипировка", customId: $"Equipment_{finder}_{toFind}", disabled: currentButton == "Equipment")
@@ -79,6 +78,15 @@ public static class ButtonSets
         }
         builder.WithButton(label: "Назад к профилю",customId:$"Equipment_{finder}_{user.id}" ,row:3);
         
+        return builder.Build();
+    }
+
+    public static MessageComponent AcceptActions(string uid,long userId)
+    {
+        var builder = new ComponentBuilder()
+            .WithButton(label: "Да", customId: $"Action_{userId}_{uid}_Accept", row: 0, style: ButtonStyle.Success)
+            .WithButton(label: "Нет", customId: $"Action_{userId}_{uid}_Denied", row: 0, style: ButtonStyle.Danger);
+
         return builder.Build();
     }
 }

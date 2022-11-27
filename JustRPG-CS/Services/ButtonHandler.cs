@@ -10,12 +10,14 @@ public class ButtonHandler
     private SocketMessageComponent _component;
     private ProfileButtons _profileButtons;
     private InventoryInteractions _inventoryInteractions;
+    private ActionButtons _actionButtons;
 
     public ButtonHandler(DiscordSocketClient client, SocketMessageComponent component, object service)
     {
         _component = component;
         _profileButtons = new ProfileButtons(client, component, service);
         _inventoryInteractions = new InventoryInteractions(client, component, service);
+        _actionButtons = new ActionButtons(client, component, service);
     }
 
     public async Task ButtonDistributor()
@@ -35,11 +37,16 @@ public class ButtonHandler
         {
             await _inventoryInteractions.Distributor(buttonInfo);
         }
+
+        if (buttonInfo[0] == "Action")
+        {
+            await _actionButtons.Distributor(buttonInfo);
+        }
     }
 
     private async Task WrongInteraction()
     {
-        await _component.RespondAsync(embed: EmbedCreater.ErrorEmbed("Вы не можете с этим взаимодействовать"));
+        await _component.RespondAsync(embed: EmbedCreater.ErrorEmbed("Вы не можете с этим взаимодействовать"), ephemeral:true);
     }
     
 

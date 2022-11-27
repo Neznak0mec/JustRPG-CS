@@ -121,4 +121,122 @@ public class InventoryInteractions
         );
         
     }
+
+    private async Task EquipItem(string buttonInfo)
+    {
+        var itemId = _inventory!.currentPageItems[Convert.ToInt32(buttonInfo[^1].ToString())];
+        object? item = null;
+        Item? itemToChange = null;
+        Embed embed;
+        Action? action = null;
+        
+        string UID = Guid.NewGuid().ToString().Split("-")[^1];
+        
+        if (itemId == null)
+        {
+            embed = EmbedCreater.ErrorEmbed("Произошла ошибка, инвентрать будет обновлён");
+            _inventory.Reload(_dbUser.inventory);
+            return;
+        }
+        else
+            item = _dataBase.ItemDb.Get(itemId);
+        
+        //todo Проверка на возможность экипировать
+
+        if (item != null)
+        {
+            Item tempItem = (Item)item;
+            string? idItemToChange = _dbUser.equipment!.GetByName(tempItem.type);
+            
+            action = new Action()
+            {
+                id = "Action_"+UID,
+                date = DateTimeOffset.Now.ToUnixTimeSeconds(),
+                userId = _dbUser.id,
+                type = "Equip",
+                args = new[]
+                {
+                    itemId!,"null"
+                }
+            };
+
+            
+            if (idItemToChange != null)
+            {
+                itemToChange = (Item)_dataBase.ItemDb.Get(idItemToChange)!;
+                action.args[1] = itemToChange.id;
+            }
+
+            embed = EmbedCreater.WarningEmbed(idItemToChange != null ? $"Вы уверены что хотите снять `{itemToChange!.name}` и надеть `{tempItem.name}` ?" : $"Вы уверены что хотите надеть `{tempItem.name}` ?");
+        }
+        else
+        {
+            embed = EmbedCreater.ErrorEmbed("Этот предмет не найден, странно 🤔");
+            action = null;
+        }
+
+        if (action != null)
+        {
+            _dataBase.ActionDb.CreateObject(action);
+            await _component.RespondAsync(embed: embed,components: ButtonSets.AcceptActions(UID, _dbUser.id), ephemeral: true);
+        }
+        else
+        {
+            await _component.RespondAsync(embed: embed, ephemeral: true);
+        }
+        
+    }
+
+    private async Task SellItem(string buttonInfo)
+    {
+        var itemId = _inventory!.currentPageItems[Convert.ToInt32(buttonInfo[^1].ToString())];
+        object? item = null;
+        Embed embed;
+        Action? action = null;
+        
+        string UID = Guid.NewGuid().ToString().Split("-")[^1];
+        
+        if (itemId == null)
+        {
+            embed = EmbedCreater.ErrorEmbed("Произошла ошибка, инвентрать будет обновлён");
+            _inventory.Reload(_dbUser.inventory);
+        }
+        else
+            item = _dataBase.ItemDb.Get(itemId);
+        
+        if (item != null)
+        {
+            Item tempItem = (Item)item;
+            
+            
+            action = new Action()
+            {
+                id = "Action_"+UID,
+                date = DateTimeOffset.Now.ToUnixTimeSeconds(),
+                type = "Sell",
+                userId = _dbUser.id,
+                args = new[]
+                {
+                    tempItem.id
+                }
+            };
+            
+            embed = EmbedCreater.WarningEmbed($"Вы уверены что хотите продать `{tempItem.name}` за `{tempItem.price / 4}`?");
+        }
+        else
+        {
+            embed = EmbedCreater.ErrorEmbed("Этот предмет не найден, странно 🤔");
+            action = null;
+        }
+        
+        if (action != null)
+        {
+            _dataBase.ActionDb.CreateObject(action);
+            await _component.RespondAsync(embed: embed,components: ButtonSets.AcceptActions(UID,_dbUser.id), ephemeral: true);
+        }
+        else
+        {
+            await _component.RespondAsync(embed: embed, ephemeral: true);
+        }
+    }
 }

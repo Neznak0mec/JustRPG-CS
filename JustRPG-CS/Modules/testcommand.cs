@@ -14,22 +14,10 @@ namespace JustRPG.Modules
             _bases = service;
         }
 
-        [SlashCommand("ping", "Receaving a ping message")]
-        public async Task Ping(
-            [Discord.Interactions.Summary(name: "number", description: "да")]
-            int number = 1
-        )
+        [SlashCommand("ping", "Reciave a ping message")]
+        public async Task Ping()
         {
-            var ctx = Context;
-            var buttin = new ButtonBuilder(label: "кнопочка", customId: $"{ctx.User.Id}-{ctx.Interaction.Id}");
-            var components = new ComponentBuilder();
-            components.WithButton(buttin);
-
-            Console.WriteLine("получаю");
-            User? a = (User)_bases.UserDb.Get("id", ctx.User.Id);
-            Console.WriteLine("получил");
-
-            await RespondAsync($"{ctx.User.Id} баба {a.cash}", components: components.Build());
+            await RespondAsync($"{( DateTimeOffset.Now - Context.Interaction.CreatedAt).TotalMilliseconds} ms to server");
         }
     }
 

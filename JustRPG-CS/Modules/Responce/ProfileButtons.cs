@@ -44,7 +44,7 @@ public class ProfileButtons
     private async Task ProfileButtonResponse(string memberId)
     {
         var user = _client.GetUser(Convert.ToUInt64(memberId));
-        var userDb = (User) _dataBase.UserDb.Get("id", memberId)!;
+        var userDb = (User) _dataBase.UserDb.Get(memberId)!;
 
         await ResponceMessage(EmbedCreater.UserProfile(userDb, user),
             ButtonSets.ProfileButtonsSet(_component.User.Id.ToString(), memberId));
@@ -53,7 +53,7 @@ public class ProfileButtons
     private async Task EquipmentButtonResponse(string memberId)
     {
         var user = _client.GetUser(Convert.ToUInt64(memberId));
-        var userDb = (User)_dataBase.UserDb.Get("id", memberId)!;
+        var userDb = (User)_dataBase.UserDb.Get( memberId)!;
 
         await ResponceMessage(new EmbedCreater(_dataBase).UserEquipment(userDb, user),
             ButtonSets.ProfileButtonsSet(_component.User.Id.ToString(), memberId, "Equipment"));
@@ -61,16 +61,16 @@ public class ProfileButtons
 
     private async Task UpSkillsButtonResponse(string memberId)
     {
-        var userDb = (User)_dataBase.UserDb.Get("id", memberId)!;
+        var userDb = (User)_dataBase.UserDb.Get(memberId)!;
         await ResponceMessage(EmbedCreater.UpSkills(), ButtonSets.UpUserSkills(memberId, userDb));
     }
 
     public async Task InventoryButtonResponse(string memberId)
     {
-        var userDb = (User)_dataBase.UserDb.Get("id", memberId)!;
+        var userDb = (User)_dataBase.UserDb.Get(memberId)!;
         var user = _client.GetUser(Convert.ToUInt64(memberId));
 
-        Inventory inventory = (Inventory)_dataBase.InventoryDb.Get("id", $"Inventory_{userDb.id}_{_component.User.Id.ToString()}")!;
+        Inventory inventory = (Inventory)_dataBase.InventoryDb.Get( $"Inventory_{userDb.id}_{_component.User.Id.ToString()}")!;
 
         var items = inventory.GetItems(_dataBase);
         
@@ -82,7 +82,7 @@ public class ProfileButtons
     private async Task UpSkill(string memberId, string skill)
     {
         
-        var userDb = (User)_dataBase.UserDb.Get("id", memberId)!;
+        var userDb = (User)_dataBase.UserDb.Get(memberId)!;
         if (userDb.skill_points <= 0)
         {
             await _component.RespondAsync( embed: EmbedCreater.ErrorEmbed("У вас недостаточно скилл поинтов"), ephemeral: true);
@@ -91,7 +91,7 @@ public class ProfileButtons
 
         _dataBase.UserDb.Add(userDb,skill,1);
         _dataBase.UserDb.Add(userDb, "skill_points", -1);
-        userDb = (User)_dataBase.UserDb.Get("id", userDb.id)!;
+        userDb = (User)_dataBase.UserDb.Get(userDb.id)!;
 
         await ResponceMessage(EmbedCreater.UpSkills(), ButtonSets.UpUserSkills(memberId, userDb));
     }

@@ -51,8 +51,8 @@ public class InventoryDB: Collection
         else
             _collection.InsertOne(temp);
 
-        string userid = temp.id.Split('_')[2];
-        User user = (User)_dataBase.UserDb.Get("id", userid)!;
+        string userid = temp.id!.Split('_')[2];
+        User user = (User)_dataBase.UserDb.Get(userid)!;
         temp.Reload(user.inventory);
         
         return null;

@@ -21,7 +21,7 @@ public class Profilecommands : InteractionModuleBase<SocketInteractionContext>
             Discord.IUser? needToFound = null)
         {
             needToFound ??= Context.User;
-            User? user = (User)_bases.UserDb.Get("id", Context.User.Id);
+            User? user = (User)_bases.UserDb.Get(Context.User.Id);
 
             if (user == null && Context.User.Id == needToFound.Id)
                 user = (User)_bases.UserDb.CreateObject(Context.User.Id);

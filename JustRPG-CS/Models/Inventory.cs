@@ -69,7 +69,7 @@ public class Inventory
             if (currentPageItems[i] == null)
                 break;
 
-            getItems[i] = (Item)dataBase.ItemDb.Get("id", currentPageItems[i]!)!;
+            getItems[i] = (Item)dataBase.ItemDb.Get(currentPageItems[i]!)!;
         }
 
         return getItems;

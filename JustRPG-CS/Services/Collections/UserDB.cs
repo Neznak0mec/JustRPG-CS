@@ -15,7 +15,7 @@ public class UserDb : Collection
         _collection = mongoDatabase.GetCollection<User>("users");
     }
     
-    public object? Get(string key, object val)
+    public object? Get(object val,string key="id")
     {
         var filterUser =Builders<User>.Filter.Eq(key, val);  
         return _collection.Find(filterUser).FirstOrDefault();

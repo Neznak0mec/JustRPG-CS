@@ -29,22 +29,62 @@ public class User
         public string? shoes { get; set; }= null;
         public string? gloves { get; set; }=null;
         public string? weapon { get; set; }=null;
+        
+        public string? GetByName ( string name )
+        {
+            return name switch
+            {
+                ("helmet") => helmet,
+                ("armor") => armor,
+                ("pants") => pants,
+                ("shoes") => shoes,
+                ("gloves") => gloves,
+                ("weapon") => weapon,
+                _ => null
+            };
+        }
+
+        public void SetByName(string name, string value)
+        {
+            switch (name)
+            {
+                case("helmet"):
+                    helmet= value;
+                    break;
+                case("armor"):
+                    armor= value;
+                    break;
+                case("pants"):
+                    pants= value;
+                    break;
+                case("shoes"):
+                    shoes= value;
+                    break;
+                case("gloves"):
+                    gloves= value;
+                    break;
+                case("weapon"):
+                    weapon= value;
+                    break;
+            }
+        }
     }
 
     public UserEquipment GetEquipmentAsItems(DataBase dataBase)
     {
         
         UserEquipment res = new UserEquipment(
-            helmet: equipment?.helmet == null ? null :(Item)dataBase.ItemDb.Get("id",equipment.helmet)!,
-            armor:  equipment?.armor == null ?  null :(Item)dataBase.ItemDb.Get("id",equipment.armor)!,
-            pants:  equipment?.pants == null ?  null :(Item)dataBase.ItemDb.Get("id",equipment.pants)!,
-            shoes:  equipment?.shoes == null ?  null :(Item)dataBase.ItemDb.Get("id",equipment.shoes)!,
-            gloves: equipment?.gloves == null ? null :(Item)dataBase.ItemDb.Get("id",equipment.gloves)!,
-            weapon: equipment?.weapon == null ? null :(Item)dataBase.ItemDb.Get("id",equipment.weapon)!
+            helmet: equipment?.helmet == null ? null :(Item)dataBase.ItemDb.Get(equipment.helmet)!,
+            armor:  equipment?.armor == null ?  null :(Item)dataBase.ItemDb.Get(equipment.armor)!,
+            pants:  equipment?.pants == null ?  null :(Item)dataBase.ItemDb.Get(equipment.pants)!,
+            shoes:  equipment?.shoes == null ?  null :(Item)dataBase.ItemDb.Get(equipment.shoes)!,
+            gloves: equipment?.gloves == null ? null :(Item)dataBase.ItemDb.Get(equipment.gloves)!,
+            weapon: equipment?.weapon == null ? null :(Item)dataBase.ItemDb.Get(equipment.weapon)!
             );
 
         return res;
     }
+    
 }
 
 

@@ -16,7 +16,7 @@ public class InventoryDB: Collection
         _collection = mongoDatabase.GetCollection<Inventory>("interactions");
     }
     
-    public object? Get(string key, object val)
+    public object? Get(object val,string key="id")
     {
         var filterInventory = Builders<Inventory>.Filter.Eq(key, val);
         

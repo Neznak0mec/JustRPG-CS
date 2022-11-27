@@ -4,6 +4,7 @@ using JustRPG.Generators;
 using JustRPG.Models;
 using JustRPG.Services;
 using Serilog;
+using Action = JustRPG.Models.Action;
 
 namespace JustRPG.Modules.Responce;
 
@@ -27,10 +28,10 @@ public class InventoryInteractions
     
     public async Task Distributor(string[] buttonInfo)
     {
-        _inventory = (Inventory)_dataBase.InventoryDb.Get("id", $"Inventory_{buttonInfo[1]}_{buttonInfo[2]}")!;
+        _inventory = (Inventory)_dataBase.InventoryDb.Get($"Inventory_{buttonInfo[1]}_{buttonInfo[2]}")!;
         _inventory.DataBase = _dataBase;
         
-        _dbUser = (User)_dataBase.UserDb.Get("id", Convert.ToUInt64(buttonInfo[2]))!;
+        _dbUser = (User)_dataBase.UserDb.Get(Convert.ToUInt64(buttonInfo[2]))!;
         _member = _client.GetUser(Convert.ToUInt64(buttonInfo[2]));
         
         
@@ -54,14 +55,13 @@ public class InventoryInteractions
         {
             await ItemInfo(buttonInfo[0]);
         }
-        
         else if (buttonInfo[0].StartsWith("InvEquip"))
         {
-            
+            await EquipItem(buttonInfo[0]);
         }
         else
         {
-            
+            await SellItem(buttonInfo[0]);
         }
     }
 
@@ -92,7 +92,7 @@ public class InventoryInteractions
 
     private async Task ItemInfo(string buttonInfo)
     {
-        var itemId = _inventory.currentPageItems[Convert.ToInt32(buttonInfo[^1].ToString())];
+        var itemId = _inventory!.currentPageItems[Convert.ToInt32(buttonInfo[^1].ToString())];
         
         Embed embed;
         if (itemId == null)
@@ -102,7 +102,7 @@ public class InventoryInteractions
         }
         else
         {
-            var item = _dataBase.ItemDb.Get("id", itemId);
+            var item = _dataBase.ItemDb.Get(itemId);
             embed = item == null ? EmbedCreater.ErrorEmbed("Этот предмет не найден, странно 🤔") : EmbedCreater.ItemInfo((Item)item);
         }
 

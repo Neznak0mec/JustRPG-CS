@@ -5,7 +5,7 @@ namespace JustRPG.Interfaces;
 
 public interface Collection
 {
-    object? Get(string key, object val);
+    object? Get(object val,string key = "id");
 
     object CreateObject(object id);
 

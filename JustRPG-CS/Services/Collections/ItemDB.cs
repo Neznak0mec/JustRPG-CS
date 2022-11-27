@@ -13,7 +13,7 @@ public class ItemDB : Collection
         _collection = mongoDatabase.GetCollection<Item>("items");
     }
     
-    public object? Get(string key, object val)
+    public object? Get(object val,string key="id")
     {
         var filterItem =Builders<Item>.Filter.Eq(key, val);  
         return _collection.Find(filterItem).FirstOrDefault();

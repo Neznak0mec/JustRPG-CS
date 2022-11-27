@@ -15,6 +15,7 @@ public class DataBase
     public ItemDB ItemDb;
     public InventoryDB InventoryDb;
     public GuildDB GuildDb;
+    public ActionDB ActionDb;
     private readonly IMongoCollection<BsonDocument> _infodb;
 
 
@@ -27,6 +28,7 @@ public class DataBase
         ItemDb = new ItemDB(_database);
         InventoryDb = new InventoryDB(_database, this);
         GuildDb = new GuildDB(_database);
+        ActionDb = new ActionDB(_database);
         
         _infodb = _database.GetCollection<BsonDocument>("info");
     }

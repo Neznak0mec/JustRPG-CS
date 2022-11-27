@@ -13,7 +13,7 @@ public class GuildDB : Collection
         _collection = mongoDatabase.GetCollection<Guild>("servers");
     }
     
-    public object? Get(string key, object val)
+    public object? Get(object val,string key="id")
     {
         var filterGuild =Builders<Guild>.Filter.Eq(key, val);  
         return _collection.Find(filterGuild).FirstOrDefault();

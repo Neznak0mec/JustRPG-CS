@@ -1,5 +1,6 @@
 using Discord;
 using Discord.Interactions;
+using JustRPG.Features.Cooldown;
 using JustRPG.Models;
 using JustRPG.Services;
 
@@ -14,6 +15,7 @@ namespace JustRPG.Modules
             _bases = service;
         }
 
+        [Cooldown(500,true)]
         [SlashCommand("ping", "Reciave a ping message")]
         public async Task Ping()
         {

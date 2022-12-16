@@ -1,6 +1,10 @@
 using System.Reflection;
+using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
+using JustRPG.Features.Cooldown;
+using JustRPG.Generators;
+using Serilog;
 
 namespace JustRPG.Services
 {
@@ -23,18 +27,28 @@ namespace JustRPG.Services
             _client.InteractionCreated += HandleInteraction;
             _client.ButtonExecuted += ButtonInteraction;
             _client.SelectMenuExecuted += SelectInteraction;
+            _commands.InteractionExecuted += OnInteractionExecuted;
         }
 
         private async Task HandleInteraction(SocketInteraction arg)
         {
             try
             {
-                var ctx = new SocketInteractionContext(_client, arg);
-                await _commands.ExecuteCommandAsync(ctx, _services);
+                var context = new SocketInteractionContext(_client, arg);
+                await _commands.ExecuteCommandAsync(context, _services);
             }
-            catch (Exception ex)
+            catch (Exception e)
             {
-                Console.WriteLine(ex.ToString());
+                Log.Debug(e.ToString());
+                throw;
+            }
+        }
+
+        private async Task OnInteractionExecuted(ICommandInfo command, IInteractionContext context, IResult result)
+        {
+            if(!result.IsSuccess)
+            {
+                await context.Interaction.RespondAsync(embed: EmbedCreater.ErrorEmbed(result.ErrorReason), ephemeral: true);
             }
         }
 

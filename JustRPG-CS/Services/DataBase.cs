@@ -1,3 +1,4 @@
+using System.Text.Json;
 using JustRPG.Models;
 using JustRPG.Services.Collections;
 using MongoDB.Bson;
@@ -17,6 +18,7 @@ public class DataBase
     public GuildDB GuildDb;
     public ActionDB ActionDb;
     private readonly IMongoCollection<BsonDocument> _infodb;
+    public List<Work> Works = new List<Work>();
 
 
     public DataBase()
@@ -30,6 +32,15 @@ public class DataBase
         GuildDb = new GuildDB(_database);
         ActionDb = new ActionDB(_database);
         
-        _infodb = _database.GetCollection<BsonDocument>("info");
+        // _infodb = _database.GetCollection<BsonDocument>("info");
+        ParseWorks();
+    }
+
+    private void ParseWorks()
+    {
+        using StreamReader r = new StreamReader("json//works.json");
+        string json = r.ReadToEnd();
+        r.Close();
+        Works = JsonSerializer.Deserialize<List<Work>>(json);
     }
 }

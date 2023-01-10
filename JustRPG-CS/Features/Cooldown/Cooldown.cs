@@ -11,13 +11,11 @@ namespace JustRPG.Features.Cooldown;
 public class Cooldown : PreconditionAttribute
 {
     private TimeSpan CooldownLength { get; set; }
-    private bool AdminsAreLimited { get; set; }
     private readonly ConcurrentDictionary<CooldownInfo, DateTime> _cooldowns = new();
 
-    public Cooldown(int seconds, bool adminsAreLimited = false)
+    public Cooldown(int seconds)
     {
         CooldownLength = TimeSpan.FromSeconds(seconds);
-        AdminsAreLimited = adminsAreLimited;
     }
 
     public struct CooldownInfo

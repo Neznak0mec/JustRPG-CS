@@ -189,7 +189,7 @@ public class InventoryInteractions
 
     private async Task SellItem(string buttonInfo)
     {
-        var itemId = _inventory!.currentPageItems[Convert.ToInt32(buttonInfo[^1].ToString())];
+        var itemId = _inventory!.currentPageItems[Convert.ToInt32(buttonInfo[^1])];
         object? item = null;
         Embed embed;
         Action? action = null;

@@ -146,5 +146,19 @@ public class EmbedCreater
             
         return emb.Build();
     }
+
+    public static Embed WorkEmbed(List<Work> works,int exp, int cash)
+    {
+        Work work = works[Random.Shared.Next(0, works.Count)];
+
+        EmbedBuilder embed = new EmbedBuilder
+        {
+            Title = work.title,
+            Description = string.Format(work.description, exp, cash),
+            ThumbnailUrl = work.url
+        };
+
+        return embed.Build();
+    }
     
 }

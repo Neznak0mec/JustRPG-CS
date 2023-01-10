@@ -32,16 +32,16 @@ namespace JustRPG.Services
 
         private async Task HandleInteraction(SocketInteraction arg)
         {
-            try
-            {
-                var context = new SocketInteractionContext(_client, arg);
-                await _commands.ExecuteCommandAsync(context, _services);
-            }
-            catch (Exception e)
-            {
-                Log.Debug(e.ToString());
-                throw;
-            }
+            if (arg.Type == InteractionType.ApplicationCommand)
+                try
+                {
+                    var context = new SocketInteractionContext(_client, arg);
+                    await _commands.ExecuteCommandAsync(context, _services);
+                }
+                catch (Exception e)
+                {
+                    Log.Debug(e.ToString());
+                }
         }
 
         private async Task OnInteractionExecuted(ICommandInfo command, IInteractionContext context, IResult result)

@@ -1,6 +1,5 @@
 using Discord;
 using JustRPG.Models;
-using JustRPG.Services;
 
 namespace JustRPG.Generators;
 
@@ -20,14 +19,13 @@ public static class ButtonSets
     public static MessageComponent UpUserSkills(string finder, User user)
     {
         int lvl = user.lvl;
-        bool canUpSkills = user.skill_points > 0;
+        bool canUpSkills = user.skillPoints > 0;
         var builder = new ComponentBuilder()
-            .WithButton(label: $"{user.hp} - хп",customId:"nothing", row: 0, disabled: true)
-            .WithButton(label: $"{user.defence} - броня",customId: $"UpSkill_{finder}_defence" ,row: 0, disabled: user.defence >= lvl || !canUpSkills)
-            .WithButton(label: $"{user.damage} - урон",customId: $"UpSkill_{finder}_damage" , row: 1, disabled: user.damage >= lvl || !canUpSkills)
-            .WithButton(label: $"{user.speed} - ловкость",customId: $"UpSkill_{finder}_speed" , row: 1, disabled: user.speed >= lvl || !canUpSkills)
-            .WithButton(label: $"{user.luck} - удача",customId: $"UpSkill_{finder}_luck" , row: 2, disabled: user.luck >= lvl || !canUpSkills)
-            .WithButton(label: $"{user.krit} - крит",customId: $"UpSkill_{finder}_krit" , row: 2, disabled: user.krit >= lvl || !canUpSkills)
+            .WithButton(label: $"{user.stats.hp} - хп",customId:"nothing", row: 0, disabled: true)
+            .WithButton(label: $"{user.stats.defence} - броня",customId: $"UpSkill_{finder}_defence" ,row: 0, disabled: user.stats.defence >= lvl || !canUpSkills)
+            .WithButton(label: $"{user.stats.damage} - урон",customId: $"UpSkill_{finder}_damage" , row: 1, disabled: user.stats.damage >= lvl || !canUpSkills)
+            .WithButton(label: $"{user.stats.speed} - ловкость",customId: $"UpSkill_{finder}_speed" , row: 1, disabled: user.stats.speed >= lvl || !canUpSkills)
+            .WithButton(label: $"{user.stats.luck} - удача",customId: $"UpSkill_{finder}_luck" , row: 2, disabled: user.stats.luck >= lvl || !canUpSkills)
             .WithButton(label: "К профилю",customId:$"Profile_{finder}_{finder}" ,row: 3, emote: Emoji.Parse("🔙"));
 
         return builder.Build();

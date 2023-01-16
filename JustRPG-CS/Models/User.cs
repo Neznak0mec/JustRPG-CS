@@ -1,74 +1,21 @@
 using JustRPG.Services;
+using MongoDB.Bson.Serialization.Attributes;
 
 namespace JustRPG.Models;
 
 public class User
 {
 
-    public long id { get; set; }
-    public int cash { get; set; }= 0;
-    public string cooldown { get; set; } = "";
-    public int lvl { get; set; }= 0;
-    public double exp { get; set; }= 10;
-    public double exp_to_lvl { get; set; }= 100;
-    public int skill_points { get; set; }= 0;
-    public int damage { get; set; }= 1;
-    public int defence { get; set; }= 1;
-    public int speed { get; set; }= 1;
-    public int krit { get; set; }= 1;
-    public int luck { get; set; }= 1;
-    public Equipment? equipment { get; set; }
-    public string[] inventory { get; set; }= {};
-    public int hp { get; set; }= 100;
+    [BsonElement("_id")] public long id { get; set; }
+    [BsonElement("cash")]public int cash { get; set; }= 0;
+    [BsonElement("lvl")]public int lvl { get; set; }= 0;
+    [BsonElement("exp")]public double exp { get; set; }= 10;
+    [BsonElement("exp_to_lvl")]public double expToLvl { get; set; }= 100;
+    [BsonElement("skill_points")]public int skillPoints { get; set; }= 0;
+    [BsonElement("stats")]public Stats stats { get; set; }
+    [BsonElement("inventory")]public string[] inventory { get; set; }= Array.Empty<string>();
+    [BsonElement("equipment")]public Equipment? equipment { get; set; }
     
-    public record Equipment
-    {
-        public string? helmet { get; set; } =null;
-        public string? armor { get; set; }= null;
-        public string? pants { get; set; }= null;
-        public string? shoes { get; set; }= null;
-        public string? gloves { get; set; }=null;
-        public string? weapon { get; set; }=null;
-        
-        public string? GetByName ( string name )
-        {
-            return name switch
-            {
-                ("helmet") => helmet,
-                ("armor") => armor,
-                ("pants") => pants,
-                ("shoes") => shoes,
-                ("gloves") => gloves,
-                ("weapon") => weapon,
-                _ => null
-            };
-        }
-
-        public void SetByName(string name, string value)
-        {
-            switch (name)
-            {
-                case("helmet"):
-                    helmet= value;
-                    break;
-                case("armor"):
-                    armor= value;
-                    break;
-                case("pants"):
-                    pants= value;
-                    break;
-                case("shoes"):
-                    shoes= value;
-                    break;
-                case("gloves"):
-                    gloves= value;
-                    break;
-                case("weapon"):
-                    weapon= value;
-                    break;
-            }
-        }
-    }
 
     public UserEquipment GetEquipmentAsItems(DataBase dataBase)
     {
@@ -86,7 +33,54 @@ public class User
     }
     
 }
+public record Equipment
+{
+    [BsonElement("helmet")]public string? helmet { get; set; } =null;
+    [BsonElement("armor")]public string? armor { get; set; }= null;
+    [BsonElement("pants")]public string? pants { get; set; }= null;
+    [BsonElement("shoes")]public string? shoes { get; set; }= null;
+    [BsonElement("gloves")]public string? gloves { get; set; }=null;
+    [BsonElement("weapon")]public string? weapon { get; set; }=null;
+        
+    public string? GetByName ( string name )
+    {
+        return name switch
+        {
+            ("helmet") => helmet,
+            ("armor") => armor,
+            ("pants") => pants,
+            ("shoes") => shoes,
+            ("gloves") => gloves,
+            ("weapon") => weapon,
+            _ => null
+        };
+    }
 
+    public void SetByName(string name, string value)
+    {
+        switch (name)
+        {
+            case("helmet"):
+                helmet= value;
+                break;
+            case("armor"):
+                armor= value;
+                break;
+            case("pants"):
+                pants= value;
+                break;
+            case("shoes"):
+                shoes= value;
+                break;
+            case("gloves"):
+                gloves= value;
+                break;
+            case("weapon"):
+                weapon= value;
+                break;
+        }
+    }
+}
 
 public class UserEquipment
 {

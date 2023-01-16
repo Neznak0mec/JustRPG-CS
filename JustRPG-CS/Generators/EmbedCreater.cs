@@ -62,12 +62,12 @@ public class EmbedCreater
             Title = $"Профиль {member.Username}"
         };
         emb.AddField($"Уровень", $"{user.lvl}", inline: true)
-            .AddField("Опыт", $"{Math.Round(user.exp_to_lvl,2)}\\{(int)user.exp}", inline: true)
+            .AddField("Опыт", $"{Math.Round(user.expToLvl,2)}\\{(int)user.exp}", inline: true)
             .AddField("Баланс", $"{user.cash}", inline: true)
-            .AddField("Очки навыков", $"{user.skill_points}", inline:true)
-            .AddField(name: "Статы", value:$"<:health:997889169567260714> : {user.hp} |  <:strength:997889205684420718> : {user.damage} " +
-                                          $"| <:armor:997889166673186987> : {user.defence} \n<:dexterity:997889168216694854> : {user.speed} " +
-                                          $"| <:luck:997889165221957642> : {user.luck} | <:crit:997889163552628757> : {user.krit}");
+            .AddField("Очки навыков", $"{user.skillPoints}", inline:true)
+            .AddField(name: "Статы", value:$"<:health:997889169567260714> : {user.stats.hp} |  <:strength:997889205684420718> : {user.stats.damage} " +
+                                          $"| <:armor:997889166673186987> : {user.stats.defence} \n<:dexterity:997889168216694854> : {user.stats.speed} " +
+                                          $"| <:luck:997889165221957642> : {user.stats.luck}");
         return emb.Build();
     }
     
@@ -79,12 +79,12 @@ public class EmbedCreater
         };
         UserEquipment equipment = user.GetEquipmentAsItems(_dataBase!);
 
-        embed.AddField(equipment.helmet  == null ? "Шлем"      : $"Шлем - {equipment.helmet!.name}",     equipment.helmet == null ? "Не надето" : equipment.helmet!.GetStatsAsString(), true)
-            .AddField(equipment.armor  == null ? "Нагрудник" : $"Нагрудник - {equipment.armor!.name}", equipment.armor  == null ? "Не надето" : equipment.armor!.GetStatsAsString(), true)
-            .AddField(equipment.pants  == null ? "Штаны"     : $"Штаны - {equipment.pants!.name}",     equipment.pants  == null ? "Не надето" : equipment.pants!.GetStatsAsString(), true)
-            .AddField(equipment.shoes  == null ? "Ботинки"   : $"Ботинки - {equipment.shoes!.name}",   equipment.shoes  == null ? "Не надето" : equipment.shoes!.GetStatsAsString(), true)
-            .AddField(equipment.gloves == null ? "Перчатки"  : $"Перчатки - {equipment.gloves!.name}", equipment.gloves == null ? "Не надето" : equipment.gloves!.GetStatsAsString(), true)
-            .AddField(equipment.weapon == null ? "Оружие"    : $"Оружие - {equipment.weapon!.name}",   equipment.weapon == null ? "Не надето" : equipment.weapon!.GetStatsAsString(), true);
+        embed.AddField(equipment.helmet  == null ? "Шлем"      : $"Шлем - {equipment.helmet!.name}",     equipment.helmet == null ? "Не надето" : equipment.helmet!.ToString(), true)
+            .AddField(equipment.armor  == null ? "Нагрудник" : $"Нагрудник - {equipment.armor!.name}", equipment.armor  == null ? "Не надето" : equipment.armor!.ToString(), true)
+            .AddField(equipment.pants  == null ? "Штаны"     : $"Штаны - {equipment.pants!.name}",     equipment.pants  == null ? "Не надето" : equipment.pants!.ToString(), true)
+            .AddField(equipment.shoes  == null ? "Ботинки"   : $"Ботинки - {equipment.shoes!.name}",   equipment.shoes  == null ? "Не надето" : equipment.shoes!.ToString(), true)
+            .AddField(equipment.gloves == null ? "Перчатки"  : $"Перчатки - {equipment.gloves!.name}", equipment.gloves == null ? "Не надето" : equipment.gloves!.ToString(), true)
+            .AddField(equipment.weapon == null ? "Оружие"    : $"Оружие - {equipment.weapon!.name}",   equipment.weapon == null ? "Не надето" : equipment.weapon!.ToString(), true);
  
         return embed.Build();
     }
@@ -98,8 +98,7 @@ public class EmbedCreater
                           "<:health:997889169567260714> - увеличивается только за счёт экипировки\n" +
                           "<:armor:997889166673186987> - принимают на себя весь урон с его частичным уменьшением\n" +
                           "<:dexterity:997889168216694854> - увеличивает вероятность уклонения\n" +
-                          "<:luck:997889165221957642> - увеличивает получаемый опыт и монеты\n" +
-                          "<:crit:997889163552628757> - вероятность критического удара\n"
+                          "<:luck:997889165221957642> - увеличивает получаемый опыт и монеты\n"
         };
         return embed.Build();
     }
@@ -112,7 +111,7 @@ public class EmbedCreater
             if (item == null)
                 emb.AddField("Пусто", "Слот не занят");
             else
-                emb.AddField($"{item.lvl} | {item.name}", item.GetStatsAsString());
+                emb.AddField($"{item.lvl} | {item.name}", item.ToString());
         }
 
         return emb.Build();
@@ -125,7 +124,7 @@ public class EmbedCreater
             .AddField("Уровень", item.lvl.ToString(), inline: true)
             .AddField("Редкость", item.rarity, inline: true)
             .AddField("Описание", item.description != "" ? item.description : "Описания нет", inline: true)
-            .AddField("Статы", item.GetStatsAsString(), inline: true)
+            .AddField("Статы", item.ToString(), inline: true)
             .AddField("uid", $"`{item.id}`", inline: true);
 
         Color temp = item.rarity switch

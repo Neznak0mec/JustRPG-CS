@@ -37,7 +37,7 @@ public class Program
         using IServiceScope serviceScope = host.Services.CreateScope();
         IServiceProvider provider = serviceScope.ServiceProvider;
 
-        var _client = provider.GetRequiredService<DiscordSocketClient>();
+        var client = provider.GetRequiredService<DiscordSocketClient>();
         var sCommands = provider.GetRequiredService<InteractionService>();
         await provider.GetRequiredService<InteractionHandler>().InitializeAsync();
         
@@ -47,22 +47,22 @@ public class Program
             .WriteTo.Console()
             .CreateLogger();
         
-        _client.Log += LogAsync;
+        client.Log += LogAsync;
         sCommands.Log += (LogMessage msg) =>
         {
             Log.Information(msg.Message);
             return Task.CompletedTask;
         };
 
-        _client.Ready += async () =>
+        client.Ready += async () =>
         {
-            Log.Information("{currentUserId} is logined!", _client.CurrentUser.Id);
+            Log.Information("{currentUserId} is logined!", client.CurrentUser.Id);
             await sCommands.RegisterCommandsGloballyAsync();
             Log.Information("commands are loaded");
         };
 
-        await _client.LoginAsync(Discord.TokenType.Bot, Environment.GetEnvironmentVariable("BotToken"));
-        await _client.StartAsync();
+        await client.LoginAsync(TokenType.Bot, Environment.GetEnvironmentVariable("BotToken"));
+        await client.StartAsync();
 
         await Task.Delay(-1);
     }

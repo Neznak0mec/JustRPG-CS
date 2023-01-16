@@ -83,7 +83,7 @@ public class ProfileButtons
     {
         
         var userDb = (User)_dataBase.UserDb.Get(memberId)!;
-        if (userDb.skill_points <= 0)
+        if (userDb.skillPoints <= 0)
         {
             await _component.RespondAsync( embed: EmbedCreater.ErrorEmbed("У вас недостаточно скилл поинтов"), ephemeral: true);
             return;

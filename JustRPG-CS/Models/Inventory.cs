@@ -6,29 +6,21 @@ namespace JustRPG.Models;
 
 public class Inventory
 {
-    [BsonElement("_id")]
-    public string? id { get; set; }
+    [BsonElement("_id")]public string? id { get; set; }
     
-    [BsonElement("interactionType")]
-    public string interactionType { get; set; } = "info";
+    [BsonElement("interactionType")]public string interactionType { get; set; } = "info";
     
-    [BsonElement("currentPage")]
-    public int currentPage { get; set; } = -1;
+    [BsonElement("currentPage")]public int currentPage { get; set; } = -1;
     
-    [BsonElement("items")]
-    public string[] items { get; set; } = Array.Empty<string>();
+    [BsonElement("items")]public string[] items { get; set; } = Array.Empty<string>();
     
-    [BsonElement("currentPageItems")]
-    public string?[] currentPageItems { get; set; } = { null , null, null, null, null };
+    [BsonElement("currentPageItems")]public string?[] currentPageItems { get; set; } = { null , null, null, null, null };
     
-    [BsonElement("lastPage")]
-    public int lastPage { get; set; } = 0;
+    [BsonElement("lastPage")]public int lastPage { get; set; } = 0;
 
-    [BsonElement("lastUsage")]
-    public long lastUsage { get; set; } = DateTimeOffset.Now.ToUnixTimeSeconds();
+    [BsonElement("lastUsage")]public long lastUsage { get; set; } = DateTimeOffset.Now.ToUnixTimeSeconds();
 
-    [BsonIgnore] 
-    public DataBase? DataBase = null;
+    [BsonIgnore]public DataBase? DataBase = null;
 
     public void NextPage()
     {
@@ -40,7 +32,7 @@ public class Inventory
         Save();
     }
 
-    public void PrewPage()
+    public void PreviousPage()
     {
         currentPage--;
         

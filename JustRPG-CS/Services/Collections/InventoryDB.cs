@@ -5,7 +5,7 @@ using Serilog;
 
 namespace JustRPG.Services.Collections;
 
-public class InventoryDB: Collection
+public class InventoryDB: ICollection
 {
     private readonly IMongoCollection<Inventory> _collection;
     private readonly DataBase _dataBase;

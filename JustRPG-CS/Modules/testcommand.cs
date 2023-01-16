@@ -1,7 +1,4 @@
-using Discord;
 using Discord.Interactions;
-using JustRPG.Features.Cooldown;
-using JustRPG.Models;
 using JustRPG.Services;
 
 namespace JustRPG.Modules

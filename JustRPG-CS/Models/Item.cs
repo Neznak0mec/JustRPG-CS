@@ -1,30 +1,22 @@
+using MongoDB.Bson.Serialization.Attributes;
+
 namespace JustRPG.Models;
 
-public record Item
+public class Item
 {
-    public string id { get; set; } = "";
-    public string name { get; set; } = "";
-    public int lvl { get; set;  } = 0;
-    public string type { get; set; } = "";
-    public int price { get; set; } = 0;
-    public string description { get; set; } = "";
-    public string rarity { get; set; } = "";
-    public GiveStats? give_stats { get; set; }
-    public bool generated { get; set; } = false;
-    public string preset { get; set; } = "";
-    public int? heal { get; set; } = null;
+    [BsonElement("id")]public string id { get; set; } = "";
+    [BsonElement("name")]public string name { get; set; } = "";
+    [BsonElement("lvl")]public int lvl { get; set;  } = 0;
+    [BsonElement("type")]public string type { get; set; } = "";
+    [BsonElement("price")]public int price { get; set; } = 0;
+    [BsonElement("description")]public string description { get; set; } = "";
+    [BsonElement("rarity")]public string rarity { get; set; } = "";
+    [BsonElement("give_stats")]public Stats? giveStats { get; set; }
+    [BsonElement("generated")]public bool generated { get; set; } = false;
     
-    public class GiveStats
-    {
-            public int hp { get; set; } = 0;
-            public int damage { get; set; } = 0;
-            public int defence { get; set; } = 0;
-            public int luck { get; set; } = 0;
-            public int speed { get; set; } = 0;
-            public int krit { get; set; } = 0;
-    }
+    [BsonElement("preset")]public string preset { get; set; } = "";
 
-    public string GetStatsAsString()
+    public override string ToString()
     {
         if (generated)
             return

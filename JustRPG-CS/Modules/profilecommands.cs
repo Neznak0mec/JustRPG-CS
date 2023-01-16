@@ -3,7 +3,6 @@ using JustRPG.Features.Cooldown;
 using JustRPG.Generators;
 using JustRPG.Models;
 using JustRPG.Services;
-using Serilog;
 
 namespace JustRPG.Modules;
 
@@ -18,7 +17,7 @@ public class Profilecommands : InteractionModuleBase<SocketInteractionContext>
 
     [SlashCommand("profile", "Просмотреть профиль")]
     public async Task Profile(
-        [Discord.Interactions.Summary(name: "user", description:"пользователь чей профиль хотете посмотерть")]
+        [Summary(name: "user", description:"пользователь чей профиль хотите посмотерть")]
         Discord.IUser? needToFound = null)
     {
         needToFound ??= Context.User;
@@ -37,8 +36,8 @@ public class Profilecommands : InteractionModuleBase<SocketInteractionContext>
     {
         User user = GetUser(Context.User.Id, true)!;
 
-        int exp = 10 + Random.Shared.Next(0, 2 * user.luck);
-        int cash = 10 + Random.Shared.Next(0, 2 * user.luck);
+        int exp = 10 + Random.Shared.Next(0, 2 * user.stats.luck);
+        int cash = 10 + Random.Shared.Next(0, 2 * user.stats.luck);
         
         _bases.UserDb.Add(user,"exp",exp);
         _bases.UserDb.Add(user,"cash",cash);

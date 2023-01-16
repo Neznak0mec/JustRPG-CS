@@ -1,9 +1,7 @@
-using System.Net.Sockets;
-using MongoDB.Driver;
 
 namespace JustRPG.Interfaces;
 
-public interface Collection
+public interface ICollection
 {
     object? Get(object val,string key = "id");
 

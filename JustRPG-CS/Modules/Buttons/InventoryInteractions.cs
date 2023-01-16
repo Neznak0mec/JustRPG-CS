@@ -3,7 +3,6 @@ using Discord.WebSocket;
 using JustRPG.Generators;
 using JustRPG.Models;
 using JustRPG.Services;
-using Serilog;
 using Action = JustRPG.Models.Action;
 
 namespace JustRPG.Modules.Responce;
@@ -47,7 +46,7 @@ public class InventoryInteractions
                 await Reload(buttonInfo[1]);
                 break;
             case "InvInteractionType":
-                await ChangeinteractionType(buttonInfo[1]);
+                await ChangeInteractionType(buttonInfo[1]);
                 break;
         }
 
@@ -67,7 +66,7 @@ public class InventoryInteractions
 
     private async Task PreviousPage(string finder)
     {
-        _inventory!.PrewPage();
+        _inventory!.PreviousPage();
         await UpdateMessage(finder);
     }
     
@@ -83,7 +82,7 @@ public class InventoryInteractions
         await UpdateMessage(finder);
     }
 
-    private async Task ChangeinteractionType(string finder)
+    private async Task ChangeInteractionType(string finder)
     {
         var interaction = string.Join("", _component.Data.Values);  
         _inventory!.interactionType = interaction;

@@ -4,7 +4,7 @@ using MongoDB.Driver;
 
 namespace JustRPG.Services.Collections;
 
-public class ItemDB : Collection
+public class ItemDB : ICollection
 {
     private readonly IMongoCollection<Item> _collection;
 

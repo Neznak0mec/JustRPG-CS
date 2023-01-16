@@ -6,7 +6,7 @@ namespace JustRPG.Services.Collections;
 
 
 
-public class UserDb : Collection
+public class UserDb : ICollection
 {
     private readonly IMongoCollection<User> _collection;
 
@@ -40,11 +40,11 @@ public class UserDb : Collection
     private UpdateDefinition<User> UpdateLvl(User user, int value)
     {
         UpdateDefinition<User> updateUser;
-        if (user.exp + value >= user.exp_to_lvl)
+        if (user.exp + value >= user.expToLvl)
         {
             updateUser = Builders<User>.Update.Inc("lvl", 1);
             updateUser.Inc("skill_points", 3);
-            updateUser.Inc("exp_to_lvl", user.exp_to_lvl / 5);
+            updateUser.Inc("exp_to_lvl", user.expToLvl / 5);
             updateUser.Set("exp", 0);
         }
         else

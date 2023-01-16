@@ -5,7 +5,7 @@ using Action = JustRPG.Models.Action;
 
 namespace JustRPG.Services.Collections;
 
-public class ActionDB : Collection
+public class ActionDB : ICollection
 {
     private readonly IMongoCollection<Action> _collection;
 
@@ -14,7 +14,7 @@ public class ActionDB : Collection
         _collection = mongoDatabase.GetCollection<Action>("interactions");
     }
     
-    public object? Get(object val, string key = "id")
+    public object? Get(object val, string key = "_id")
     {
         var filterAction =Builders<Action>.Filter.Eq(key, val);  
         return _collection.Find(filterAction).FirstOrDefault();

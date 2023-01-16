@@ -1,10 +1,6 @@
 using System.Collections.Concurrent;
 using Discord;
 using Discord.Interactions;
-using JustRPG.Features.Cooldown;
-using JustRPG.Models;
-using JustRPG.Services;
-using Serilog;
 
 namespace JustRPG.Features.Cooldown;
 

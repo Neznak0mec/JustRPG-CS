@@ -1,5 +1,6 @@
 using Discord;
 using JustRPG.Models;
+using JustRPG.Models.SubClasses;
 using JustRPG.Services;
 
 namespace JustRPG.Generators;

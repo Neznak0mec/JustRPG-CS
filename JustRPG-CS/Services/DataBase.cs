@@ -9,7 +9,6 @@ namespace JustRPG.Services;
 public class DataBase
 {
     private readonly MongoClient _client;
-
     private readonly IMongoDatabase _database;
 
     public UserDb UserDb;
@@ -17,8 +16,8 @@ public class DataBase
     public InventoryDB InventoryDb;
     public GuildDB GuildDb;
     public ActionDB ActionDb;
-    private readonly IMongoCollection<BsonDocument> _infodb;
-    public List<Work> Works = new List<Work>();
+    public LocationsDB LocationsDb;
+    public List<Work>? Works = new List<Work>();
 
 
     public DataBase()
@@ -31,14 +30,15 @@ public class DataBase
         InventoryDb = new InventoryDB(_database, this);
         GuildDb = new GuildDB(_database);
         ActionDb = new ActionDB(_database);
+        LocationsDb = new LocationsDB(_database);
         
-        // _infodb = _database.GetCollection<BsonDocument>("info");
         ParseWorks();
     }
 
     private void ParseWorks()
     {
-        using StreamReader r = new StreamReader("json//works.json");
+        //using StreamReader r = new StreamReader("JustRPG-CS/Services/json/works.json");
+        using StreamReader r = new StreamReader("json/works.json");
         string json = r.ReadToEnd();
         r.Close();
         Works = JsonSerializer.Deserialize<List<Work>>(json);

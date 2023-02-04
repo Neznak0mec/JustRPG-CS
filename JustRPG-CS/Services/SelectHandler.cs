@@ -9,11 +9,13 @@ public class SelectHandler
 {
     private SocketMessageComponent _component;
     private InventoryInteractions _profileButtons;
+    private SelectLocation _selectLocation;
     
     public SelectHandler(DiscordSocketClient client, SocketMessageComponent component, object service)
     {
         _component = component;
         _profileButtons = new InventoryInteractions(client, component, service);
+        _selectLocation = new SelectLocation(client, component, service);
     }
     
     public async Task SelectDistributor()
@@ -27,6 +29,9 @@ public class SelectHandler
 
         if (buttonInfo[0].StartsWith("InvInteractionType"))
             await _profileButtons.Distributor(buttonInfo);
+
+        if (buttonInfo[0] == "SelectLocation")
+            await _selectLocation.Distributor(buttonInfo);
 
     }
     

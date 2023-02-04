@@ -31,23 +31,23 @@ public static class ButtonSets
         return builder.Build();
     }
 
-    public static MessageComponent InventoryButtonsSet(string finder, User user, Inventory inventory,Item?[] items)
+    public static MessageComponent InventoryButtonsSet(string finder, long userId, Inventory inventory,Item?[] items)
     {
         
         
         var select = new SelectMenuBuilder()
             .WithPlaceholder(
                 $"Тип взаимодействия: {(inventory.interactionType == "info" ? "информация" : inventory.interactionType == "sell" ? "продажа" : "экипировать")}")
-            .WithCustomId($"InvInteractionType_{finder}_{user.id}")
+            .WithCustomId($"InvInteractionType_{finder}_{userId}")
             .AddOption("Информация", "info")
             .AddOption("Экипировать", "equip")
             .AddOption("Продать", "sell");
 
         var builder = new ComponentBuilder()
-            .WithButton(label: "⮘", customId: $"InvPrewPage_{finder}_{user.id}", disabled: inventory.currentPage == 0, row: 0)
+            .WithButton(label: "⮘", customId: $"InvPrewPage_{finder}_{userId}", disabled: inventory.currentPage == 0, row: 0)
             .WithButton(label: $"{inventory.currentPage+1}/{inventory.lastPage+1}", customId: "none1", disabled: true, row: 0)
-            .WithButton(label: "➣", customId: $"InvNextPage_{finder}_{user.id}", disabled: inventory.currentPage >= inventory.lastPage, row: 0)
-            .WithButton(label: "♺", customId: $"InvReload_{finder}_{user.id}")
+            .WithButton(label: "➣", customId: $"InvNextPage_{finder}_{userId}", disabled: inventory.currentPage >= inventory.lastPage, row: 0)
+            .WithButton(label: "♺", customId: $"InvReload_{finder}_{userId}")
             .WithSelectMenu(select, row: 1);
 
         ButtonStyle style = inventory.interactionType == "info" ? ButtonStyle.Primary : inventory.interactionType == "sell" ? ButtonStyle.Danger : ButtonStyle.Success;
@@ -62,19 +62,19 @@ public static class ButtonSets
             
             if (inventory.interactionType == "info")
             {
-                builder.WithButton(label: $"{i+1}", customId: $"InvInfo{i}_{finder}_{user.id}", style: style, disabled: false,row: 2);
+                builder.WithButton(label: $"{i+1}", customId: $"InvInfo{i}_{finder}_{userId}", style: style, disabled: false,row: 2);
                 continue;
             }
-            if (finder == user.id.ToString())
+            if (finder == userId.ToString())
             {
                 if (inventory.interactionType == "equip")
-                    builder.WithButton(label: $"{i+1}", customId: $"InvEquip{i}_{finder}_{user.id}", style: style, disabled: !items[i]!.IsEquippable(),row: 2);
+                    builder.WithButton(label: $"{i+1}", customId: $"InvEquip{i}_{finder}_{userId}", style: style, disabled: !items[i]!.IsEquippable(),row: 2);
                 else
-                    builder.WithButton(label: $"{i+1}", customId: $"InvSell{i}_{finder}_{user.id}", style: style, disabled: false,row: 2);
+                    builder.WithButton(label: $"{i+1}", customId: $"InvSell{i}_{finder}_{userId}", style: style, disabled: false,row: 2);
             }
             
         }
-        builder.WithButton(label: "Назад к профилю",customId:$"Equipment_{finder}_{user.id}" ,row:3);
+        builder.WithButton(label: "Назад к профилю",customId:$"Equipment_{finder}_{userId}" ,row:3);
         
         return builder.Build();
     }
@@ -86,5 +86,21 @@ public static class ButtonSets
             .WithButton(label: "Нет", customId: $"Action_{userId}_{uid}_Denied", row: 0, style: ButtonStyle.Danger);
 
         return builder.Build();
+    }
+
+    public static MessageComponent SelectLocation(string type,long userId, List<Location> locations)
+    {
+        var select = new SelectMenuBuilder()
+            .WithPlaceholder("Куда вы хотете отправиться ?")
+            .WithCustomId($"SelectLocation_{userId}_{type}");
+        
+        locations.Sort((x, y) => x.lvl-y.lvl);
+
+        foreach (var i in locations)
+        {
+            select.AddOption($"{i.name} - {i.lvl}", i.id);
+        }
+
+        return new ComponentBuilder().WithSelectMenu(select).Build();
     }
 }

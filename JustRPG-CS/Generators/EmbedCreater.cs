@@ -1,7 +1,9 @@
+using System.Reflection.Emit;
 using Discord;
 using JustRPG.Models;
 using JustRPG.Models.SubClasses;
 using JustRPG.Services;
+using JustRPG.Features;
 
 namespace JustRPG.Generators;
 
@@ -161,4 +163,39 @@ public class EmbedCreater
         return embed.Build();
     }
     
+
+    public static Embed SelectAdventureEmbed()
+    {
+        EmbedBuilder embed = new EmbedBuilder
+        {
+            Title = "Выберите куда хочешь отправиться",
+            Description = "Поход - самый эффективный способ прокачки для новичков."
+        };
+
+        return embed.Build();
+    }
+
+    public static Embed BattlEmbed(Battle battle)
+    {
+        Warrior selectedEnemy = battle.enemies[battle.selectedEnemy];
+        Warrior currentWarrior = battle.players[battle.currentUser];
+        var progressBar = SecondaryFunctions.ProgressBar;
+        EmbedBuilder embed = new EmbedBuilder
+        {
+            Title = $"Битва с {selectedEnemy.name} - {selectedEnemy.name}"
+        };
+        embed.AddField($"Вы - {currentWarrior.lvl}",
+            $"hp - {progressBar(currentWarrior.stats.hp,currentWarrior.stats.MaxHP)}\n " +
+            $"def - {progressBar(currentWarrior.stats.defence,currentWarrior.stats.MaxDef)}\n" +
+            $"урон - {currentWarrior.stats.damage}");
+
+        embed.AddField($"Вы - {selectedEnemy.lvl}",
+            $"hp - {progressBar(selectedEnemy.stats.hp,selectedEnemy.stats.MaxHP)}\n " +
+            $"def - {progressBar(selectedEnemy.stats.defence,selectedEnemy.stats.MaxDef)}\n" +
+            $"урон - {selectedEnemy.stats.damage}");
+
+        return embed.Build();
+    }
+
+
 }

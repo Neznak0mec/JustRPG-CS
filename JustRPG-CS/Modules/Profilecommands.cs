@@ -17,19 +17,18 @@ public class Profilecommands : InteractionModuleBase<SocketInteractionContext>
 
     [SlashCommand("profile", "Просмотреть профиль")]
     public async Task Profile(
-        [Summary(name: "user", description:"пользователь чей профиль хотите посмотерть")]
-        Discord.IUser? needToFound = null)
+        [Summary(name: "user", description:"пользователь чей профиль хотите посмотерть")] Discord.IUser? needToFound = null)
     {
         needToFound ??= Context.User;
 
-        User? user = Context.User.Id == needToFound.Id ? GetUser(Context.User.Id, true) : GetUser(Context.User.Id);
+        User? user = GetUser(Context.User.Id, Context.User.Id == needToFound.Id);
 
         if (user == null)
             await RespondAsync(embed: EmbedCreater.ErrorEmbed("Данный пользователь не найден"), ephemeral: true);
         else
             await RespondAsync(embed: EmbedCreater.UserProfile(user, needToFound), components:ButtonSets.ProfileButtonsSet(Context.User.Id.ToString(),user.id.ToString()));
     }
-   
+
     [Cooldown(300)]
     [SlashCommand("work", "Помочь в городе")]
     public async Task Work()
@@ -38,7 +37,7 @@ public class Profilecommands : InteractionModuleBase<SocketInteractionContext>
 
         int exp = 10 + Random.Shared.Next(0, 2 * user.stats.luck);
         int cash = 10 + Random.Shared.Next(0, 2 * user.stats.luck);
-        
+
         _bases.UserDb.Add(user,"exp",exp);
         _bases.UserDb.Add(user,"cash",cash);
 
@@ -51,7 +50,7 @@ public class Profilecommands : InteractionModuleBase<SocketInteractionContext>
         if (tempUser == null && !create)
             return null;
         else
-            return tempUser == null ? null : (User)tempUser;
+            return (User)tempUser;
 
     }
 }

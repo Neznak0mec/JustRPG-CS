@@ -13,7 +13,7 @@ public class Program
 {
     public static Task Main(string[] args) => new Program().MainAsync();
 
-    public async Task MainAsync()
+    private async Task MainAsync()
     {
         using IHost host = Host.CreateDefaultBuilder()
             .ConfigureServices((_, services) =>
@@ -32,7 +32,7 @@ public class Program
         await RunAsync(host);
     }
 
-    public async Task RunAsync(IHost host)
+    private async Task RunAsync(IHost host)
     {
         using IServiceScope serviceScope = host.Services.CreateScope();
         IServiceProvider provider = serviceScope.ServiceProvider;

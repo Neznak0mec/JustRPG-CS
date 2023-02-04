@@ -115,7 +115,7 @@ public class InventoryInteractions
             x =>
             {
                 x.Embed = new EmbedCreater().UserInventory(_member, items);
-                x.Components = ButtonSets.InventoryButtonsSet(finder, _dbUser, _inventory, items);
+                x.Components = ButtonSets.InventoryButtonsSet(finder, _dbUser.id, _inventory, items);
             }
         );
         

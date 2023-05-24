@@ -120,7 +120,7 @@ public static class ButtonSets
             for (int i = 0; i < battle.enemies.Length; i++)
             {
                 var temp = SecondaryFunctions.WarriorToStatusString(battle.enemies[i], i == battle.selectedEnemy);
-                select.AddOption(label:$"{i+1} - {battle.enemies[i]}",value:$"{i}",description:temp.Item2,emote: new Emoji(temp.Item1) );
+                select.AddOption(label:$"{i+1} - {battle.enemies[i].name}",value:$"{i}",description:temp.Item2,emote: new Emoji(temp.Item1) );
             }
 
             select.IsDisabled = disableSelectEnemy || disableButtons;

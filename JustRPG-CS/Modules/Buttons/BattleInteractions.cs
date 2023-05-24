@@ -151,7 +151,7 @@ public class BattleInteractions : IInteractionMaster {
     async Task SelectEnemy(Battle battle)
     {
         battle.selectedEnemy = Convert.ToInt16(_component.Data.Values.ToArray()[0]);
-        battle.log += $"{battle.players[battle.currentUser].name} изменил цель на {battle.enemies[battle.selectedEnemy]}";
+        battle.log += $"{battle.players[battle.currentUser].name} изменил цель на {battle.enemies[battle.selectedEnemy].name}";
         await UpdateBattle(battle, disableSelectEnemy:true);
     }
     

@@ -1,14 +1,13 @@
 using Discord;
 using Discord.WebSocket;
 using JustRPG.Generators;
-using JustRPG.Interfaces;
 using JustRPG.Models;
 using JustRPG.Services;
 using Action = JustRPG.Models.Action;
 
-namespace JustRPG.Modules.Buttons;
+namespace JustRPG.Modules.Responce;
 
-public class InventoryInteractions : IInteractionMaster
+public class InventoryInteractions
 {
     private DiscordSocketClient _client;
     private SocketMessageComponent _component;
@@ -39,29 +38,29 @@ public class InventoryInteractions : IInteractionMaster
         {
             case "InvPrewPage":
                 await PreviousPage(buttonInfo[1]);
-                return;
+                break;
             case "InvNextPage":
                 await NextPage(buttonInfo[1]);
-                return;
+                break;
             case "InvReload":
                 await Reload(buttonInfo[1]);
-                return;
+                break;
             case "InvInteractionType":
                 await ChangeInteractionType(buttonInfo[1]);
-                return;
+                break;
         }
 
         if (buttonInfo[0].StartsWith("InvInfo"))
         {
-            await ItemInfo(buttonInfo[3]);
+            await ItemInfo(buttonInfo[0]);
         }
         else if (buttonInfo[0].StartsWith("InvEquip"))
         {
-            await EquipItem(buttonInfo[3]);
+            await EquipItem(buttonInfo[0]);
         }
         else
         {
-            await SellItem(buttonInfo[3]);
+            await SellItem(buttonInfo[0]);
         }
     }
 
@@ -92,7 +91,7 @@ public class InventoryInteractions : IInteractionMaster
 
     private async Task ItemInfo(string buttonInfo)
     {
-        var itemId = _inventory!.currentPageItems[Convert.ToInt16(buttonInfo)];
+        var itemId = _inventory!.currentPageItems[Convert.ToInt32(buttonInfo[^1].ToString())];
         
         Embed embed;
         if (itemId == null)
@@ -124,7 +123,7 @@ public class InventoryInteractions : IInteractionMaster
 
     private async Task EquipItem(string buttonInfo)
     {
-        var itemId = _inventory!.currentPageItems[Convert.ToInt16(buttonInfo)];
+        var itemId = _inventory!.currentPageItems[Convert.ToInt32(buttonInfo[^1].ToString())];
         object? item = null;
         Item? itemToChange = null;
         Embed embed;
@@ -167,9 +166,7 @@ public class InventoryInteractions : IInteractionMaster
                 action.args[1] = itemToChange.id;
             }
 
-            embed = EmbedCreater.WarningEmbed(idItemToChange != null ?
-                $"Вы уверены что хотите снять `{itemToChange!.name}` и надеть `{tempItem.name}` ?" :
-                $"Вы уверены что хотите надеть `{tempItem.name}` ?");
+            embed = EmbedCreater.WarningEmbed(idItemToChange != null ? $"Вы уверены что хотите снять `{itemToChange!.name}` и надеть `{tempItem.name}` ?" : $"Вы уверены что хотите надеть `{tempItem.name}` ?");
         }
         else
         {
@@ -191,15 +188,16 @@ public class InventoryInteractions : IInteractionMaster
 
     private async Task SellItem(string buttonInfo)
     {
-        var itemId = _inventory!.currentPageItems[Convert.ToInt16(buttonInfo)];
+        var itemId = _inventory!.currentPageItems[Convert.ToInt32(buttonInfo[^1])];
         object? item = null;
         Embed embed;
-        Action action;
+        Action? action = null;
         
-        string uId = Guid.NewGuid().ToString().Split("-")[^1];
+        string UID = Guid.NewGuid().ToString().Split("-")[^1];
         
         if (itemId == null)
         {
+            embed = EmbedCreater.ErrorEmbed("Произошла ошибка, инвентрать будет обновлён");
             _inventory.Reload(_dbUser.inventory);
         }
         else
@@ -212,7 +210,7 @@ public class InventoryInteractions : IInteractionMaster
             
             action = new Action()
             {
-                id = "Action_"+uId,
+                id = "Action_"+UID,
                 date = DateTimeOffset.Now.ToUnixTimeSeconds(),
                 type = "Sell",
                 userId = _dbUser.id,
@@ -233,7 +231,7 @@ public class InventoryInteractions : IInteractionMaster
         if (action != null)
         {
             _dataBase.ActionDb.CreateObject(action);
-            await _component.RespondAsync(embed: embed,components: ButtonSets.AcceptActions(uId,_dbUser.id), ephemeral: true);
+            await _component.RespondAsync(embed: embed,components: ButtonSets.AcceptActions(UID,_dbUser.id), ephemeral: true);
         }
         else
         {

@@ -1,52 +1,61 @@
 using Discord.WebSocket;
 using JustRPG.Generators;
-using JustRPG.Modules.Responce;
-using Serilog;
+using JustRPG.Interfaces;
+using JustRPG.Modules.Buttons;
 
 namespace JustRPG.Services;
 
 public class ButtonHandler
 {
+    private DiscordSocketClient _client;
+    private object _service;
     private SocketMessageComponent _component;
-    private ProfileButtons _profileButtons;
-    private InventoryInteractions _inventoryInteractions;
-    private ActionButtons _actionButtons;
+
 
     public ButtonHandler(DiscordSocketClient client, SocketMessageComponent component, object service)
     {
         _component = component;
-        _profileButtons = new ProfileButtons(client, component, service);
-        _inventoryInteractions = new InventoryInteractions(client, component, service);
-        _actionButtons = new ActionButtons(client, component, service);
+        _client = client;
+        _service = service;
     }
 
     public async Task ButtonDistributor()
     {
+        IInteractionMaster master;
+
         var buttonInfo = _component.Data.CustomId.Split('_');
         if (_component.User.Id.ToString() != buttonInfo[1])
         {
-            await WrongInteraction();
+            await WrongInteraction("Вы не можете с этим взаимодействовать");
             return;
         }
 
         if (buttonInfo[0] == "Profile" || buttonInfo[0] == "Equipment" || buttonInfo[0] == "Inventory" ||
             buttonInfo[0] == "UpSkills" || buttonInfo[0] == "UpSkill")
-            await _profileButtons.Distributor(buttonInfo);
+            master = new ProfileInteractions(_client, _component, _service);
 
-        if (buttonInfo[0].Contains("Inv"))
+        else if (buttonInfo[0].Contains("Inv"))
+            master = new InventoryInteractions(_client, _component, _service);
+
+        else if (buttonInfo[0] == "Action")
+            master = new ActionInteractions(_client, _component, _service);
+
+        else if (buttonInfo[0] == "Battle")
+            master = new BattleInteractions(_client, _component, _service);
+
+        else
         {
-            await _inventoryInteractions.Distributor(buttonInfo);
+            await WrongInteraction("Кнопка не найдена, попробуйте вызвать меню ещё раз");
+            return;
         }
 
-        if (buttonInfo[0] == "Action")
-        {
-            await _actionButtons.Distributor(buttonInfo);
-        }
+
+        await master.Distributor(buttonInfo);
     }
 
-    private async Task WrongInteraction()
+    private async Task WrongInteraction(string text)
     {
-        await _component.RespondAsync(embed: EmbedCreater.ErrorEmbed("Вы не можете с этим взаимодействовать"), ephemeral:true);
+        await _component.RespondAsync(embed: EmbedCreater.ErrorEmbed(text), ephemeral:true);
     }
     
 

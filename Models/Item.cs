@@ -12,7 +12,7 @@ public class Item
     [BsonElement("price")]public int price { get; set; } = 0;
     [BsonElement("description")]public string description { get; set; } = "";
     [BsonElement("rarity")]public string rarity { get; set; } = "";
-    [BsonElement("give_stats")]public Stats giveStats { get; set; }
+    [BsonElement("give_stats")]public Stats? giveStats { get; set; }
     [BsonElement("generated")]public bool generated { get; set; } = false;
     
     [BsonElement("preset")]public string preset { get; set; } = "";

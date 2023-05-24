@@ -23,9 +23,9 @@ public class User
         
         UserEquipment res = new UserEquipment(
             helmet: equipment?.helmet == null ? null :(Item)dataBase.ItemDb.Get(equipment.helmet)!,
-            armor:  equipment?.armor  == null ? null :(Item)dataBase.ItemDb.Get(equipment.armor)!,
-            pants:  equipment?.pants  == null ? null :(Item)dataBase.ItemDb.Get(equipment.pants)!,
-            shoes:  equipment?.shoes  == null ? null :(Item)dataBase.ItemDb.Get(equipment.shoes)!,
+            armor:  equipment?.armor == null ?  null :(Item)dataBase.ItemDb.Get(equipment.armor)!,
+            pants:  equipment?.pants == null ?  null :(Item)dataBase.ItemDb.Get(equipment.pants)!,
+            shoes:  equipment?.shoes == null ?  null :(Item)dataBase.ItemDb.Get(equipment.shoes)!,
             gloves: equipment?.gloves == null ? null :(Item)dataBase.ItemDb.Get(equipment.gloves)!,
             weapon: equipment?.weapon == null ? null :(Item)dataBase.ItemDb.Get(equipment.weapon)!
             );

@@ -14,7 +14,7 @@ public class AdventuresCommands : InteractionModuleBase<SocketInteractionContext
         _bases = service;
     }
 
-    // [Cooldown(300)]
+    [Cooldown(300)]
     [SlashCommand(name: "adventure", description: "...")]
     public async Task Adventure()
     {
@@ -25,18 +25,5 @@ public class AdventuresCommands : InteractionModuleBase<SocketInteractionContext
                                         Convert.ToInt64(Context.User.Id),
                                         locations
                                     ));
-    }
-
-    // [Cooldown(300)]
-    [SlashCommand(name: "dungeon", description: "...")]
-    public async Task Dungeon()
-    {
-        var locations = _bases.LocationsDb.GetAdventuresLocations();
-        await RespondAsync( embed: EmbedCreater.SelectAdventureEmbed(),
-            components: ButtonSets.SelectLocation(
-            "dungeon",
-            Convert.ToInt64(Context.User.Id),
-            locations
-            ));
     }
 }

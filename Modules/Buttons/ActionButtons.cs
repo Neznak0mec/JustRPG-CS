@@ -25,7 +25,6 @@ public class ActionButtons
 
     public async Task Distributor(string[] buttonInfo)
     {
-        Log.Debug($"Action_{buttonInfo[2]}");
         _action = (Action)_dataBase.ActionDb.Get($"Action_{buttonInfo[2]}");
 
         if (_action == null)

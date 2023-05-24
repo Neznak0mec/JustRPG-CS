@@ -1,5 +1,4 @@
 using Discord;
-using JustRPG.Features;
 using JustRPG.Models;
 
 namespace JustRPG.Generators;
@@ -46,7 +45,7 @@ public static class ButtonSets
 
         var builder = new ComponentBuilder()
             .WithButton(label: "⮘", customId: $"InvPrewPage_{finder}_{userId}", disabled: inventory.currentPage == 0, row: 0)
-            .WithButton(label: $"{inventory.currentPage+1}/{inventory.lastPage+1}", customId: "null1", disabled: true, row: 0)
+            .WithButton(label: $"{inventory.currentPage+1}/{inventory.lastPage+1}", customId: "none1", disabled: true, row: 0)
             .WithButton(label: "➣", customId: $"InvNextPage_{finder}_{userId}", disabled: inventory.currentPage >= inventory.lastPage, row: 0)
             .WithButton(label: "♺", customId: $"InvReload_{finder}_{userId}")
             .WithSelectMenu(select, row: 1);
@@ -57,21 +56,21 @@ public static class ButtonSets
         {
             if (items[i] == null)
             {
-                builder.WithButton(label: $"{i+1}", customId: "null", style: style, disabled: true,row: 2);
+                builder.WithButton(label: $"{i+1}", customId: $"null{Random.Shared.Next()}", style: style, disabled: true,row: 2);
                 continue;
             }
             
             if (inventory.interactionType == "info")
             {
-                builder.WithButton(label: $"{i+1}", customId: $"InvInfo_{finder}_{userId}_{i}", style: style, disabled: false,row: 2);
+                builder.WithButton(label: $"{i+1}", customId: $"InvInfo{i}_{finder}_{userId}", style: style, disabled: false,row: 2);
                 continue;
             }
             if (finder == userId.ToString())
             {
                 if (inventory.interactionType == "equip")
-                    builder.WithButton(label: $"{i+1}", customId: $"InvEquip_{finder}_{userId}_{i}", style: style, disabled: !items[i]!.IsEquippable(),row: 2);
+                    builder.WithButton(label: $"{i+1}", customId: $"InvEquip{i}_{finder}_{userId}", style: style, disabled: !items[i]!.IsEquippable(),row: 2);
                 else
-                    builder.WithButton(label: $"{i+1}", customId: $"InvSell_{finder}_{userId}_{i}", style: style, disabled: false,row: 2);
+                    builder.WithButton(label: $"{i+1}", customId: $"InvSell{i}_{finder}_{userId}", style: style, disabled: false,row: 2);
             }
             
         }
@@ -105,28 +104,12 @@ public static class ButtonSets
         return new ComponentBuilder().WithSelectMenu(select).Build();
     }
 
-    public static MessageComponent BattleButtonSet(Battle battle, string userId,bool disableButtons = false, bool disableSelectEnemy = false)
+    public static MessageComponent BattleButtonSet(string battleUid, string userId)
     {
         var builder = new ComponentBuilder()
-            .WithButton(label: "Атака", customId: $"Battle_{userId}_Attack_{battle.id}",disabled: disableButtons)
-            .WithButton(label: "Хил", customId: $"Battle_{userId}_Heal_{battle.id}",disabled: disableButtons, style:ButtonStyle.Success)
-            .WithButton(label: "Побег", customId: $"Battle_{userId}_Run_{battle.id}",disabled: disableButtons, style:ButtonStyle.Danger);
-
-        if (battle.type == "dungeon"){
-            SelectMenuBuilder select = new SelectMenuBuilder()
-                .WithPlaceholder("Выберите противника")
-                .WithCustomId($"Battle_{userId}_SelectEnemy_{battle.id}");
-
-            for (int i = 0; i < battle.enemies.Length; i++)
-            {
-                var temp = SecondaryFunctions.WarriorToStatusString(battle.enemies[i], i == battle.selectedEnemy);
-                select.AddOption(label:$"{i+1} - {battle.enemies[i]}",value:$"{i}",description:temp.Item2,emote: new Emoji(temp.Item1) );
-            }
-
-            select.IsDisabled = disableSelectEnemy || disableButtons;
-
-            builder.WithSelectMenu(select);
-        }
+            .WithButton(label: "Атака", customId: $"Battle_{userId}_Attack_{battleUid}")
+            .WithButton(label: "Хил", customId: $"Battle_{userId}_Heal_{battleUid}")
+            .WithButton(label: "Побег", customId: $"Battle_{userId}_Run_{battleUid}");
 
         return builder.Build();
     }

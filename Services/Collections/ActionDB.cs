@@ -36,7 +36,7 @@ public class ActionDB : ICollection
         throw new NotImplementedException();
     }
 
-    public void Delete(string id)
+    public void Remove(string id)
     {
         _collection.DeleteOne(x => x.id == id);
     }

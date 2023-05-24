@@ -1,23 +1,21 @@
 using Discord.WebSocket;
 using JustRPG.Generators;
-using JustRPG.Interfaces;
-using JustRPG.Modules.Buttons;
+using JustRPG.Modules.Responce;
 using Serilog;
 
 namespace JustRPG.Services;
 
 public class SelectHandler
 {
-    
-    private DiscordSocketClient _client;
-    private object _service;
     private SocketMessageComponent _component;
-    IInteractionMaster master;
+    private InventoryInteractions _profileButtons;
+    private SelectLocation _selectLocation;
+    
     public SelectHandler(DiscordSocketClient client, SocketMessageComponent component, object service)
     {
         _component = component;
-        _client = client;
-        _service = service;
+        _profileButtons = new InventoryInteractions(client, component, service);
+        _selectLocation = new SelectLocation(client, component, service);
     }
     
     public async Task SelectDistributor()
@@ -30,15 +28,11 @@ public class SelectHandler
         }
 
         if (buttonInfo[0].StartsWith("InvInteractionType"))
-            master = new InventoryInteractions(_client, _component, _service);
+            await _profileButtons.Distributor(buttonInfo);
 
         if (buttonInfo[0] == "SelectLocation")
-            master = new SelectLocation(_client, _component, _service);
+            await _selectLocation.Distributor(buttonInfo);
 
-        if (buttonInfo[0] == "Battle")
-            master = new BattleInteractions(_client, _component, _service);
-
-        await master.Distributor(buttonInfo);
     }
     
     private async Task WrongInteraction()

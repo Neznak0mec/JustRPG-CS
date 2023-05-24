@@ -175,34 +175,24 @@ public class EmbedCreater
         return embed.Build();
     }
 
-    public static Embed BattlEmbed(Battle battle, bool gameEnded = false)
+    public static Embed BattlEmbed(Battle battle)
     {
         Warrior selectedEnemy = battle.enemies[battle.selectedEnemy];
         Warrior currentWarrior = battle.players[battle.currentUser];
         var progressBar = SecondaryFunctions.ProgressBar;
         EmbedBuilder embed = new EmbedBuilder
         {
-            Title = $"Битва {currentWarrior.name} - {selectedEnemy.name}"
+            Title = $"Битва с {selectedEnemy.name} - {selectedEnemy.name}"
         };
+        embed.AddField($"Вы - {currentWarrior.lvl}",
+            $"hp - {progressBar(currentWarrior.stats.hp,currentWarrior.stats.MaxHP)}\n " +
+            $"def - {progressBar(currentWarrior.stats.defence,currentWarrior.stats.MaxDef)}\n" +
+            $"урон - {currentWarrior.stats.damage}");
 
-        if (battle.type == "adventure")
-            embed.WithThumbnailUrl(selectedEnemy.url);
-
-        if (!gameEnded)
-        {
-            embed.AddField($"Вы - {currentWarrior.lvl}",
-                $"<:health:997889169567260714> - {progressBar(currentWarrior.stats.hp,currentWarrior.stats.MaxHP)}\n " +
-                $"<:armor:997889166673186987> - {progressBar(currentWarrior.stats.defence,currentWarrior.stats.MaxDef)}\n" +
-                $"<:strength:997764094125953054> - {currentWarrior.stats.damage}");
-
-            embed.AddField($"Вы - {selectedEnemy.lvl}",
-                $"<:health:997889169567260714> - {progressBar(selectedEnemy.stats.hp,selectedEnemy.stats.MaxHP)}\n " +
-                $"<:armor:997889166673186987> - {progressBar(selectedEnemy.stats.defence,selectedEnemy.stats.MaxDef)}\n" +
-                $"<:strength:997764094125953054> - {selectedEnemy.stats.damage}");
-        }
-
-        if (battle.log != "")
-            embed.AddField("Логи", $"```{battle.log}```");
+        embed.AddField($"Вы - {selectedEnemy.lvl}",
+            $"hp - {progressBar(selectedEnemy.stats.hp,selectedEnemy.stats.MaxHP)}\n " +
+            $"def - {progressBar(selectedEnemy.stats.defence,selectedEnemy.stats.MaxDef)}\n" +
+            $"урон - {selectedEnemy.stats.damage}");
 
         return embed.Build();
     }

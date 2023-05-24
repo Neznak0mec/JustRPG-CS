@@ -1,0 +1,91 @@
+{
+  "format": 1,
+  "restore": {
+    "/home/noname/programming/Projects/JustRPG-CS/JustRPG-CS/JustRPG-CS.csproj": {}
+  },
+  "projects": {
+    "/home/noname/programming/Projects/JustRPG-CS/JustRPG-CS/JustRPG-CS.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "/home/noname/programming/Projects/JustRPG-CS/JustRPG-CS/JustRPG-CS.csproj",
+        "projectName": "JustRPG-CS",
+        "projectPath": "/home/noname/programming/Projects/JustRPG-CS/JustRPG-CS/JustRPG-CS.csproj",
+        "packagesPath": "/home/noname/.nuget/packages/",
+        "outputPath": "/home/noname/programming/Projects/JustRPG-CS/JustRPG-CS/obj/",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "/home/noname/.nuget/NuGet/NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net7.0"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net7.0": {
+            "targetAlias": "net7.0",
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "net7.0": {
+          "targetAlias": "net7.0",
+          "dependencies": {
+            "Discord.Net": {
+              "target": "Package",
+              "version": "[3.8.1, )"
+            },
+            "Microsoft.Extensions.Configuration": {
+              "target": "Package",
+              "version": "[7.0.0-preview.7.22375.6, )"
+            },
+            "Microsoft.Extensions.Configuration.Yaml": {
+              "target": "Package",
+              "version": "[2.0.0-preview2, )"
+            },
+            "Microsoft.Extensions.Hosting": {
+              "target": "Package",
+              "version": "[7.0.0-preview.7.22375.6, )"
+            },
+            "MongoDB.Driver": {
+              "target": "Package",
+              "version": "[2.17.1, )"
+            },
+            "Serilog": {
+              "target": "Package",
+              "version": "[2.12.0, )"
+            },
+            "Serilog.Sinks.Console": {
+              "target": "Package",
+              "version": "[4.1.1-dev-00896, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "/usr/share/dotnet/sdk/7.0.203/RuntimeIdentifierGraph.json"
+        }
+      }
+    }
+  }
+}

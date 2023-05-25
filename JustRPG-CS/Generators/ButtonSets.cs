@@ -57,7 +57,7 @@ public static class ButtonSets
         {
             if (items[i] == null)
             {
-                builder.WithButton(label: $"{i+1}", customId: "null", style: style, disabled: true,row: 2);
+                builder.WithButton(label: $"{i+1}", customId: $"null-{Guid.NewGuid()}", style: style, disabled: true,row: 2);
                 continue;
             }
             

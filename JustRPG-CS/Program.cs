@@ -1,6 +1,7 @@
 ﻿using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
+using JustRPG_CS.Features;
 using JustRPG.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -11,10 +12,12 @@ namespace JustRPG;
 
 public class Program
 {
+    DataBase _shareDataBase;
     public static Task Main(string[] args) => new Program().MainAsync();
 
     private async Task MainAsync()
     {
+        _shareDataBase = new DataBase();
         using IHost host = Host.CreateDefaultBuilder()
             .ConfigureServices((_, services) =>
                 services
@@ -25,11 +28,23 @@ public class Program
                     }))
                     .AddSingleton(x => new InteractionService(x.GetRequiredService<DiscordSocketClient>()))
                     .AddSingleton<InteractionHandler>()
-                    .AddSingleton<DataBase>()
+                    .AddSingleton<DataBase>(_shareDataBase)
             ).Build();
 
+        Task backgroundTask = RunBackgroundTaskAsync();
 
         await RunAsync(host);
+
+        await backgroundTask;
+    }
+
+    private async Task RunBackgroundTaskAsync()
+    {
+        while (true)
+        {
+            Background.BackgroundMaster(_shareDataBase);
+            await Task.Delay(30000);
+        }
     }
 
     private async Task RunAsync(IHost host)

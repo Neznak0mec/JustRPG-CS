@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JustRPG-CS", "JustRPG-CS\JustRPG-CS.csproj", "{5AAA0846-F174-4576-B256-A6CBDECF0A9C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JustRPG", "JustRPG\JustRPG.csproj", "{5AAA0846-F174-4576-B256-A6CBDECF0A9C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

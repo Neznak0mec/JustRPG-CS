@@ -10,10 +10,9 @@ public class SelectHandler
 {
     
     private DiscordSocketClient _client;
-    private object _service;
+    private IServiceProvider _service;
     private SocketMessageComponent _component;
-    IInteractionMaster master;
-    public SelectHandler(DiscordSocketClient client, SocketMessageComponent component, object service)
+    public SelectHandler(DiscordSocketClient client, SocketMessageComponent component, IServiceProvider service)
     {
         _component = component;
         _client = client;
@@ -29,6 +28,8 @@ public class SelectHandler
             return;
         }
 
+        IInteractionMaster master;
+
         if (buttonInfo[0].StartsWith("InvInteractionType"))
             master = new InventoryInteractions(_client, _component, _service);
 
@@ -37,6 +38,9 @@ public class SelectHandler
 
         if (buttonInfo[0] == "Battle")
             master = new BattleInteractions(_client, _component, _service);
+
+        else
+            throw new Exception("wtf");
 
         await master.Distributor(buttonInfo);
     }

@@ -8,11 +8,11 @@ namespace JustRPG.Services;
 public class ButtonHandler
 {
     private DiscordSocketClient _client;
-    private object _service;
+    private IServiceProvider _service;
     private SocketMessageComponent _component;
 
 
-    public ButtonHandler(DiscordSocketClient client, SocketMessageComponent component, object service)
+    public ButtonHandler(DiscordSocketClient client, SocketMessageComponent component, IServiceProvider service)
     {
         _component = component;
         _client = client;

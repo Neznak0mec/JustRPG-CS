@@ -53,7 +53,7 @@ public class Inventory
         Save();
     }
 
-    public Item?[] GetItems(DataBase dataBase)
+    public async Task<Item?[]> GetItems(DataBase dataBase)
     {
         Item?[] getItems = {null, null, null, null, null };
         for (int i = 0; i < currentPageItems.Length; i++)
@@ -61,7 +61,7 @@ public class Inventory
             if (currentPageItems[i] == null)
                 break;
 
-            getItems[i] = (Item)dataBase.ItemDb.Get(currentPageItems[i]!)!;
+            getItems[i] = (Item) (await dataBase.ItemDb.Get(currentPageItems[i]!))!;
         }
 
         return getItems;

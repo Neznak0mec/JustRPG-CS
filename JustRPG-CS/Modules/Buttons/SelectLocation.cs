@@ -12,14 +12,14 @@ namespace JustRPG.Modules.Buttons;
 public class SelectLocation : IInteractionMaster
 {
     private DiscordSocketClient _client;
-    private SocketMessageComponent _component;
-    private DataBase _dataBase;
+    private readonly SocketMessageComponent _component;
+    private readonly DataBase _dataBase;
 
-    public SelectLocation(DiscordSocketClient client, SocketMessageComponent component, object? service)
+    public SelectLocation(DiscordSocketClient client, SocketMessageComponent component, IServiceProvider service)
     {
         _client = client;
         _component = component;
-        _dataBase = (DataBase)service!;
+        _dataBase = (DataBase)service.GetService(typeof(DataBase))!;
     }
 
     public async Task Distributor(string[] buttonInfo)
@@ -38,7 +38,7 @@ public class SelectLocation : IInteractionMaster
     private async Task GenerateDungeon(string userId)
     {
         Location location = _dataBase.LocationsDb.Get(_component.Data.Values.ToArray()[0]);
-        Warrior mainPlayer = AdventureGenerators.GenerateWarriorByUser((User)_dataBase.UserDb.Get(userId), _component.User.Username, _dataBase);
+        Warrior mainPlayer = await AdventureGenerators.GenerateWarriorByUser((User) (await _dataBase.UserDb.Get(userId))!, _component.User.Username, _dataBase);
 
         List<Warrior> enemies = new List<Warrior>();
         for (int i = 0; i < Random.Shared.Next(1,3);i++)
@@ -56,15 +56,15 @@ public class SelectLocation : IInteractionMaster
             log = "-"
         };
 
-        _dataBase.BattlesDb.CreateObject(newBattle);
+        await _dataBase.BattlesDb.CreateObject(newBattle);
 
-        await ResponceMessage(EmbedCreater.BattlEmbed(newBattle), component: ButtonSets.BattleButtonSet(newBattle,userId));
+        await ResponseMessage(EmbedCreater.BattleEmbed(newBattle), component: ButtonSets.BattleButtonSet(newBattle,Convert.ToInt64(userId)));
     }
 
     async Task GenerateAdventure(string userId)
     {
         Location location = _dataBase.LocationsDb.Get(_component.Data.Values.ToArray()[0]);
-        Warrior mainPlayer = AdventureGenerators.GenerateWarriorByUser((User)_dataBase.UserDb.Get(userId), _component.User.Username, _dataBase);
+        Warrior mainPlayer = await AdventureGenerators.GenerateWarriorByUser((User) (await _dataBase.UserDb.Get(userId))!, _component.User.Username, _dataBase);
         Battle newBattle = new Battle
         {
             id = Guid.NewGuid().ToString(),
@@ -75,12 +75,12 @@ public class SelectLocation : IInteractionMaster
             log = "-"
         };
 
-        _dataBase.BattlesDb.CreateObject(newBattle);
+        await _dataBase.BattlesDb.CreateObject(newBattle);
 
-        await ResponceMessage(EmbedCreater.BattlEmbed(newBattle), component: ButtonSets.BattleButtonSet(newBattle,userId));
+        await ResponseMessage(EmbedCreater.BattleEmbed(newBattle), component: ButtonSets.BattleButtonSet(newBattle,Convert.ToInt64(userId)));
     }
     
-    private async Task ResponceMessage(Embed embed, MessageComponent component = null)
+    private async Task ResponseMessage(Embed embed, MessageComponent? component = null)
     {
         await _component.UpdateAsync(x =>
         {

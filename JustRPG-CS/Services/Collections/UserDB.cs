@@ -8,33 +8,35 @@ namespace JustRPG.Services.Collections;
 
 public class UserDb : ICollection
 {
-    private readonly IMongoCollection<User> _collection;
+    private readonly IMongoCollection<User?> _collection;
+    private readonly List<ulong> usersIdCache;
 
     public UserDb(IMongoDatabase mongoDatabase)
     {
         _collection = mongoDatabase.GetCollection<User>("users");
+        usersIdCache = new List<ulong>();
     }
     
-    public object? Get(object val,string key="id")
+    public async Task<object?> Get(object val,string key="id")
     {
-        var filterUser =Builders<User>.Filter.Eq(key, val);  
-        return _collection.Find(filterUser).FirstOrDefault();
+        FilterDefinition<User?> filterUser =Builders<User>.Filter.Eq(key, val);
+        return await (await _collection.FindAsync(filterUser)).FirstOrDefaultAsync();
     }
 
-    public object CreateObject(object id)
+    public async Task<object?> CreateObject(object? id)
     {
-        User newUser = new User{id  = Convert.ToInt64(id)};
-        _collection.InsertOne(newUser);
+        User? newUser = new User{id  = Convert.ToInt64(id)};
+        await _collection.InsertOneAsync(newUser);
         return newUser;
     }
 
-    public void Add(object where,string fieldKey, int value)
+    public async Task Add(object where,string fieldKey, int value)
     {
         User temp = (User)where;
-        var filterUser = Builders<User>.Filter.Eq("id", temp.id);
-        var updateUser = fieldKey == "exp" ? UpdateLvl(temp, value) : Builders<User>.Update.Inc(fieldKey, value);
+        FilterDefinition<User> filterUser = Builders<User>.Filter.Eq("id", temp.id);
+        UpdateDefinition<User> updateUser = fieldKey == "exp" ? UpdateLvl(temp, value) : Builders<User>.Update.Inc(fieldKey, value);
 
-        _collection.UpdateOne(filterUser, updateUser);
+        await _collection.UpdateOneAsync(filterUser!, updateUser!);
     }
 
     private UpdateDefinition<User> UpdateLvl(User user, int value)
@@ -53,10 +55,22 @@ public class UserDb : ICollection
         return updateUser;
     }
 
-    public void Update(object obj)
+    public async Task Update(object? obj)
     {
         User temp = (User)obj;
-        var filterUser =Builders<User>.Filter.Eq("id", temp.id);
-        _collection.ReplaceOne(filterUser,temp);
+        FilterDefinition<User?> filterUser =Builders<User>.Filter.Eq("id", temp.id);
+        await _collection.ReplaceOneAsync(filterUser,temp);
+    }
+
+    public async Task Cache(ulong userId)
+    {
+        if (usersIdCache.Contains(userId))
+          return;
+
+        var user = Get(userId);
+        if (user == null)
+            await CreateObject(userId);
+
+        usersIdCache.Add(userId);
     }
 }

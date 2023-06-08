@@ -1,4 +1,4 @@
-﻿using Discord;
+﻿﻿using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
 using JustRPG_CS.Features;
@@ -13,38 +13,37 @@ namespace JustRPG;
 public class Program
 {
     DataBase _shareDataBase;
+    DiscordSocketClient _client;
+    private Background _background;
     public static Task Main(string[] args) => new Program().MainAsync();
 
     private async Task MainAsync()
     {
         _shareDataBase = new DataBase();
+        _client = new DiscordSocketClient(new DiscordSocketConfig()
+            {
+                GatewayIntents = Discord.GatewayIntents.None,
+                AlwaysDownloadUsers = true
+            });
+        _background = new Background(_shareDataBase, _client);
+
         using IHost host = Host.CreateDefaultBuilder()
             .ConfigureServices((_, services) =>
                 services
-                    .AddSingleton(x => new DiscordSocketClient(new DiscordSocketConfig()
-                    {
-                        GatewayIntents = Discord.GatewayIntents.None,
-                        AlwaysDownloadUsers = true
-                    }))
+                    .AddSingleton<DiscordSocketClient>(_client)
                     .AddSingleton(x => new InteractionService(x.GetRequiredService<DiscordSocketClient>()))
                     .AddSingleton<InteractionHandler>()
                     .AddSingleton<DataBase>(_shareDataBase)
+                    .AddSingleton<Background>(_background)
             ).Build();
 
-        Task backgroundTask = RunBackgroundTaskAsync();
+        await Task.WhenAll(RunAsync(host), RunBackgroundTaskAsync());
 
-        await RunAsync(host);
-
-        await backgroundTask;
     }
 
     private async Task RunBackgroundTaskAsync()
     {
-        while (true)
-        {
-            Background.BackgroundMaster(_shareDataBase);
-            await Task.Delay(30000);
-        }
+        await _background.BackgroundMaster();
     }
 
     private async Task RunAsync(IHost host)

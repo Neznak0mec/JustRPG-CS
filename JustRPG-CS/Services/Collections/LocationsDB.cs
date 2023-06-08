@@ -12,10 +12,10 @@ public class LocationsDB
         _collection = mongoDatabase.GetCollection<Location>("info");
     }
     
-    public List<Location> GetDungeons()
+    public async Task<List<Location>> GetDungeons()
     {
-        var filterAction =Builders<Location>.Filter.Eq("type", "dungeon");  
-        return _collection.Find(filterAction).ToList();
+        var filterAction =Builders<Location>.Filter.Eq("type", "dungeon");
+        return (await _collection.FindAsync(filterAction)).ToList();
     }
     
     public List<Location> GetAdventuresLocations()

@@ -1,5 +1,6 @@
 using System.Reflection.Emit;
 using Discord;
+using JustRPG_CS.Models;
 using JustRPG.Models;
 using JustRPG.Models.SubClasses;
 using JustRPG.Services;
@@ -19,10 +20,12 @@ public class EmbedCreater
     
     public static Embed ErrorEmbed(string text)
     {
-        var emb = new EmbedBuilder();
-        emb.Title = "🚫 Ошибка";
-        emb.Color = Color.Red;
-        emb.Description = text;
+        var emb = new EmbedBuilder
+        {
+            Title = "🚫 Ошибка",
+            Color = Color.Red,
+            Description = text
+        };
         return emb.Build();
     }
 
@@ -58,7 +61,7 @@ public class EmbedCreater
         return emb.Build();
     } 
 
-    public static Embed UserProfile(User user, Discord.IUser member)
+    public static Embed UserProfile(User user, IUser member)
     {
         var emb = new EmbedBuilder
         {
@@ -67,6 +70,7 @@ public class EmbedCreater
         emb.AddField($"Уровень", $"{user.lvl}", inline: true)
             .AddField("Опыт", $"{Math.Round(user.expToLvl,2)}\\{(int)user.exp}", inline: true)
             .AddField("Баланс", $"{user.cash}", inline: true)
+            .AddField("Очки рейтинга", $"{user.mmr}",inline:true)
             .AddField("Очки навыков", $"{user.skillPoints}", inline:true)
             .AddField(name: "Статы", value:$"<:health:997889169567260714> : {user.stats.hp} |  <:strength:997889205684420718> : {user.stats.damage} " +
                                           $"| <:armor:997889166673186987> : {user.stats.defence} \n<:dexterity:997889168216694854> : {user.stats.speed} " +
@@ -74,13 +78,13 @@ public class EmbedCreater
         return emb.Build();
     }
     
-    public Embed UserEquipment(User user, Discord.IUser member)
+    public async Task<Embed> UserEquipment(User user, IUser member)
     {
         var embed = new EmbedBuilder
         {
             Title = $"Экипировка {member.Username}"
         };
-        UserEquipment equipment = user.GetEquipmentAsItems(_dataBase!);
+        UserEquipment equipment = await user.GetEquipmentAsItems(_dataBase!);
 
         embed.AddField(equipment.helmet  == null ? "Шлем"      : $"Шлем - {equipment.helmet!.name}",     equipment.helmet == null ? "Не надето" : equipment.helmet!.ToString(), true)
             .AddField(equipment.armor  == null ? "Нагрудник" : $"Нагрудник - {equipment.armor!.name}", equipment.armor  == null ? "Не надето" : equipment.armor!.ToString(), true)
@@ -175,27 +179,45 @@ public class EmbedCreater
         return embed.Build();
     }
 
-    public static Embed BattlEmbed(Battle battle, bool gameEnded = false)
+    public static Embed BattleEmbed(Battle? battle, bool gameEnded = false)
     {
-        Warrior selectedEnemy = battle.enemies[battle.selectedEnemy];
-        Warrior currentWarrior = battle.players[battle.currentUser];
+        Warrior selectedEnemy, currentWarrior;
+        EmbedBuilder embed;
         var progressBar = SecondaryFunctions.ProgressBar;
-        EmbedBuilder embed = new EmbedBuilder
+        switch (battle!.type)
         {
-            Title = $"Битва {currentWarrior.name} - {selectedEnemy.name}"
+            case "adventure" or "dungeon":
+                currentWarrior = battle.players[battle.currentUser];
+                selectedEnemy = battle.enemies[battle.selectedEnemy];
+                break;
+            case "arena":
+                currentWarrior = battle.players[battle.currentUser];
+                selectedEnemy = battle.players[battle.currentUser == 1 ? 0 : 1];
+                break;
+            default:
+                return ErrorEmbed("wha ?");
+        }
+
+        embed = new EmbedBuilder
+        {
+            Title = $"Бой {currentWarrior.name} - {selectedEnemy.name}",
+            Description = battle.type == "arena" ? $"Сейчас ходит {currentWarrior.name}" : ""
         };
 
-        if (battle.type == "adventure")
+
+        if (battle.type is "adventure" or "dungeon")
             embed.WithThumbnailUrl(selectedEnemy.url);
+        else
+            embed.WithThumbnailUrl(currentWarrior.url);
 
         if (!gameEnded)
         {
-            embed.AddField($"Вы - {currentWarrior.lvl}",
+            embed.AddField($"{currentWarrior.name} - {currentWarrior.lvl}",
                 $"<:health:997889169567260714> - {progressBar(currentWarrior.stats.hp,currentWarrior.stats.MaxHP)}\n " +
                 $"<:armor:997889166673186987> - {progressBar(currentWarrior.stats.defence,currentWarrior.stats.MaxDef)}\n" +
                 $"<:strength:997764094125953054> - {currentWarrior.stats.damage}");
 
-            embed.AddField($"Вы - {selectedEnemy.lvl}",
+            embed.AddField($"{selectedEnemy.name} - {selectedEnemy.lvl}",
                 $"<:health:997889169567260714> - {progressBar(selectedEnemy.stats.hp,selectedEnemy.stats.MaxHP)}\n " +
                 $"<:armor:997889166673186987> - {progressBar(selectedEnemy.stats.defence,selectedEnemy.stats.MaxDef)}\n" +
                 $"<:strength:997764094125953054> - {selectedEnemy.stats.damage}");
@@ -207,5 +229,19 @@ public class EmbedCreater
         return embed.Build();
     }
 
+    public static Embed FindPvp(FindPVP pvp, long count = -1)
+    {
+        EmbedBuilder embed = new EmbedBuilder
+        {
+            Title = $"Поиск битвы",
+            Description = "Чем дольше вы ждёте битву тем более сильнее или слабее противник может попасться"
+        };
+        embed.AddField("Ваш mmr", $"```{pvp.mmr}```", inline: true);
+        embed.AddField("Время начала поиска", $"<t:{pvp.stratTime}:R>", inline:true);
+        if (count != -1)
+            embed.AddField("В поиске на моент начала", $"```{count}```");
 
+
+        return embed.Build();
+    }
 }

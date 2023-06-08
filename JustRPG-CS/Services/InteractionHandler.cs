@@ -13,12 +13,14 @@ namespace JustRPG.Services
         private readonly DiscordSocketClient _client;
         private readonly InteractionService _commands;
         private readonly IServiceProvider _services;
+        private readonly DataBase _dataBase;
         
         public InteractionHandler(DiscordSocketClient client, InteractionService commands, IServiceProvider services)
         {
             _client = client;
             _commands = commands;
             _services = services;
+            _dataBase = (DataBase)_services.GetService(typeof(DataBase))!;
         }
 
         public async Task InitializeAsync()
@@ -32,6 +34,7 @@ namespace JustRPG.Services
 
         private async Task HandleInteraction(SocketInteraction arg)
         {
+            _dataBase.UserDb.Cache(arg.User.Id);
             if (arg.Type == InteractionType.ApplicationCommand)
                 try
                 {
@@ -46,24 +49,30 @@ namespace JustRPG.Services
 
         private async Task OnInteractionExecuted(ICommandInfo command, IInteractionContext context, IResult result)
         {
-            if(!result.IsSuccess && result.ErrorReason.StartsWith("Не так быстро") || context.User.Id == 426986442632462347)
+            // todo: remove on release
+            if (true)
+            {
+                await context.Interaction.RespondAsync(embed: EmbedCreater.ErrorEmbed(result.ErrorReason), ephemeral: true);
+            }
+            else if(!result.IsSuccess && result.ErrorReason.StartsWith("Не так быстро") || context.User.Id == 426986442632462347)
             {
                 await context.Interaction.RespondAsync(embed: EmbedCreater.ErrorEmbed(result.ErrorReason), ephemeral: true);
             }
             else if(!result.IsSuccess)
             {
                 await context.Interaction.RespondAsync(embed: EmbedCreater.ErrorEmbed("Произошла неизвестная ошибка, попробуйте позже"), ephemeral: true);
+                Log.Error(result.ErrorReason);
             }
         }
 
         private async Task ButtonInteraction(SocketMessageComponent component)
         {
-            await new ButtonHandler(_client, component, _services.GetService(typeof(DataBase))!).ButtonDistributor();
+            await new ButtonHandler(_client, component, _services).ButtonDistributor();
         }
 
         private async Task SelectInteraction(SocketMessageComponent component)
         {
-            await new SelectHandler(_client, component, _services.GetService(typeof(DataBase))!).SelectDistributor();
+            await new SelectHandler(_client, component, _services).SelectDistributor();
         }
     }
 } 

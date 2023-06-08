@@ -22,7 +22,7 @@ public class Profilecommands : InteractionModuleBase<SocketInteractionContext>
     {
         needToFound ??= Context.User;
 
-        User? user = GetUser(Context.User.Id, Context.User.Id == needToFound.Id);
+        User? user = await GetUser(Context.User.Id, Context.User.Id == needToFound.Id);
 
         if (user == null)
             await RespondAsync(embed: EmbedCreater.ErrorEmbed("Данный пользователь не найден"), ephemeral: true);
@@ -34,24 +34,24 @@ public class Profilecommands : InteractionModuleBase<SocketInteractionContext>
     [SlashCommand("work", "Помочь в городе")]
     public async Task Work()
     {
-        User user = GetUser(Context.User.Id, true)!;
+        User user = (await GetUser(Context.User.Id, true))!;
 
         int exp = 10 + Random.Shared.Next(0, 2 * user.stats.luck);
         int cash = 10 + Random.Shared.Next(0, 2 * user.stats.luck);
 
-        _bases.UserDb.Add(user,"exp",exp);
-        _bases.UserDb.Add(user,"cash",cash);
+        await _bases.UserDb.Add(user,"exp",exp);
+        await _bases.UserDb.Add(user,"cash",cash);
 
-        await Context.Interaction.RespondAsync(embed: EmbedCreater.WorkEmbed(_bases.Works, exp, cash));
+        await Context.Interaction.RespondAsync(embed: EmbedCreater.WorkEmbed(_bases.works!, exp, cash));
     }
 
-    private User? GetUser(ulong userId, bool create = false)
+    private async Task<User?> GetUser(ulong userId, bool create = false)
     {
-        var tempUser = _bases.UserDb.Get(userId);
+        var tempUser = await _bases.UserDb.Get(userId);
         if (tempUser == null && !create)
             return null;
         else
-            return (User)tempUser;
+            return (User)tempUser!;
 
     }
 }

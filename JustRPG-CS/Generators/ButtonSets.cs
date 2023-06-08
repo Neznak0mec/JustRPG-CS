@@ -32,13 +32,13 @@ public static class ButtonSets
         return builder.Build();
     }
 
-    public static MessageComponent InventoryButtonsSet(string finder, long userId, Inventory inventory,Item?[] items)
+    public static MessageComponent InventoryButtonsSet(string finder, long userId, Inventory? inventory,Item?[] items)
     {
         
         
         var select = new SelectMenuBuilder()
             .WithPlaceholder(
-                $"Тип взаимодействия: {(inventory.interactionType == "info" ? "информация" : inventory.interactionType == "sell" ? "продажа" : "экипировать")}")
+                $"Тип взаимодействия: {(inventory!.interactionType == "info" ? "информация" : inventory.interactionType == "sell" ? "продажа" : "экипировать")}")
             .WithCustomId($"InvInteractionType_{finder}_{userId}")
             .AddOption("Информация", "info")
             .AddOption("Экипировать", "equip")
@@ -105,10 +105,10 @@ public static class ButtonSets
         return new ComponentBuilder().WithSelectMenu(select).Build();
     }
 
-    public static MessageComponent BattleButtonSet(Battle battle, string userId,bool disableButtons = false, bool disableSelectEnemy = false)
+    public static MessageComponent BattleButtonSet(Battle? battle, long userId,bool disableButtons = false, bool disableSelectEnemy = false)
     {
         var builder = new ComponentBuilder()
-            .WithButton(label: "Атака", customId: $"Battle_{userId}_Attack_{battle.id}",disabled: disableButtons)
+            .WithButton(label: "Атака", customId: $"Battle_{userId}_Attack_{battle!.id}",disabled: disableButtons)
             .WithButton(label: "Хил", customId: $"Battle_{userId}_Heal_{battle.id}",disabled: disableButtons, style:ButtonStyle.Success)
             .WithButton(label: "Побег", customId: $"Battle_{userId}_Run_{battle.id}",disabled: disableButtons, style:ButtonStyle.Danger);
 

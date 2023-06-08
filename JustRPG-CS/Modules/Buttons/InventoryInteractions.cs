@@ -10,28 +10,28 @@ namespace JustRPG.Modules.Buttons;
 
 public class InventoryInteractions : IInteractionMaster
 {
-    private DiscordSocketClient _client;
-    private SocketMessageComponent _component;
-    private DataBase _dataBase;
+    private readonly DiscordSocketClient _client;
+    private readonly SocketMessageComponent _component;
+    private readonly DataBase _dataBase;
     private Inventory? _inventory;
     private User _dbUser;
     private SocketUser _member;
 
-    public InventoryInteractions(DiscordSocketClient client, SocketMessageComponent component, object? service)
+    public InventoryInteractions(DiscordSocketClient client, SocketMessageComponent component, IServiceProvider service)
     {
         _client = client;
         _component = component;
-        _dataBase = (DataBase)service!;
+        _dataBase = (DataBase)service.GetService(typeof(DataBase))!;
 
     }
     
     
     public async Task Distributor(string[] buttonInfo)
     {
-        _inventory = (Inventory)_dataBase.InventoryDb.Get($"Inventory_{buttonInfo[1]}_{buttonInfo[2]}")!;
+        _inventory = (Inventory) (await _dataBase.InventoryDb.Get($"Inventory_{buttonInfo[1]}_{buttonInfo[2]}"))!;
         _inventory.DataBase = _dataBase;
         
-        _dbUser = (User)_dataBase.UserDb.Get(Convert.ToUInt64(buttonInfo[2]))!;
+        _dbUser = (User) (await _dataBase.UserDb.Get(Convert.ToUInt64(buttonInfo[2])))!;
         _member = _client.GetUser(Convert.ToUInt64(buttonInfo[2]));
         
         
@@ -102,7 +102,7 @@ public class InventoryInteractions : IInteractionMaster
         }
         else
         {
-            var item = _dataBase.ItemDb.Get(itemId);
+            var item = await _dataBase.ItemDb.Get(itemId);
             embed = item == null ? EmbedCreater.ErrorEmbed("Этот предмет не найден, странно 🤔") : EmbedCreater.ItemInfo((Item)item);
         }
 
@@ -111,7 +111,7 @@ public class InventoryInteractions : IInteractionMaster
 
     private async Task UpdateMessage(string finder)
     {
-        var items = _inventory!.GetItems(_dataBase);
+        var items = await _inventory!.GetItems(_dataBase);
         await _component.UpdateAsync(
             x =>
             {
@@ -125,45 +125,42 @@ public class InventoryInteractions : IInteractionMaster
     private async Task EquipItem(string buttonInfo)
     {
         var itemId = _inventory!.currentPageItems[Convert.ToInt16(buttonInfo)];
-        object? item = null;
         Item? itemToChange = null;
         Embed embed;
-        Action? action = null;
+        Action? action;
         
-        string UID = Guid.NewGuid().ToString().Split("-")[^1];
+        string uId = Guid.NewGuid().ToString().Split("-")[^1];
         
         if (itemId == null)
         {
-            embed = EmbedCreater.ErrorEmbed("Произошла ошибка, инвентрать будет обновлён");
+//            embed = EmbedCreater.ErrorEmbed("Произошла ошибка, инвентрать будет обновлён");
             _inventory.Reload(_dbUser.inventory);
             return;
         }
-        else
-            item = _dataBase.ItemDb.Get(itemId);
-        
-        //todo Проверка на возможность экипировать
+        object? item = await _dataBase.ItemDb.Get(itemId);
 
+        //todo Проверка на возможность экипировать
         if (item != null)
         {
             Item tempItem = (Item)item;
             string? idItemToChange = _dbUser.equipment!.GetByName(tempItem.type);
             
-            action = new Action()
+            action = new Action
             {
-                id = "Action_"+UID,
+                id = "Action_"+uId,
                 date = DateTimeOffset.Now.ToUnixTimeSeconds(),
                 userId = _dbUser.id,
                 type = "Equip",
                 args = new[]
                 {
-                    itemId!,"null"
+                    itemId,"null"
                 }
             };
 
             
             if (idItemToChange != null)
             {
-                itemToChange = (Item)_dataBase.ItemDb.Get(idItemToChange)!;
+                itemToChange = (Item) (await _dataBase.ItemDb.Get(idItemToChange))!;
                 action.args[1] = itemToChange.id;
             }
 
@@ -179,8 +176,8 @@ public class InventoryInteractions : IInteractionMaster
 
         if (action != null)
         {
-            _dataBase.ActionDb.CreateObject(action);
-            await _component.RespondAsync(embed: embed,components: ButtonSets.AcceptActions(UID, _dbUser.id), ephemeral: true);
+            await _dataBase.ActionDb.CreateObject(action);
+            await _component.RespondAsync(embed: embed,components: ButtonSets.AcceptActions(uId, _dbUser.id), ephemeral: true);
         }
         else
         {
@@ -194,7 +191,7 @@ public class InventoryInteractions : IInteractionMaster
         var itemId = _inventory!.currentPageItems[Convert.ToInt16(buttonInfo)];
         object? item = null;
         Embed embed;
-        Action action;
+        Action? action;
         
         string uId = Guid.NewGuid().ToString().Split("-")[^1];
         
@@ -203,14 +200,14 @@ public class InventoryInteractions : IInteractionMaster
             _inventory.Reload(_dbUser.inventory);
         }
         else
-            item = _dataBase.ItemDb.Get(itemId);
+            item = await _dataBase.ItemDb.Get(itemId);
         
         if (item != null)
         {
             Item tempItem = (Item)item;
             
             
-            action = new Action()
+            action = new Action
             {
                 id = "Action_"+uId,
                 date = DateTimeOffset.Now.ToUnixTimeSeconds(),
@@ -232,7 +229,7 @@ public class InventoryInteractions : IInteractionMaster
         
         if (action != null)
         {
-            _dataBase.ActionDb.CreateObject(action);
+            await _dataBase.ActionDb.CreateObject(action);
             await _component.RespondAsync(embed: embed,components: ButtonSets.AcceptActions(uId,_dbUser.id), ephemeral: true);
         }
         else

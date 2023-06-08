@@ -16,60 +16,67 @@ public class InventoryDB: ICollection
         _collection = mongoDatabase.GetCollection<Inventory>("interactions");
     }
     
-    public object? Get(object val,string key="id")
+    public async Task<object?> Get(object val,string key="id")
     {
-        var filterInventory = Builders<Inventory>.Filter.Eq(key, val);
+        FilterDefinition<Inventory> filterInventory = Builders<Inventory>.Filter.Eq(key, val);
         
         if (key != "id")
-            return _collection.Find(filterInventory).FirstOrDefault();
+        {
+            var res = await _collection.FindAsync(filterInventory);
+            return res.FirstOrDefault();
+        }
+
         
         
-        Inventory temp = new Inventory
+        Inventory? temp = new Inventory
         {
             id = val.ToString()
         };
-        if (_collection.CountDocuments(x => x.id == temp.id) > 0)
-            temp = _collection.Find(filterInventory).FirstOrDefault();
+        if (await _collection.CountDocumentsAsync(x => x!.id == temp.id) > 0)
+        {
+            var res = await _collection.FindAsync(filterInventory);
+            temp = res.FirstOrDefault();
+        }
         else
-            CreateObject(temp);
+            await CreateObject(temp);
                 
         TimeSpan aTimeSpan = new TimeSpan(0,0,5,0);
-        if (temp.lastUsage < DateTimeOffset.Now.Subtract(aTimeSpan).ToUnixTimeSeconds())
+        if (temp!.lastUsage < DateTimeOffset.Now.Subtract(aTimeSpan).ToUnixTimeSeconds())
         {
-            CreateObject(temp);
+            await CreateObject(temp);
         }
         
         return temp;
     }
 
-    public object CreateObject(object id)
+    public async Task<object?> CreateObject(object? id)
     {
-        var temp = (Inventory)id;
+        var temp = (Inventory)id!;
         
-        if (_collection.CountDocuments(x => x.id == temp.id) > 0)
-            _collection.ReplaceOne(x => x.id == temp.id, temp);
+        if (await _collection.CountDocumentsAsync(x => x!.id == temp.id) > 0)
+            await _collection.ReplaceOneAsync(x => x!.id == temp.id, temp);
         else
-            _collection.InsertOne(temp);
+            await _collection.InsertOneAsync(temp);
 
         string userid = temp.id!.Split('_')[2];
-        User user = (User)_dataBase.UserDb.Get(userid)!;
+        User user = (User) (await _dataBase.UserDb.Get(userid))!;
         temp.Reload(user.inventory);
         
         return null;
     }
 
-    public void Add(object where,string fieldKey, int value)
+    public async Task Add(object where,string fieldKey, int value)
     {
         Inventory temp = (Inventory)where;
-        var filterInventory =Builders<Inventory>.Filter.Eq("id", temp.id);
-        var updateInventory = Builders<Inventory>.Update.Inc(fieldKey, value);
-        _collection.UpdateOne(filterInventory,updateInventory);
+        FilterDefinition<Inventory> filterInventory =Builders<Inventory>.Filter.Eq("id", temp.id);
+        UpdateDefinition<Inventory> updateInventory = Builders<Inventory>.Update.Inc(fieldKey, value);
+        await _collection.UpdateOneAsync(filterInventory!,updateInventory!);
     }
 
-    public void Update(object obj)
+    public async Task Update(object? obj)
     {
-        Inventory temp = (Inventory)obj;
-        var filterInventory =Builders<Inventory>.Filter.Eq("id", temp.id);
-        _collection.ReplaceOne(filterInventory,temp);
+        Inventory? temp = (Inventory)obj!;
+        FilterDefinition<Inventory> filterInventory =Builders<Inventory>.Filter.Eq("id", temp.id)!;
+        await _collection.ReplaceOneAsync(filterInventory,temp);
     }
 }

@@ -6,16 +6,16 @@ namespace JustRPG.Generators;
 
 public static class AdventureGenerators
 {
-    public static void Reward(Battle battle, DataBase dataBase)
+    public static async Task Reward(Battle? battle, DataBase dataBase)
     {
-        List<User> users = new List<User>();
-        foreach (var player in battle.players)
+        List<User?> users = new List<User?>();
+        foreach (var player in battle!.players)
         {
-            User user = (User)dataBase.UserDb.Get(player.id!)!;
+            User? user = (User) (await dataBase.UserDb.Get(player.id!))!;
             users.Add(user);
         }
         
-        //  reward players who alive
+        //todo:  reward players who alive
         foreach (var player in battle.players.Where(x =>x.stats.hp >0))
         {
             
@@ -25,32 +25,33 @@ public static class AdventureGenerators
         // restore Heal poition
         for (int i = 0; i < battle.players.Length; i++)
         {
-            List<String> inventory = users[i].inventory.ToList();
+            List<String> inventory = users[i]!.inventory.ToList();
             foreach (var item in battle.players[i].inventory)
             {
                 if (inventory.Count >=30)
                     break;
                 inventory.Add(item.Item1);
             }
-            users[i].inventory = inventory.ToArray();
+            users[i]!.inventory = inventory.ToArray();
         }
                 
         foreach (var user in users)
         {
-            dataBase.UserDb.Update(user);
+            await dataBase.UserDb.Update(user);
         }
     }
     
-    public static Warrior GenerateWarriorByUser(User user,string username, DataBase dataBase) => new()
+    public static async Task<Warrior> GenerateWarriorByUser(User user,string username, DataBase dataBase, string? avatarUrl = "") => new()
     {
         id = user.id,
         name = username,
-        stats = new BattleStats(user,dataBase),
-        inventory = InventoryToBattleInventory(user, dataBase),
+        stats = await (new BattleStats()).BattleStatsAsync(user,dataBase),
+        inventory = await InventoryToBattleInventory(user, dataBase),
         lvl = user.lvl,
+        url = avatarUrl ?? ""
     };
     
-    public static List<Tuple<string, BattleStats>> InventoryToBattleInventory(User user, DataBase dataBase)
+    public static async Task<List<Tuple<string, BattleStats>>> InventoryToBattleInventory(User user, DataBase dataBase)
     {
         // todo: update to new system on add skills
 
@@ -77,7 +78,7 @@ public static class AdventureGenerators
         }
 
         user.inventory = inventory.ToArray();
-        dataBase.UserDb.Update(user);
+        await dataBase.UserDb.Update(user);
         return res;
     }
     
@@ -96,7 +97,7 @@ public static class AdventureGenerators
     public static BattleStats GenerateRandomStats(BattleStats player, int lvl)
     {
 
-        BattleStats mobStats = new BattleStats()
+        BattleStats mobStats = new BattleStats
         {
             damage = 1,
             defence = 1,

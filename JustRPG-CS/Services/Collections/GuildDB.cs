@@ -13,31 +13,31 @@ public class GuildDB : ICollection
         _collection = mongoDatabase.GetCollection<Guild>("servers");
     }
     
-    public object? Get(object val,string key="id")
+    public async Task<object?> Get(object val, string key = "_id")
     {
-        var filterGuild =Builders<Guild>.Filter.Eq(key, val);  
-        return _collection.Find(filterGuild).FirstOrDefault();
+        FilterDefinition<Guild> filterAction =Builders<Guild>.Filter.Eq(key, val);
+        return await (await _collection!.FindAsync(filterAction)).FirstOrDefaultAsync();
     }
 
-    public object CreateObject(object id)
+    public async Task<object?> CreateObject(object? id)
     {
-        Guild newGuild = new Guild{id  = Convert.ToInt64(id)};
-        _collection.InsertOne(newGuild);
+        Guild? newGuild = new Guild{id  = Convert.ToInt64(id)};
+        await _collection.InsertOneAsync(newGuild);
         return newGuild;
     }
 
-    public void Add(object where,string fieldKey, int value)
+    public async Task Add(object where,string fieldKey, int value)
     {
         Guild temp = (Guild)where;
-        var filterGuild =Builders<Guild>.Filter.Eq("id", temp.id);
-        var updateGuild = Builders<Guild>.Update.Inc(fieldKey, value);
-        _collection.UpdateOne(filterGuild,updateGuild);
+        FilterDefinition<Guild> filterGuild =Builders<Guild>.Filter.Eq("id", temp.id);
+        UpdateDefinition<Guild> updateGuild = Builders<Guild>.Update.Inc(fieldKey, value);
+        await _collection.UpdateOneAsync(filterGuild!,updateGuild!);
     }
 
-    public void Update(object obj)
+    public async Task Update(object? obj)
     {
-        Guild temp = (Guild)obj;
-        var filterGuild =Builders<Guild>.Filter.Eq("id", temp.id);
-        _collection.ReplaceOne(filterGuild,temp);
+        Guild? temp = (Guild)obj!;
+        FilterDefinition<Guild> filterGuild =Builders<Guild>.Filter.Eq("id", temp.id);
+        await _collection.ReplaceOneAsync(filterGuild!,temp);
     }
 }

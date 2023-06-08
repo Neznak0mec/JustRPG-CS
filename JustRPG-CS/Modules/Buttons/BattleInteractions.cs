@@ -1,5 +1,6 @@
 using Discord;
 using Discord.WebSocket;
+using JustRPG_CS.Features;
 using JustRPG.Generators;
 using JustRPG.Interfaces;
 using JustRPG.Models;
@@ -12,24 +13,24 @@ namespace JustRPG.Modules.Buttons;
 // todo: Refactor, and split enemies attacks by battle types 
 public class BattleInteractions : IInteractionMaster {
     private DiscordSocketClient _client;
-    private SocketMessageComponent _component;
-    private DataBase _dataBase;
+    private readonly SocketMessageComponent _component;
+    private readonly DataBase _dataBase;
 
-    public BattleInteractions(DiscordSocketClient client, SocketMessageComponent component, object? service)
+    public BattleInteractions(DiscordSocketClient client, SocketMessageComponent component, IServiceProvider service)
     {
         _client = client;
         _component = component;
-        _dataBase = (DataBase)service!;
+        _dataBase = (DataBase)service.GetService(typeof(DataBase))!;
     }
     
     public async Task Distributor(string[] buttonInfo)
     {
-        object? temp = _dataBase.BattlesDb.Get(buttonInfo[3]);
+        object? temp = await _dataBase.BattlesDb.Get(buttonInfo[3]);
         if (temp == null){
             await WrongInteraction("Боя не существует или он завершился");
             return;
         }
-        Battle? battle = (Battle)temp;
+        Battle battle = (Battle)temp;
         switch (buttonInfo[2])
         {
             case "Attack":
@@ -73,7 +74,24 @@ public class BattleInteractions : IInteractionMaster {
             {
                 battle.log += "Вы проиграли\n";
                 await UpdateBattle(battle, true);
+                return;
             }
+        }
+
+        if (battle.type is "arena")
+        {
+            Warrior user = battle.players[battle.currentUser];
+            Warrior enemy = battle.players[battle.currentUser == 1 ? 0 : 1];
+
+            user.Attack(battle,enemy);
+
+            if (battle.players.Any(x => x.stats.hp <= 0))
+            {
+                battle.log += $"{battle.players[battle.currentUser].name} побеждает\n";
+                await UpdateBattle(battle, true);
+                return;
+            }
+
         }
         
         await UpdateBattle(battle);
@@ -93,7 +111,7 @@ public class BattleInteractions : IInteractionMaster {
                 $"Покапашившись в сумке {battle.players[battle.currentUser].name} не нашёл у себя зелье для восстановления ";
         }
 
-        if (battle.type == "adventure" || battle.type == "dungeon")
+        if (battle.type is "adventure" or "dungeon")
         {
             Warrior user = battle.players[0];
             Warrior enemy = battle.enemies[0];
@@ -108,6 +126,7 @@ public class BattleInteractions : IInteractionMaster {
             {
                 battle.log += "Вы проиграли\n";
                 await UpdateBattle(battle, true);
+                return;
             }
         }
         
@@ -117,7 +136,7 @@ public class BattleInteractions : IInteractionMaster {
     async Task Run(Battle battle)
     {
         
-        if (battle.type == "adventure" || battle.type == "dungeon")
+        if (battle.type is "adventure" or "dungeon")
         {
             
             Warrior user = battle.players[0];
@@ -142,9 +161,25 @@ public class BattleInteractions : IInteractionMaster {
             {
                 battle.log += "Вы проиграли\n";
                 await UpdateBattle(battle, true);
+                return;
             }
         }
-        
+
+        if (battle.type is "arena")
+        {
+
+            Warrior user = battle.players[battle.currentUser];
+
+            if (Random.Shared.Next(1, 100) < 1 + user.stats.luck)
+            {
+                battle.log += $"{battle.players[battle.currentUser].name} успешно сбежал\n";
+                await UpdateBattle(battle, true);
+                return;
+            }
+            else
+                battle.log += $"{battle.players[battle.currentUser].name} не удалось сбежать\n";
+        }
+
         await UpdateBattle(battle);
     }
     
@@ -157,20 +192,45 @@ public class BattleInteractions : IInteractionMaster {
     
     async Task UpdateBattle(Battle battle, bool gameEnded = false, bool disableSelectEnemy = false)
     {
+        if (battle.type == "arena")
+            battle.currentUser = (short)(battle.currentUser == 1 ? 0 : 1);
+
         if (gameEnded){
-            AdventureGenerators.Reward(battle,_dataBase);
-            _dataBase.BattlesDb.Delete(battle);
+            await AdventureGenerators.Reward(battle,_dataBase);
+            await _dataBase.BattlesDb.Delete(battle);
         }
         else
-            _dataBase.BattlesDb.Update(battle);
+            await _dataBase.BattlesDb.Update(battle);
         
+
+        Embed embed = EmbedCreater.BattleEmbed(battle, gameEnded);
+        MessageComponent component = ButtonSets.BattleButtonSet(battle,(long)battle.players[battle.currentUser].id!, gameEnded, disableSelectEnemy);
         
-        
+
         await _component.UpdateAsync(x =>
         {
-            x.Embed = EmbedCreater.BattlEmbed(battle, gameEnded);
-            x.Components = ButtonSets.BattleButtonSet(battle, _component.User.Id.ToString(), gameEnded, disableSelectEnemy);
+            x.Embed = embed;
+            x.Components = component;
         });
+
+        if (battle.type == "arena")
+        {
+            var pvp = _dataBase.ArenaDb.GetPVP(battle.id);
+            foreach (var i in pvp.msgLocations.Where(i => i != _component))
+            {
+
+                await i.ModifyOriginalResponseAsync(x =>
+                {
+                    x.Embed = embed;
+                    x.Components = component;
+                });
+            }
+
+            if (battle.players.Any(x=> x.stats.hp <= 0))
+                _dataBase.ArenaDb.RemovePVP(pvp);
+            else
+                _dataBase.ArenaDb.UpdatePVP(pvp);
+        }
     }
     
     private async Task WrongInteraction(string text)

@@ -50,7 +50,7 @@ public class Warrior
         return damage;
     }
 
-    public void Attack(Battle battle,Warrior enemy)
+    public void Attack(Battle? battle,Warrior enemy)
     {
         double damage;
         string msg;

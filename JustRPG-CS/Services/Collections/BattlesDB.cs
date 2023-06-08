@@ -13,36 +13,37 @@ public class BattlesDB: ICollection{
         _collection = mongoDatabase.GetCollection<Battle>("battles");
     }
     
-    public object? Get(object val, string key = "id")
+    public async Task<object?> Get(object val, string key = "_id")
     {
-        var filterBattle =Builders<Battle>.Filter.Eq(key, val);  
-        return _collection.Find(filterBattle).FirstOrDefault();
+        var filterAction =Builders<Battle>.Filter.Eq(key, val);
+        var res = await _collection.FindAsync(filterAction);
+        return res.FirstOrDefault();
     }
 
-    public object CreateObject(object id)
+    public async Task<object?> CreateObject(object? id)
     {
-        Battle temp = (Battle)id;
+        Battle temp = (Battle)id!;
         temp.lastActivity = DateTimeOffset.Now.ToUnixTimeSeconds();
-        _collection.InsertOne(temp);
+        await _collection.InsertOneAsync(temp);
         return id;
     }
 
-    public void Add(object where, string fieldKey, int value)
+    public async Task Add(object where, string fieldKey, int value)
     {
         throw new NotImplementedException();
     }
 
-    public void Update(object obj)
+    public async Task Update(object? obj)
     {
-        Battle temp = (Battle)obj;
+        Battle temp = (Battle)obj!;
         temp.lastActivity = DateTimeOffset.Now.ToUnixTimeSeconds();
         var filterInventory =Builders<Battle>.Filter.Eq("id", temp.id);
-        _collection.ReplaceOne(filterInventory,temp);
+        await _collection.ReplaceOneAsync(filterInventory,temp);
     }
 
-    public void Delete(object obj)
+    public async Task Delete(object? obj)
     {
-        Battle battle = (Battle)obj;
-        _collection.DeleteOne(x => x.id == battle.id);
+        Battle battle = (Battle)obj!;
+        await _collection.DeleteOneAsync(x => x.id == battle.id);
     }
 }

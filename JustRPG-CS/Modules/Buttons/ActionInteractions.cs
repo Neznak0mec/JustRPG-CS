@@ -15,18 +15,18 @@ public class ActionInteractions : IInteractionMaster
     private SocketMessageComponent _component;
     private readonly DataBase _dataBase;
     private Action? _action;
-    private User _dbUser;
+    private User? _dbUser;
 
-    public ActionInteractions(DiscordSocketClient client, SocketMessageComponent component, object? service)
+    public ActionInteractions(DiscordSocketClient client, SocketMessageComponent component, IServiceProvider service)
     {
         _client = client;
         _component = component;
-        _dataBase = (DataBase)service!;
+        _dataBase = (DataBase)service.GetService(typeof(DataBase))!;
     }
 
     public async Task Distributor(string[] buttonInfo)
     {
-        _action = (Action)_dataBase.ActionDb.Get($"Action_{buttonInfo[2]}");
+        _action = (Action)(await _dataBase.ActionDb.Get($"Action_{buttonInfo[2]}"))!;
 
         if (_action == null)
         {
@@ -38,7 +38,7 @@ public class ActionInteractions : IInteractionMaster
             return;
         }
 
-        User _dbUser = (User)_dataBase.UserDb.Get(Convert.ToUInt64(buttonInfo[1]))!;
+        _dbUser = (User) (await _dataBase.UserDb.Get(Convert.ToUInt64(buttonInfo[1])))!;
         
         if (buttonInfo[3] == "Denied")
         {
@@ -69,15 +69,15 @@ public class ActionInteractions : IInteractionMaster
     private async Task AcceptSell()
     {
         Embed embed;
-        if (_dbUser.inventory.Contains(_action!.args[0]))
+        if (_dbUser!.inventory.Contains(_action!.args[0]))
         {
-            Item item = (Item)_dataBase.ItemDb.Get(_action.args[0])!;
+            Item item = (Item) (await _dataBase.ItemDb.Get(_action.args[0]))!;
             int itemIndex = Array.IndexOf(_dbUser.inventory,item.id);
             _dbUser.inventory = _dbUser.inventory.Where((x,y) => y != itemIndex).ToArray();
             _dbUser.cash += item.price / 4;
             
             embed = EmbedCreater.SuccessEmbed($"Вы успешно продали `{item.name}` за `{item.price / 4}`");
-            _dataBase.UserDb.Update(_dbUser);
+            await _dataBase.UserDb.Update(_dbUser);
         }
         else
         {
@@ -93,9 +93,9 @@ public class ActionInteractions : IInteractionMaster
     private async Task AcceptEquip()
     {
         Embed embed;
-        if (_dbUser.inventory.Contains(_action!.args[0]))
+        if (_dbUser!.inventory.Contains(_action!.args[0]))
         {
-            Item item = (Item)_dataBase.ItemDb.Get(_action.args[0])!;
+            Item item = (Item) (await _dataBase.ItemDb.Get(_action.args[0]))!;
             string? itemToChangeId = _dbUser.equipment!.GetByName(item.type);
 
             if (itemToChangeId != null)
@@ -104,7 +104,7 @@ public class ActionInteractions : IInteractionMaster
                 _dbUser.inventory[indexInInventory] = itemToChangeId;
                 _dbUser.equipment.SetByName(item.type,item.id);
 
-                var itemToChange = (Item)_dataBase.ItemDb.Get(itemToChangeId)!;
+                var itemToChange = (Item) (await _dataBase.ItemDb.Get(itemToChangeId))!;
 
                 embed = EmbedCreater.SuccessEmbed($"Вы успешно сняли `{itemToChange.name}` и надели `{item.name}`");
             }
@@ -117,7 +117,7 @@ public class ActionInteractions : IInteractionMaster
                 embed = EmbedCreater.SuccessEmbed($"Вы успешно сняли надели `{item.name}`");
             }
             
-            _dataBase.UserDb.Update(_dbUser);
+            await _dataBase.UserDb.Update(_dbUser);
         }
         else
         {

@@ -19,7 +19,8 @@ public class DataBase
     public readonly ActionDB ActionDb;
     public readonly LocationsDB LocationsDb;
     public readonly BattlesDB BattlesDb;
-    public List<Work>? Works = new List<Work>();
+    public readonly ArenaDB ArenaDb;
+    public List<Work>? works;
 
 
     public DataBase()
@@ -34,16 +35,17 @@ public class DataBase
         ActionDb = new ActionDB(_database);
         LocationsDb = new LocationsDB(_database);
         BattlesDb = new BattlesDB(_database);
+        ArenaDb = new ArenaDB(_database);
 
         ParseWorks();
     }
 
     private void ParseWorks()
     {
-        using StreamReader r = new StreamReader("json/works.json");
-        // using StreamReader r = new StreamReader("Services/json/works.json");
+//        using StreamReader r = new StreamReader("json/works.json");
+            using StreamReader r = new StreamReader("Services/json/works.json");
         string json = r.ReadToEnd();
         r.Close();
-        Works = JsonSerializer.Deserialize<List<Work>>(json);
+        works = JsonSerializer.Deserialize<List<Work>>(json);
     }
 }

@@ -43,6 +43,10 @@ public class ButtonHandler
         else if (buttonInfo[0] == "Battle")
             master = new BattleInteractions(_client, _component, _service);
 
+        else if (buttonInfo[0] == "FindPvp")
+            master = new FindPvpInteractions(_client,_component, _service);
+
+
         else
         {
             await WrongInteraction("Кнопка не найдена, попробуйте вызвать меню ещё раз");

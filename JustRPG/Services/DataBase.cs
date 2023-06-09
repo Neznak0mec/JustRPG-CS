@@ -42,8 +42,7 @@ public class DataBase
 
     private void ParseWorks()
     {
-//        using StreamReader r = new StreamReader("json/works.json");
-            using StreamReader r = new StreamReader("Services/json/works.json");
+        using StreamReader r = new StreamReader("json/works.json");
         string json = r.ReadToEnd();
         r.Close();
         works = JsonSerializer.Deserialize<List<Work>>(json);

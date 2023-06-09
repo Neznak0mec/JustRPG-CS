@@ -58,7 +58,7 @@ public class AdventuresCommands : InteractionModuleBase<SocketInteractionContext
 
         long count = _dataBase.ArenaDb.CountOfFinfPVP();
 
-        await RespondAsync(embed: EmbedCreater.FindPvp(findPvp, count));
+        await RespondAsync(embed: EmbedCreater.FindPvp(findPvp, count), components:ButtonSets.CancelFindPvp(Context.User.Id));
 
         findPvp.msgLocation = Context.Interaction;
         _dataBase.ArenaDb.AppFindPVP(findPvp);

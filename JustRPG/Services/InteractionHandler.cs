@@ -34,12 +34,12 @@ namespace JustRPG.Services
 
         private async Task HandleInteraction(SocketInteraction arg)
         {
-            _dataBase.UserDb.Cache(arg.User.Id);
+            await _dataBase.UserDb.Cache(arg.User.Id);
             if (arg.Type == InteractionType.ApplicationCommand)
                 try
                 {
                     var context = new SocketInteractionContext(_client, arg);
-                    await _commands.ExecuteCommandAsync(context, _services);
+                    _ = Task.Run(() => { _commands.ExecuteCommandAsync(context, _services); });
                 }
                 catch (Exception e)
                 {
@@ -65,14 +65,16 @@ namespace JustRPG.Services
             }
         }
 
-        private async Task ButtonInteraction(SocketMessageComponent component)
+        private Task ButtonInteraction(SocketMessageComponent component)
         {
-            await new ButtonHandler(_client, component, _services).ButtonDistributor();
+            _ = Task.Run(() => { new ButtonHandler(_client, component, _services).ButtonDistributor(); });
+            return Task.CompletedTask;
         }
 
-        private async Task SelectInteraction(SocketMessageComponent component)
+        private Task SelectInteraction(SocketMessageComponent component)
         {
-            await new SelectHandler(_client, component, _services).SelectDistributor();
+            _ = Task.Run(() => { new SelectHandler(_client, component, _services).SelectDistributor(); });
+            return Task.CompletedTask;
         }
     }
 } 

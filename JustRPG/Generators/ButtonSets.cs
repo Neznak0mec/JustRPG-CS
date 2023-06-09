@@ -130,4 +130,12 @@ public static class ButtonSets
 
         return builder.Build();
     }
+
+    public static MessageComponent CancelFindPvp(ulong userId)
+    {
+        var builder = new ComponentBuilder()
+            .WithButton(label: "Отмена", customId: $"FindPvp_{userId}_CancelFind", style:ButtonStyle.Danger);
+
+        return builder.Build();
+    }
 }

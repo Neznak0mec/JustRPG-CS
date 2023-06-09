@@ -45,7 +45,7 @@ public static class AdventureGenerators
     {
         id = user.id,
         name = username,
-        stats = await (new BattleStats()).BattleStatsAsync(user,dataBase),
+        stats = await new BattleStats().BattleStatsAsync(user,dataBase),
         inventory = await InventoryToBattleInventory(user, dataBase),
         lvl = user.lvl,
         url = avatarUrl ?? ""

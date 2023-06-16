@@ -34,7 +34,7 @@ public class ButtonHandler
             buttonInfo[0] == "UpSkills" || buttonInfo[0] == "UpSkill")
             master = new ProfileInteractions(_client, _component, _service);
 
-        else if (buttonInfo[0].Contains("Inv"))
+        else if (buttonInfo[0] == "Inventary")
             master = new InventoryInteractions(_client, _component, _service);
 
         else if (buttonInfo[0] == "Action")
@@ -44,8 +44,13 @@ public class ButtonHandler
             master = new BattleInteractions(_client, _component, _service);
 
         else if (buttonInfo[0] == "FindPvp")
-            master = new FindPvpInteractions(_client,_component, _service);
+            master = new FindPvpInteractions(_client, _component, _service);
 
+        else if (buttonInfo[0] == "Market")
+            master = new MarketInteractions(_client, _component, _service);
+
+        else if (buttonInfo[0] == "MarketSort")
+            master = new MarketSortInteractions(_client, _component, _service);
 
         else
         {

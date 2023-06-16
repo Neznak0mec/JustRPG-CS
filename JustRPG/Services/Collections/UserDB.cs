@@ -13,14 +13,14 @@ public class UserDb : ICollection
 
     public UserDb(IMongoDatabase mongoDatabase)
     {
-        _collection = mongoDatabase.GetCollection<User>("users");
+        _collection = mongoDatabase.GetCollection<User>("users")!;
         usersIdCache = new List<ulong>();
     }
     
     public async Task<object?> Get(object val,string key="id")
     {
-        FilterDefinition<User?> filterUser =Builders<User>.Filter.Eq(key, val);
-        return await (await _collection.FindAsync(filterUser)).FirstOrDefaultAsync();
+        FilterDefinition<User> filterUser =Builders<User>.Filter.Eq(key, val);
+        return await (await _collection!.FindAsync(filterUser)).FirstOrDefaultAsync();
     }
 
     public async Task<object?> CreateObject(object? id)
@@ -57,9 +57,9 @@ public class UserDb : ICollection
 
     public async Task Update(object? obj)
     {
-        User temp = (User)obj;
-        FilterDefinition<User?> filterUser =Builders<User>.Filter.Eq("id", temp.id);
-        await _collection.ReplaceOneAsync(filterUser,temp);
+        User temp = (User)obj!;
+        FilterDefinition<User> filterUser =Builders<User>.Filter.Eq("id", temp.id);
+        await _collection.ReplaceOneAsync(filterUser!,temp);
     }
 
     public async Task Cache(ulong userId)

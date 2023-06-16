@@ -56,7 +56,7 @@ public class ProfileInteractions : IInteractionMaster
         var user = _client.GetUser(Convert.ToUInt64(memberId));
         var userDb = (User) (await _dataBase.UserDb.Get( memberId))!;
 
-        await ResponseMessage(await new EmbedCreater(_dataBase).UserEquipment(userDb, user),
+        await ResponseMessage(await EmbedCreater.UserEquipmentEmbed(userDb, user, _dataBase),
             ButtonSets.ProfileButtonsSet(_component.User.Id.ToString(), memberId, "Equipment"));
     }
 
@@ -68,12 +68,12 @@ public class ProfileInteractions : IInteractionMaster
 
     public async Task InventoryButtonResponse(string memberId)
     {
-        var user = _client.GetUser(Convert.ToUInt64(memberId));
+        var member = _client.GetUser(Convert.ToUInt64(memberId));
+        Inventory inventory = (Inventory) (await  _dataBase.InventoryDb.Get( $"Inventory_{memberId}_{_component.User.Id.ToString()}"))!;
+        var items = await inventory.GetItems(_dataBase);
 
-        Inventory? inventory = (Inventory) (await  _dataBase.InventoryDb.Get( $"Inventory_{memberId}_{_component.User.Id.ToString()}"))!;
-
-        await ResponseMessage(new EmbedCreater(_dataBase).UserInventory(user, new Item[]{}),
-            ButtonSets.InventoryButtonsSet(_component.User.Id.ToString(), Convert.ToInt64(memberId), inventory, new Item[]{}));
+        await ResponseMessage( EmbedCreater.UserInventory( member, items),
+            ButtonSets.InventoryButtonsSet(_component.User.Id.ToString(), Convert.ToInt64(memberId), inventory, items));
 
     }
 

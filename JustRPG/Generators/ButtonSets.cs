@@ -38,44 +38,63 @@ public static class ButtonSets
         
         var select = new SelectMenuBuilder()
             .WithPlaceholder(
-                $"Тип взаимодействия: {(inventory!.interactionType == "info" ? "информация" : inventory.interactionType == "sell" ? "продажа" : "экипировать")}")
-            .WithCustomId($"InvInteractionType_{finder}_{userId}")
+            $"Тип взаимодействия: {(inventory!.interactionType == "info" ? "информация" : inventory.interactionType == "sell" ? "продажа" : inventory.interactionType == "destroy" ? "уничтожть" : "экипировать")}")
+            .WithCustomId($"Inventary_{finder}_{userId}_InteractionType")
             .AddOption("Информация", "info")
             .AddOption("Экипировать", "equip")
-            .AddOption("Продать", "sell");
+            .AddOption("Продать", "sell")
+            .AddOption("Уничтожить", "destroy")
+            .WithDisabled(finder != userId.ToString());
 
         var builder = new ComponentBuilder()
-            .WithButton(label: "⮘", customId: $"InvPrewPage_{finder}_{userId}", disabled: inventory.currentPage == 0, row: 0)
+            .WithButton(label: "⮘", customId: $"Inventary_{finder}_{userId}_PrewPage", disabled: inventory.currentPage == 0, row: 0)
             .WithButton(label: $"{inventory.currentPage+1}/{inventory.lastPage+1}", customId: "null1", disabled: true, row: 0)
-            .WithButton(label: "➣", customId: $"InvNextPage_{finder}_{userId}", disabled: inventory.currentPage >= inventory.lastPage, row: 0)
-            .WithButton(label: "♺", customId: $"InvReload_{finder}_{userId}")
+            .WithButton(label: "➣", customId: $"Inventary_{finder}_{userId}_NextPage", disabled: inventory.currentPage >= inventory.lastPage, row: 0)
+            .WithButton(label: "♺", customId: $"Inventary_{finder}_{userId}_Reload")
             .WithSelectMenu(select, row: 1);
 
-        ButtonStyle style = inventory.interactionType == "info" ? ButtonStyle.Primary : inventory.interactionType == "sell" ? ButtonStyle.Danger : ButtonStyle.Success;
+        ButtonStyle style;
+
+        switch (inventory.interactionType)
+        {
+            case "info":
+                style = ButtonStyle.Primary;
+                break;
+            case "destroy":
+                style = ButtonStyle.Danger;
+                break;
+            default:
+                style = ButtonStyle.Success;
+                break;
+        }
+
 
         for (int i = 0; i < items.Length; i++)
         {
+            string customId;
+            bool disabled = false;
+
             if (items[i] == null)
             {
-                builder.WithButton(label: $"{i+1}", customId: $"null-{Guid.NewGuid()}", style: style, disabled: true,row: 2);
-                continue;
+                customId = $"null-{Guid.NewGuid()}";
+                disabled = true;
             }
-            
-            if (inventory.interactionType == "info")
+            else if (inventory.interactionType == "info" || finder == userId.ToString())
             {
-                builder.WithButton(label: $"{i+1}", customId: $"InvInfo_{finder}_{userId}_{i}", style: style, disabled: false,row: 2);
-                continue;
-            }
-            if (finder == userId.ToString())
-            {
+                customId = $"Inventary_{finder}_{userId}_{inventory.interactionType}_{i}";;
+
                 if (inventory.interactionType == "equip")
-                    builder.WithButton(label: $"{i+1}", customId: $"InvEquip_{finder}_{userId}_{i}", style: style, disabled: !items[i]!.IsEquippable(),row: 2);
-                else
-                    builder.WithButton(label: $"{i+1}", customId: $"InvSell_{finder}_{userId}_{i}", style: style, disabled: false,row: 2);
+                    disabled = !items[i]!.IsEquippable();
             }
-            
+            else
+            {
+                continue;
+            }
+
+            builder.WithButton(label: $"{i + 1}", customId: customId, style: style, disabled: disabled, row: 2);
         }
-        builder.WithButton(label: "Назад к профилю",customId:$"Equipment_{finder}_{userId}" ,row:3);
+        builder.WithButton(label: "Назад к профилю",customId:$"Equipment_{finder}_{userId}" ,row:3)
+            .WithButton(emote:Emoji.Parse(":tools:"),label:"🛒",customId:$"Inventary_{finder}_{userId}_OpenSlotsSettings",row:3);
         
         return builder.Build();
     }
@@ -135,6 +154,91 @@ public static class ButtonSets
     {
         var builder = new ComponentBuilder()
             .WithButton(label: "Отмена", customId: $"FindPvp_{userId}_CancelFind", style:ButtonStyle.Danger);
+
+        return builder.Build();
+    }
+
+    public static MessageComponent MarketSortComponents(ulong userId,string interactionId)
+    {
+
+        var rarityOptions = new[]
+        {
+                "сброс",
+                "обычное",
+                "необычное",
+                "редкое",
+                "эпическое",
+                "легендарное",
+        };
+
+        var itemTypeOptions = new[]
+        {
+                "сброс",
+                "шлем",
+                "нагрудник",
+                "перчатки",
+                "штаны",
+                "оружие",
+                "зелья"
+        };
+
+         var levelOptions = Enumerable.Range(1, 50)
+            .GroupBy(x => (x - 1) / 5)
+             .Select(g => new { range = $"{g.First()}-{g.Last()}"})
+             .ToArray();
+
+
+
+        var selectMenuLvl = new SelectMenuBuilder()
+            .WithCustomId($"MarketSort_{userId}_byLvl")
+            .WithPlaceholder("Выберете уровень предмета")
+            .WithOptions(levelOptions.Select(x =>
+            new SelectMenuOptionBuilder().WithLabel($"Уровень {x.range}").WithValue($"{x.range}")).ToList());
+
+        var selectMenuRaty = new SelectMenuBuilder()
+            .WithCustomId($"MarketSort_{userId}_byRaty")
+            .WithPlaceholder("Выберете редкость предмета")
+            .WithOptions(rarityOptions.Select(x =>
+            new SelectMenuOptionBuilder().WithLabel(x).WithValue($"{x}")).ToList());
+
+        var selectMenuType = new SelectMenuBuilder()
+            .WithCustomId($"MarketSort_{userId}_byType")
+            .WithPlaceholder("Выберете тип предмета")
+            .WithOptions(itemTypeOptions.Select(x =>
+                new SelectMenuOptionBuilder().WithLabel(x).WithValue($"{x}")).ToList());
+
+
+        var builder = new ComponentBuilder()
+            .WithButton(label:"←",customId:$"MarketSort_{userId}_prewPage",row:0)
+            .WithButton(label:"↑",customId:$"MarketSort_{userId}_prewItem",row:0)
+            .WithButton(emote:Emoji.Parse(":shopping_cart:"),customId:$"MarketSort_{userId}_buyItem",row:0)
+            .WithButton(label:"↓",customId:$"MarketSort_{userId}_nextItem",row:0)
+            .WithButton(label:"→",customId:$"MarketSort_{userId}_nextPage",row:0)
+            .WithSelectMenu(selectMenuLvl,row:1)
+            .WithSelectMenu(selectMenuRaty,row:2)
+            .WithSelectMenu(selectMenuType,row:3)
+            .WithButton(emote:Emoji.Parse(":repeat:"),customId:$"MarketSort_{userId}_reloadPage",row:4)
+            .WithButton(emote:Emoji.Parse("🔍"),customId:$"MarketSort_{userId}_search",row:4, disabled:true)
+            .WithButton(emote:Emote.Parse("<:silver:997889161484828826>"), label:"↑",customId:$"MarketSort_{userId}_priceUp",row:4)
+            .WithButton(emote:Emote.Parse("<:silver:997889161484828826>") ,label:"↓",customId:$"MarketSort_{userId}_priceDown",row:4)
+            .WithButton(emote:Emoji.Parse(":tools:"),customId:$"MarketSort_{userId}_openSlotsSettings",row:4);
+
+
+        return builder.Build();
+    }
+
+    public static MessageComponent MarketSettingComponents(MarketSettings settings)
+    {
+        var builder = new ComponentBuilder()
+            .WithButton(label:"↑",customId:$"Market_{settings.userId}_prewItem",row:0 , disabled: settings.SearchResults.Count== 0)
+            .WithButton(label:"↓",customId:$"Market_{settings.userId}_nextItem",row:0, disabled: settings.SearchResults.Count== 0)
+            .WithButton(emote: Emoji.Parse(":money_with_wings:"), customId: $"Market_{settings.userId}_editPrice",row:0, disabled: settings.SearchResults.Count== 0)
+            .WithButton(emote: Emoji.Parse(":eye:"), customId: $"Market_{settings.userId}_editVisible",style:
+            (settings.SearchResults.Count== 0 ? ButtonStyle.Success : settings.SearchResults[settings.CurrentItemIndex].isVisible ? ButtonStyle.Success : ButtonStyle.Danger)
+            ,row:0, disabled: settings.SearchResults.Count== 0)
+            .WithButton(label: "Снять с продажи", customId: $"Market_{settings.userId}_Remove",row:0, disabled: settings.SearchResults.Count== 0)
+            .WithButton(emote:Emoji.Parse(":repeat:"),customId:$"Market_{settings.userId}_reloadPage",row:1)
+            .WithButton(label: "Назад", customId:  $"Market_{settings.userId}_goBack",row:1);
 
         return builder.Build();
     }

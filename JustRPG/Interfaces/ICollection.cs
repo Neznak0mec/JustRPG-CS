@@ -7,7 +7,5 @@ public interface ICollection
 
     Task<object?> CreateObject(object? id);
 
-    Task Add(object where,string fieldKey, int value);
-
     Task Update(object? obj);
 }

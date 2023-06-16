@@ -6,14 +6,16 @@ public class SecondaryFunctions
 {
     public static string ProgressBar(double current, double max = 100)
     {
-        string res = "[";
-        double proc = current / max * 100;
-        int numOfBlack = (int)(proc / 10) - 1;
-        res += new string('█', numOfBlack < 0 ? 0 : numOfBlack);
-        res += (int)proc % 10 >= 5 ? "█" : "▒";
-        int numOfWhite = 10 - numOfBlack - 1;
-        res += new string('-', numOfWhite);
-        return res + "]" + $"- {current:F2}/{max:F0}";
+        int percent = (int)(current / max * 100);
+        int filledBlocks = percent / 10;
+        int unfilledBlocks = 9 - filledBlocks;
+        string progress = "["
+                      + new string('█', filledBlocks)
+                      + (percent % 10 >= 5 ? '█' : '▒')
+                      + new string('-', unfilledBlocks)
+                      + $"] {current:F2}/{max:F0}";
+
+    return progress;
     }
 
     public static Tuple<string,string> WarriorToStatusString(Warrior warrior, bool current)

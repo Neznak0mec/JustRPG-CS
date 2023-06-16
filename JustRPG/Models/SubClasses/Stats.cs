@@ -27,7 +27,7 @@ public class BattleStats : Stats
 
     public async Task<BattleStats> BattleStatsAsync(User? user, DataBase dataBase)
     {
-        hp = user.stats.hp;
+        hp = user!.stats.hp;
         damage = user.stats.damage;
         defence = user.stats.defence;
         luck = user.stats.luck;

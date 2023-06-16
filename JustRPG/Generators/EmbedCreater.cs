@@ -1,4 +1,3 @@
-using System.Reflection.Emit;
 using Discord;
 using JustRPG_CS.Models;
 using JustRPG.Models;
@@ -10,13 +9,7 @@ namespace JustRPG.Generators;
 
 public class EmbedCreater
 {
-    private readonly DataBase? _dataBase;
 
-    public EmbedCreater(DataBase? dataBase = null)
-    {
-        _dataBase = dataBase;
-    }
-    
     
     public static Embed ErrorEmbed(string text)
     {
@@ -55,7 +48,7 @@ public class EmbedCreater
         var emb = new EmbedBuilder
         {
             Title = "✅ Успешно",
-            Color = Color.DarkOrange,
+            Color = Color.Green,
             Description = text
         };
         return emb.Build();
@@ -78,13 +71,13 @@ public class EmbedCreater
         return emb.Build();
     }
     
-    public async Task<Embed> UserEquipment(User user, IUser member)
+    public static async Task<Embed> UserEquipmentEmbed(User user, IUser member, DataBase dataBase)
     {
         var embed = new EmbedBuilder
         {
             Title = $"Экипировка {member.Username}"
         };
-        UserEquipment equipment = await user.GetEquipmentAsItems(_dataBase!);
+        UserEquipment equipment = await user.GetEquipmentAsItems(dataBase!);
 
         embed.AddField(equipment.helmet  == null ? "Шлем"      : $"Шлем - {equipment.helmet!.name}",     equipment.helmet == null ? "Не надето" : equipment.helmet!.ToString(), true)
             .AddField(equipment.armor  == null ? "Нагрудник" : $"Нагрудник - {equipment.armor!.name}", equipment.armor  == null ? "Не надето" : equipment.armor!.ToString(), true)
@@ -110,7 +103,7 @@ public class EmbedCreater
         return embed.Build();
     }
 
-    public Embed UserInventory(IUser member,Item?[] items)
+    public static Embed UserInventory(IUser member,Item?[] items)
     {
         var emb = new EmbedBuilder{Title = $"Инвентарь {member.Username}"};
         foreach (var item in items)
@@ -243,5 +236,39 @@ public class EmbedCreater
 
 
         return embed.Build();
+    }
+
+    public static Embed MarketPage(SearchState searchState)
+    {
+        var emb = new EmbedBuilder{Title = $"Маркет"};
+        List<SaleItem> items = searchState.GetItemsOnPage(searchState.CurrentPage);
+        for (int i=0;i<5;i++)
+        {
+            if ( i>=items.Count)
+                emb.AddField("-", "-");
+            else
+                emb.AddField((searchState.CurrentItemIndex == i ? "💠 " : "") + $"{items[i].itemName} | {items[i].price}<:silver:997889161484828826>", items[i].itemDescription);
+        }
+
+        return emb.Build();
+    }
+
+    public static Embed MarketSettingsPage(MarketSettings searchState)
+    {
+
+        List<SaleItem> items = searchState.SearchResults;
+        var emb = new EmbedBuilder
+        {
+            Title = "Настрокйи товаров",
+            Description = (items.Count == 0 ? "Вы не выставили предметы на продажу" : null)
+        };
+        if (items.Count != 0)
+            for (int i=0;i<5;i++)
+            {
+                if ( i<items.Count)
+                    emb.AddField((searchState.CurrentItemIndex == i ? "💠 " : "") + $"{items[i].itemName} | {items[i].price}<:silver:997889161484828826>", items[i].itemDescription);
+            }
+
+        return emb.Build();
     }
 }

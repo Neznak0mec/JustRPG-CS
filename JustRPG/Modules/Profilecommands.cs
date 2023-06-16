@@ -45,6 +45,21 @@ public class Profilecommands : InteractionModuleBase<SocketInteractionContext>
         await Context.Interaction.RespondAsync(embed: EmbedCreater.WorkEmbed(_bases.works!, exp, cash));
     }
 
+    [SlashCommand("market", "Посмотреть торговую площадку")]
+    public async Task Market()
+    {
+        SearchState searchState = new SearchState()
+        {
+            id = Guid.NewGuid().ToString(),
+            userId = Context.User.Id
+        };
+        await _bases.MarketDb.CreateSearch(searchState);
+
+        await _bases.MarketDb.SearchGetAndUpdate(searchState);
+
+        await RespondAsync(embed:EmbedCreater.MarketPage(searchState),components:ButtonSets.MarketSortComponents(Context.User.Id,searchState.id));
+    }
+
     private async Task<User?> GetUser(ulong userId, bool create = false)
     {
         var tempUser = await _bases.UserDb.Get(userId);

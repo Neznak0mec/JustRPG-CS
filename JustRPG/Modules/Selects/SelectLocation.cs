@@ -3,11 +3,9 @@ using Discord.WebSocket;
 using JustRPG.Generators;
 using JustRPG.Interfaces;
 using JustRPG.Models;
-using JustRPG.Generators;
 using JustRPG.Services;
-using Serilog;
 
-namespace JustRPG.Modules.Buttons;
+namespace JustRPG.Modules.Selects;
 
 public class SelectLocation : IInteractionMaster
 {

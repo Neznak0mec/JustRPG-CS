@@ -28,10 +28,6 @@ public class BattlesDB: ICollection{
         return id;
     }
 
-    public async Task Add(object where, string fieldKey, int value)
-    {
-        throw new NotImplementedException();
-    }
 
     public async Task Update(object? obj)
     {

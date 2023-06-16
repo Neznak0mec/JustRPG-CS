@@ -5,7 +5,6 @@ namespace JustRPG_CS.Services.Collections;
 
 public class ArenaDB
 {
-    private readonly IMongoCollection<PVP> _pvpCollection;
 
     private List<FindPVP> _findPvps;
     private List<PVP> _pvps;

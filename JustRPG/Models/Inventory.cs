@@ -7,42 +7,35 @@ namespace JustRPG.Models;
 public class Inventory
 {
     [BsonElement("_id")]public string? id { get; set; }
-    
     [BsonElement("interactionType")]public string interactionType { get; set; } = "info";
-    
     [BsonElement("currentPage")]public int currentPage { get; set; } = -1;
-    
     [BsonElement("items")]public string[] items { get; set; } = Array.Empty<string>();
-    
     [BsonElement("currentPageItems")]public string?[] currentPageItems { get; set; } = { null , null, null, null, null };
-    
     [BsonElement("lastPage")]public int lastPage { get; set; } = 0;
-
     [BsonElement("lastUsage")]public long lastUsage { get; set; } = DateTimeOffset.Now.ToUnixTimeSeconds();
-
     [BsonIgnore]public DataBase? DataBase = null;
 
-    public void NextPage()
+    public async Task NextPage()
     {
         
         currentPage++;
         if (currentPage > lastPage)
             currentPage = lastPage;
         
-        Save();
+        await Save();
     }
 
-    public void PreviousPage()
+    public async Task PreviousPage()
     {
         currentPage--;
         
         if (currentPage < 0)
             currentPage = 0;
         
-        Save();
+        await Save();
     }
 
-    public void Reload(string[] inventory)
+    public async Task Reload(string[] inventory)
     {
         interactionType = "info";
         currentPage = 0;
@@ -50,18 +43,22 @@ public class Inventory
         lastPage = items.Length / 5 ;
         lastUsage = DateTimeOffset.Now.ToUnixTimeSeconds();
         
-        Save();
+        await Save();
     }
 
     public async Task<Item?[]> GetItems(DataBase dataBase)
     {
         Item?[] getItems = {null, null, null, null, null };
-        for (int i = 0; i < currentPageItems.Length; i++)
+        int counter = 0;
+        foreach (var i in currentPageItems)
         {
-            if (currentPageItems[i] == null)
-                break;
+            if (i == null)
+                continue;
 
-            getItems[i] = (Item) (await dataBase.ItemDb.Get(currentPageItems[i]!))!;
+            var a = await dataBase.ItemDb.Get(i);
+
+            getItems[counter] = (Item) a!;
+            counter++;
         }
 
         return getItems;
@@ -79,11 +76,11 @@ public class Inventory
         }
     }
     
-    private void Save(){
+    private async Task Save(){
         if (DataBase != null)
         {
             UpdatePageItems();
-            DataBase.InventoryDb.Update(this);
+            await DataBase.InventoryDb.Update(this);
         }
     }
 }

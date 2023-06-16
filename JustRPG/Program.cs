@@ -12,9 +12,9 @@ namespace JustRPG;
 
 public class Program
 {
-    DataBase _shareDataBase;
-    DiscordSocketClient _client;
-    private Background _background;
+    DataBase? _shareDataBase;
+    DiscordSocketClient? _client;
+    private Background? _background;
     public static Task Main(string[] args) => new Program().MainAsync();
 
     private async Task MainAsync()
@@ -43,7 +43,7 @@ public class Program
 
     private async Task RunBackgroundTaskAsync()
     {
-        await _background.BackgroundMaster();
+        await _background!.BackgroundMaster();
     }
 
     private async Task RunAsync(IHost host)

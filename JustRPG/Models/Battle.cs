@@ -67,7 +67,7 @@ public class Warrior
             msg = $"{enemy.name} удалось укланиться\n";
 
 
-        battle.log+=msg;
+        battle!.log+=msg;
     }
 
     public double Heal()

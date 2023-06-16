@@ -54,6 +54,12 @@ public class ActionInteractions : IInteractionMaster
             case "Equip":
                 await AcceptEquip();
                 break;
+            case "Destroy":
+                await AcceptDestroy();
+                break;
+            case "MarketBuy":
+                await MarketBuy();
+                break;
         }
     }
 
@@ -127,6 +133,74 @@ public class ActionInteractions : IInteractionMaster
         await _component.UpdateAsync(x =>
         {
             x.Embed = embed;
+            x.Components = null;
+        });
+    }
+
+    private async Task AcceptDestroy()
+    {
+        Embed embed;
+        if (_dbUser!.inventory.Contains(_action!.args[0]))
+        {
+            Item item = (Item) (await _dataBase.ItemDb.Get(_action.args[0]))!;
+            int itemIndex = Array.IndexOf(_dbUser.inventory,item.id);
+            _dbUser.inventory = _dbUser.inventory.Where((x,y) => y != itemIndex).ToArray();
+
+            embed = EmbedCreater.SuccessEmbed($"Вы успешно уничтожили `{item.name}`");
+            await _dataBase.UserDb.Update(_dbUser);
+        }
+        else
+        {
+            embed = EmbedCreater.ErrorEmbed("Данный предмет не найден в вашем инвентаре");
+        }
+
+        await _component.UpdateAsync(x => {
+            x.Embed = embed;
+            x.Components = null;
+        });
+    }
+
+    private async Task MarketBuy()
+    {
+        var temp = await _dataBase.MarketDb.Get(_action!.args[0]);
+        SaleItem item;
+        User user;
+
+        if (temp == null)
+        {
+            await _component.UpdateAsync(x=> x.Embed = EmbedCreater.ErrorEmbed("Предмет не найден, возможно он уже был продан или снят с продажи"));
+            return;
+        }
+        item = (SaleItem)(temp!);
+        user = (User)(await _dataBase.UserDb.Get(_component.User.Id))!;
+
+        if (user.cash < item.price)
+        {
+            await _component.UpdateAsync(x=> x.Embed = EmbedCreater.ErrorEmbed("У вас недостаточно средств для продажи"));
+            return;
+        }
+        if (user.inventory.Length >= 30)
+        {
+            await _component.UpdateAsync(x=> x.Embed = EmbedCreater.ErrorEmbed("У вас недостаточно места в инвентаре"));
+            return;
+        }
+
+
+        user.cash -= item.price;
+        List<string> inventary = user.inventory.ToList();
+        inventary.Add(item.itemId);
+        user.inventory = inventary.ToArray();
+
+        User seller = (User)(await _dataBase.UserDb.Get(item.userId))!      ;
+        seller.cash += item.price;
+
+        await _dataBase.UserDb.Update(user);
+        await _dataBase.UserDb.Update(seller);
+        await _dataBase.MarketDb.Delete(item);
+
+        await _component.UpdateAsync(x=>
+        {
+            x.Embed = EmbedCreater.SuccessEmbed("Предмет приобретён");
             x.Components = null;
         });
     }

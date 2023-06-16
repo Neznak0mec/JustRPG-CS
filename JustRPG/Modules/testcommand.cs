@@ -1,4 +1,6 @@
 using Discord.Interactions;
+using JustRPG.Generators;
+using JustRPG.Models;
 using JustRPG.Services;
 
 namespace JustRPG.Modules

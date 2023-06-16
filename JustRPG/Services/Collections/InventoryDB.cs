@@ -60,17 +60,9 @@ public class InventoryDB: ICollection
 
         string userid = temp.id!.Split('_')[2];
         User user = (User) (await _dataBase.UserDb.Get(userid))!;
-        temp.Reload(user.inventory);
+        await temp.Reload(user.inventory);
         
         return null;
-    }
-
-    public async Task Add(object where,string fieldKey, int value)
-    {
-        Inventory temp = (Inventory)where;
-        FilterDefinition<Inventory> filterInventory =Builders<Inventory>.Filter.Eq("id", temp.id);
-        UpdateDefinition<Inventory> updateInventory = Builders<Inventory>.Update.Inc(fieldKey, value);
-        await _collection.UpdateOneAsync(filterInventory!,updateInventory!);
     }
 
     public async Task Update(object? obj)

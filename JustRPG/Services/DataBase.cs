@@ -20,6 +20,7 @@ public class DataBase
     public readonly LocationsDB LocationsDb;
     public readonly BattlesDB BattlesDb;
     public readonly ArenaDB ArenaDb;
+    public readonly MarketDB MarketDb;
     public List<Work>? works;
 
 
@@ -36,6 +37,7 @@ public class DataBase
         LocationsDb = new LocationsDB(_database);
         BattlesDb = new BattlesDB(_database);
         ArenaDb = new ArenaDB(_database);
+        MarketDb = new MarketDB(_database);
 
         ParseWorks();
     }

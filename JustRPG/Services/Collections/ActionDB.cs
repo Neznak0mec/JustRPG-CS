@@ -27,14 +27,11 @@ public class ActionDB : ICollection
         return id;
     }
 
-    public async Task Add(object where, string fieldKey, int value)
-    {
-        throw new NotImplementedException();
-    }
-
     public async Task Update(object? obj)
     {
-        throw new NotImplementedException();
+        Action? temp = (Action)obj!;
+        FilterDefinition<Action> filterAction = Builders<Action>.Filter.Eq("id", temp.id)!;
+        await _collection.ReplaceOneAsync(filterAction,temp);
     }
 
     public async Task Delete(string id)

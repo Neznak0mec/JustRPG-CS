@@ -129,7 +129,7 @@ public class MarketSortInteractions  : IInteractionMaster
         {
             item = search.GetItemsOnPage(search.CurrentPage)[search.CurrentItemIndex];
         }
-        catch (Exception e)
+        catch (Exception)
         {
             await _component.RespondAsync(embed:EmbedCreater.ErrorEmbed("Предмет не найден, обновите поиск"),ephemeral:true);
             return;

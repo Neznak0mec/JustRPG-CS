@@ -15,11 +15,30 @@ public static class AdventureGenerators
             users.Add(user);
         }
         
-        //todo:  reward players who alive
-        foreach (var player in battle.players.Where(x =>x.stats.hp >0))
+        if (battle.type == "arena")
         {
-            
+            int loserIndex = users.IndexOf(users.First(x=> x!.id == battle.players.First(x =>x.stats.hp <=0).id));
+            int winerIndex = users.IndexOf(users.First(x=> x!.id == battle.players.First(x =>x.stats.hp > 0).id));
+
+            int mmrDifference = Math.Abs(users[loserIndex]!.mmr - users[winerIndex]!.mmr);
+            int transferPoints = Math.Max(mmrDifference / 2, 5);
+
+
+            users[loserIndex]!.mmr -= transferPoints;
+            battle.log += $"${battle.players[loserIndex].name} потерял {transferPoints}mmr\n";
+            users[winerIndex]!.mmr += transferPoints;
+            battle.log += $"${battle.players[winerIndex].name} получил {transferPoints}mmr\n";
         }
+        else
+        {
+
+            //todo:  reward players who alive
+            foreach (var player in battle.players.Where(x =>x.stats.hp >0))
+            {
+
+            }
+        }
+
             
                 
         // restore Heal poition

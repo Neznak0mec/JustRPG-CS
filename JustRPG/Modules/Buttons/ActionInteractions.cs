@@ -191,7 +191,7 @@ public class ActionInteractions : IInteractionMaster
         inventary.Add(item.itemId);
         user.inventory = inventary.ToArray();
 
-        User seller = (User)(await _dataBase.UserDb.Get(item.userId))!      ;
+        User seller = (User)(await _dataBase.UserDb.Get(item.userId))!;
         seller.cash += item.price;
 
         await _dataBase.UserDb.Update(user);

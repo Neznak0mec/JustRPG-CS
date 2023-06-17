@@ -3,28 +3,28 @@ using MongoDB.Bson.Serialization.Attributes;
 
 namespace JustRPG.Models;
 
-public class MarketSettings {
-    [BsonElement("_id")]public string id {get;set;}
-    [BsonElement("user_id")]public ulong userId{get;set;}
-    [BsonElement("current_item_index")]public int CurrentItemIndex { get; set; } = 0;
-    [BsonElement("search_results")]public List<SaleItem> SearchResults { get; set; } = new List<SaleItem>();
-    [BsonElement("start_page")]public string startPage {get;set;}
-    
-    
+public class MarketSettings
+{
+    [BsonElement("_id")] public string id { get; set; }
+    [BsonElement("user_id")] public ulong userId { get; set; }
+    [BsonElement("current_item_index")] public int currentItemIndex { get; set; } = 0;
+    [BsonElement("search_results")] public List<SaleItem> searchResults { get; set; } = new List<SaleItem>();
+    [BsonElement("start_page")] public string startPage { get; set; }
+
+
     public void IncrementItemIndex()
     {
-    
-        if (CurrentItemIndex < SearchResults.Count - 1)
+        if (currentItemIndex < searchResults.Count - 1)
         {
-            CurrentItemIndex++;
+            currentItemIndex++;
         }
     }
-    
+
     public void DecrementItemIndex()
     {
-        if (CurrentItemIndex > 0)
+        if (currentItemIndex > 0)
         {
-            CurrentItemIndex--;
+            currentItemIndex--;
         }
     }
 }

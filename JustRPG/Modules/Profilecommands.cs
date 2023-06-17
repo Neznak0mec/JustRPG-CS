@@ -17,8 +17,9 @@ public class Profilecommands : InteractionModuleBase<SocketInteractionContext>
 
     [SlashCommand("profile", "Просмотреть профиль")]
     public async Task Profile(
-        [Summary(name: "user", description:"пользователь чей профиль хотите посмотерть")] Discord.IUser? needToFound = null
-        )
+        [Summary(name: "user", description: "пользователь чей профиль хотите посмотерть")]
+        Discord.IUser? needToFound = null
+    )
     {
         needToFound ??= Context.User;
 
@@ -27,7 +28,8 @@ public class Profilecommands : InteractionModuleBase<SocketInteractionContext>
         if (user == null)
             await RespondAsync(embed: EmbedCreater.ErrorEmbed("Данный пользователь не найден"), ephemeral: true);
         else
-            await RespondAsync(embed: EmbedCreater.UserProfile(user, needToFound), components:ButtonSets.ProfileButtonsSet(Context.User.Id.ToString(),user.id.ToString()));
+            await RespondAsync(embed: EmbedCreater.UserProfile(user, needToFound),
+                components: ButtonSets.ProfileButtonsSet(Context.User.Id.ToString(), user.id.ToString()));
     }
 
     [Cooldown(300)]
@@ -39,8 +41,8 @@ public class Profilecommands : InteractionModuleBase<SocketInteractionContext>
         int exp = 10 + Random.Shared.Next(0, 2 * user.stats.luck);
         int cash = 10 + Random.Shared.Next(0, 2 * user.stats.luck);
 
-        await _bases.UserDb.Add(user,"exp",exp);
-        await _bases.UserDb.Add(user,"cash",cash);
+        await _bases.UserDb.Add(user, "exp", exp);
+        await _bases.UserDb.Add(user, "cash", cash);
 
         await Context.Interaction.RespondAsync(embed: EmbedCreater.WorkEmbed(_bases.works!, exp, cash));
     }
@@ -57,7 +59,8 @@ public class Profilecommands : InteractionModuleBase<SocketInteractionContext>
 
         await _bases.MarketDb.SearchGetAndUpdate(searchState);
 
-        await RespondAsync(embed:EmbedCreater.MarketPage(searchState),components:ButtonSets.MarketSortComponents(Context.User.Id,searchState.id));
+        await RespondAsync(embed: EmbedCreater.MarketPage(searchState),
+            components: ButtonSets.MarketSortComponents(Context.User.Id, searchState.id));
     }
 
     private async Task<User?> GetUser(ulong userId, bool create = false)
@@ -67,6 +70,5 @@ public class Profilecommands : InteractionModuleBase<SocketInteractionContext>
             return null;
         else
             return (User)tempUser!;
-
     }
 }

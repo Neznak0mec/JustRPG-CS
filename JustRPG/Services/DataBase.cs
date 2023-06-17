@@ -1,5 +1,5 @@
 using System.Text.Json;
-using JustRPG_CS.Services.Collections;
+using JustRPG.Services.Collections;
 using JustRPG.Models;
 using JustRPG.Services.Collections;
 using MongoDB.Bson;
@@ -7,6 +7,7 @@ using MongoDB.Driver;
 using Serilog;
 
 namespace JustRPG.Services;
+
 public class DataBase
 {
     private readonly MongoClient _client;

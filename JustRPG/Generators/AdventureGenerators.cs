@@ -13,14 +13,14 @@ public static class AdventureGenerators
         List<User?> users = new List<User?>();
         foreach (var player in battle!.players)
         {
-            User? user = (User) (await dataBase.UserDb.Get(player.id!))!;
+            User? user = (User)(await dataBase.UserDb.Get(player.id!))!;
             users.Add(user);
         }
-        
+
         if (battle.type == "arena")
         {
-            int loserIndex = users.IndexOf(users.First(x=> x!.id == battle.players.First(x =>x.stats.hp <=0).id));
-            int winerIndex = users.IndexOf(users.First(x=> x!.id == battle.players.First(x =>x.stats.hp > 0).id));
+            int loserIndex = users.IndexOf(users.First(x => x!.id == battle.players.First(x => x.stats.hp <= 0).id));
+            int winerIndex = users.IndexOf(users.First(x => x!.id == battle.players.First(x => x.stats.hp > 0).id));
 
             int mmrDifference = Math.Abs(users[loserIndex]!.mmr - users[winerIndex]!.mmr);
             int transferPoints = Math.Max(mmrDifference / 2, 5);
@@ -40,11 +40,10 @@ public static class AdventureGenerators
         }
         else
         {
-
             //todo:  reward players who alive
-             for (int i = 0; i < battle.players.Length; i++)
+            for (int i = 0; i < battle.players.Length; i++)
             {
-                if (battle.players[i].stats.hp <= 0 )
+                if (battle.players[i].stats.hp <= 0)
                     continue;
 
                 List<String> inventory = users[i]!.inventory.ToList();
@@ -54,53 +53,54 @@ public static class AdventureGenerators
                 countOfDropedItem += GetRandomNumberForDrop();
                 for (int j = 0; j < countOfDropedItem; j++)
                 {
-                    Tuple<string,string>? itemname = SecondaryFunctions.GetRandomKeyValuePair(battle.drop);
+                    Tuple<string, string>? itemname = SecondaryFunctions.GetRandomKeyValuePair(battle.drop);
                     if (itemname == null)
                         break;
-                    Item item = GenerateEquipmentItem(itemname.Item1, Random.Shared.Next(battle.enemies.First().lvl,battle.enemies.First().lvl+2),itemname.Item2);
+                    Item item = GenerateEquipmentItem(itemname.Item1,
+                        Random.Shared.Next(battle.enemies.First().lvl, battle.enemies.First().lvl + 2), itemname.Item2);
                     inventory.Add(item.id);
 
                     await dataBase.ItemDb.CreateObject(item);
-                    battle.log+= $"{battle.players[i].name} получил {item.name} | {item.lvl}\n";
+                    battle.log += $"{battle.players[i].name} получил {item.name} | {item.lvl}\n";
                 }
 
 
-
-                users[i]!.inventory = inventory.ToArray();
+                users[i]!.inventory = inventory;
             }
         }
 
-            
-                
+
         // restore Heal poition
         for (int i = 0; i < battle.players.Length; i++)
         {
-            List<String> inventory = users[i]!.inventory.ToList();
+            List<String> inventory = users[i]!.inventory;
             foreach (var item in battle.players[i].inventory)
             {
-                if (inventory.Count >=30)
+                if (inventory.Count >= 30)
                     break;
                 inventory.Add(item.Item1);
             }
-            users[i]!.inventory = inventory.ToArray();
+
+            users[i]!.inventory = inventory;
         }
-                
+
         foreach (var user in users)
         {
             await dataBase.UserDb.Update(user);
         }
     }
-    
-    public static async Task<Warrior> GenerateWarriorByUser(User user,string username, DataBase dataBase, string? avatarUrl = "") => new()
+
+    public static async Task<Warrior> GenerateWarriorByUser(User user, string username, DataBase dataBase,
+        string? avatarUrl = "") => new()
     {
         id = user.id,
         name = username,
-        stats = await new BattleStats().BattleStatsAsync(user,dataBase),
+        stats = await new BattleStats().BattleStatsAsync(user, dataBase),
         inventory = await InventoryToBattleInventory(user, dataBase),
         lvl = user.lvl,
         url = avatarUrl ?? ""
     };
-    
+
     public static async Task<List<Tuple<string, BattleStats>>> InventoryToBattleInventory(User user, DataBase dataBase)
     {
         // todo: update to new system on add skills
@@ -109,7 +109,6 @@ public static class AdventureGenerators
         List<string> inventory = user.inventory.ToList();
         for (int i = 0; i < inventory.Count; i++)
         {
-
             if (inventory[i] == "fb75ff73-1116-4e95-ae46-8075c4e9a782")
             {
                 res.Add(new Tuple<string, BattleStats>(inventory[i], new BattleStats()
@@ -127,26 +126,25 @@ public static class AdventureGenerators
             }
         }
 
-        user.inventory = inventory.ToArray();
+        user.inventory = inventory;
         await dataBase.UserDb.Update(user);
         return res;
     }
-    
-    
+
+
     public static Warrior GenerateMob(Location location, BattleStats player)
     {
-        Warrior mob = new Warrior();
-        mob.lvl = Random.Shared.Next(location.lvl,location.lvl+4);
         var names = location.monsters.Keys;
+        Warrior mob = new Warrior();
+        mob.lvl = Random.Shared.Next(location.lvl, location.lvl + 4);
         mob.name = names.ToArray()[Random.Shared.Next(0, names.Count)];
         mob.stats = GenerateRandomStats(player, mob.lvl);
         mob.url = location.monsters[mob.name];
         return mob;
     }
-    
+
     public static BattleStats GenerateRandomStats(BattleStats player, int lvl)
     {
-
         BattleStats mobStats = new BattleStats
         {
             damage = 1,
@@ -160,7 +158,6 @@ public static class AdventureGenerators
 
         return mobStats;
     }
-
 
 
     public static int GetRandomNumberForDrop()
@@ -200,7 +197,7 @@ public static class AdventureGenerators
 
     public static Item GenerateEquipmentItem(string type, int lvl, string name)
     {
-        Stats stats = new Stats();
+        Stats stats;
 
         int rarity = GenEquipmentItemRarity();
 

@@ -38,14 +38,14 @@ public class ActionInteractions : IInteractionMaster
             return;
         }
 
-        _dbUser = (User) (await _dataBase.UserDb.Get(Convert.ToUInt64(buttonInfo[1])))!;
-        
+        _dbUser = (User)(await _dataBase.UserDb.Get(Convert.ToUInt64(buttonInfo[1])))!;
+
         if (buttonInfo[3] == "Denied")
         {
             await DeniedAction();
             return;
         }
-        
+
         switch (_action.type)
         {
             case "Sell":
@@ -77,11 +77,12 @@ public class ActionInteractions : IInteractionMaster
         Embed embed;
         if (_dbUser!.inventory.Contains(_action!.args[0]))
         {
-            Item item = (Item) (await _dataBase.ItemDb.Get(_action.args[0]))!;
-            int itemIndex = Array.IndexOf(_dbUser.inventory,item.id);
-            _dbUser.inventory = _dbUser.inventory.Where((x,y) => y != itemIndex).ToArray();
+            Item item = (Item)(await _dataBase.ItemDb.Get(_action.args[0]))!;
+
+            int itemIndex = _dbUser.inventory.IndexOf(item.id);
+            _dbUser.inventory = _dbUser.inventory.Where((x, y) => y != itemIndex).ToList();
             _dbUser.cash += item.price / 4;
-            
+
             embed = EmbedCreater.SuccessEmbed($"Вы успешно продали `{item.name}` за `{item.price / 4}`");
             await _dataBase.UserDb.Update(_dbUser);
         }
@@ -89,8 +90,9 @@ public class ActionInteractions : IInteractionMaster
         {
             embed = EmbedCreater.ErrorEmbed("Данный предмет не найден в вашем инвентаре");
         }
-        
-        await _component.UpdateAsync(x => {
+
+        await _component.UpdateAsync(x =>
+        {
             x.Embed = embed;
             x.Components = null;
         });
@@ -101,35 +103,35 @@ public class ActionInteractions : IInteractionMaster
         Embed embed;
         if (_dbUser!.inventory.Contains(_action!.args[0]))
         {
-            Item item = (Item) (await _dataBase.ItemDb.Get(_action.args[0]))!;
+            Item item = (Item)(await _dataBase.ItemDb.Get(_action.args[0]))!;
             string? itemToChangeId = _dbUser.equipment!.GetByName(item.type);
 
             if (itemToChangeId != null)
             {
-                int indexInInventory = Array.IndexOf(_dbUser.inventory, item.id);
+                int indexInInventory = _dbUser.inventory.IndexOf(item.id);
                 _dbUser.inventory[indexInInventory] = itemToChangeId;
-                _dbUser.equipment.SetByName(item.type,item.id);
+                _dbUser.equipment.SetByName(item.type, item.id);
 
-                var itemToChange = (Item) (await _dataBase.ItemDb.Get(itemToChangeId))!;
+                var itemToChange = (Item)(await _dataBase.ItemDb.Get(itemToChangeId))!;
 
                 embed = EmbedCreater.SuccessEmbed($"Вы успешно сняли `{itemToChange.name}` и надели `{item.name}`");
             }
             else
             {
-                int itemIndex = Array.IndexOf(_dbUser.inventory,item.id);
-                _dbUser.inventory = _dbUser.inventory.Where((x,y) => y != itemIndex).ToArray();
-                _dbUser.equipment.SetByName(item.type,item.id);
-                
+                int itemIndex = _dbUser.inventory.IndexOf(item.id);
+                _dbUser.inventory = _dbUser.inventory.Where((x, y) => y != itemIndex).ToList();
+                _dbUser.equipment.SetByName(item.type, item.id);
+
                 embed = EmbedCreater.SuccessEmbed($"Вы успешно сняли надели `{item.name}`");
             }
-            
+
             await _dataBase.UserDb.Update(_dbUser);
         }
         else
         {
             embed = EmbedCreater.ErrorEmbed("Данный предмет не найден в вашем инвентаре");
         }
-        
+
         await _component.UpdateAsync(x =>
         {
             x.Embed = embed;
@@ -142,9 +144,9 @@ public class ActionInteractions : IInteractionMaster
         Embed embed;
         if (_dbUser!.inventory.Contains(_action!.args[0]))
         {
-            Item item = (Item) (await _dataBase.ItemDb.Get(_action.args[0]))!;
-            int itemIndex = Array.IndexOf(_dbUser.inventory,item.id);
-            _dbUser.inventory = _dbUser.inventory.Where((x,y) => y != itemIndex).ToArray();
+            Item item = (Item)(await _dataBase.ItemDb.Get(_action.args[0]))!;
+            int itemIndex = _dbUser.inventory.IndexOf(item.id);
+            _dbUser.inventory = _dbUser.inventory.Where((x, y) => y != itemIndex).ToList();
 
             embed = EmbedCreater.SuccessEmbed($"Вы успешно уничтожили `{item.name}`");
             await _dataBase.UserDb.Update(_dbUser);
@@ -154,7 +156,8 @@ public class ActionInteractions : IInteractionMaster
             embed = EmbedCreater.ErrorEmbed("Данный предмет не найден в вашем инвентаре");
         }
 
-        await _component.UpdateAsync(x => {
+        await _component.UpdateAsync(x =>
+        {
             x.Embed = embed;
             x.Components = null;
         });
@@ -168,28 +171,31 @@ public class ActionInteractions : IInteractionMaster
 
         if (temp == null)
         {
-            await _component.UpdateAsync(x=> x.Embed = EmbedCreater.ErrorEmbed("Предмет не найден, возможно он уже был продан или снят с продажи"));
+            await _component.UpdateAsync(x =>
+                x.Embed = EmbedCreater.ErrorEmbed("Предмет не найден, возможно он уже был продан или снят с продажи"));
             return;
         }
-        item = (SaleItem)(temp!);
+
+        item = (SaleItem)(temp);
         user = (User)(await _dataBase.UserDb.Get(_component.User.Id))!;
 
         if (user.cash < item.price)
         {
-            await _component.UpdateAsync(x=> x.Embed = EmbedCreater.ErrorEmbed("У вас недостаточно средств для продажи"));
+            await _component.UpdateAsync(x =>
+                x.Embed = EmbedCreater.ErrorEmbed("У вас недостаточно средств для продажи"));
             return;
         }
-        if (user.inventory.Length >= 30)
+
+        if (user.inventory.Count >= 30)
         {
-            await _component.UpdateAsync(x=> x.Embed = EmbedCreater.ErrorEmbed("У вас недостаточно места в инвентаре"));
+            await _component.UpdateAsync(x =>
+                x.Embed = EmbedCreater.ErrorEmbed("У вас недостаточно места в инвентаре"));
             return;
         }
 
 
         user.cash -= item.price;
-        List<string> inventary = user.inventory.ToList();
-        inventary.Add(item.itemId);
-        user.inventory = inventary.ToArray();
+        user.inventory.Add(item.itemId);
 
         User seller = (User)(await _dataBase.UserDb.Get(item.userId))!;
         seller.cash += item.price;
@@ -198,7 +204,7 @@ public class ActionInteractions : IInteractionMaster
         await _dataBase.UserDb.Update(seller);
         await _dataBase.MarketDb.Delete(item);
 
-        await _component.UpdateAsync(x=>
+        await _component.UpdateAsync(x =>
         {
             x.Embed = EmbedCreater.SuccessEmbed("Предмет приобретён");
             x.Components = null;

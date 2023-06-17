@@ -18,5 +18,4 @@ public class UserEquipment
         this.gloves = gloves;
         this.weapon = weapon;
     }
-    
 }

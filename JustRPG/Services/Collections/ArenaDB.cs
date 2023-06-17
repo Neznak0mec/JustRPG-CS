@@ -1,11 +1,10 @@
-using JustRPG_CS.Models;
+using JustRPG.Models;
 using MongoDB.Driver;
 
-namespace JustRPG_CS.Services.Collections;
+namespace JustRPG.Services.Collections;
 
 public class ArenaDB
 {
-
     private List<FindPVP> _findPvps;
     private List<PVP> _pvps;
 
@@ -14,17 +13,16 @@ public class ArenaDB
         _findPvps = new List<FindPVP>();
         _pvps = new List<PVP>();
     }
-    
+
     public void AppFindPVP(FindPVP findPvp) => _findPvps.Add(findPvp);
 
-    public void DeletFindPVP(long userId) =>  _findPvps = _findPvps.Where(x => x.userId != userId).ToList();
+    public void DeletFindPVP(long userId) => _findPvps = _findPvps.Where(x => x.userId != userId).ToList();
 
     public int CountOfFinfPVP() => _findPvps.Count;
 
     public List<FindPVP> GetAllFindPVP() => _findPvps;
 
-    
-    
+
     public PVP GetPVP(string val)
     {
         return _pvps.Where(x => x.battleId == val).ToList()[0];
@@ -39,7 +37,7 @@ public class ArenaDB
     {
         _pvps.Remove(obj);
     }
-    
+
     public void UpdatePVP(PVP obj)
     {
         var temp = GetPVP(obj.battleId);
@@ -47,5 +45,4 @@ public class ArenaDB
         temp.lastInteraction = DateTimeOffset.Now.ToUnixTimeSeconds();
         AddPVP(temp);
     }
-    
 }

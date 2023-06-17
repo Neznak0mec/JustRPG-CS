@@ -64,9 +64,6 @@ public class ButtonHandler
 
     private async Task WrongInteraction(string text)
     {
-        await _component.RespondAsync(embed: EmbedCreater.ErrorEmbed(text), ephemeral:true);
+        await _component.RespondAsync(embed: EmbedCreater.ErrorEmbed(text), ephemeral: true);
     }
-    
-
-    
 }

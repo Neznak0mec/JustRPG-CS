@@ -36,10 +36,12 @@ public class SelectLocation : IInteractionMaster
     private async Task GenerateDungeon(string userId)
     {
         Location location = _dataBase.LocationsDb.Get(_component.Data.Values.ToArray()[0]);
-        Warrior mainPlayer = await AdventureGenerators.GenerateWarriorByUser((User) (await _dataBase.UserDb.Get(userId))!, _component.User.Username, _dataBase);
+        Warrior mainPlayer =
+            await AdventureGenerators.GenerateWarriorByUser((User)(await _dataBase.UserDb.Get(userId))!,
+                _component.User.Username, _dataBase);
 
         List<Warrior> enemies = new List<Warrior>();
-        for (int i = 0; i < Random.Shared.Next(1,3);i++)
+        for (int i = 0; i < Random.Shared.Next(1, 3); i++)
         {
             enemies.Add(AdventureGenerators.GenerateMob(location, mainPlayer.stats));
         }
@@ -56,13 +58,16 @@ public class SelectLocation : IInteractionMaster
 
         await _dataBase.BattlesDb.CreateObject(newBattle);
 
-        await ResponseMessage(EmbedCreater.BattleEmbed(newBattle), component: ButtonSets.BattleButtonSet(newBattle,Convert.ToInt64(userId)));
+        await ResponseMessage(EmbedCreater.BattleEmbed(newBattle),
+            component: ButtonSets.BattleButtonSet(newBattle, Convert.ToInt64(userId)));
     }
 
     async Task GenerateAdventure(string userId)
     {
         Location location = _dataBase.LocationsDb.Get(_component.Data.Values.ToArray()[0]);
-        Warrior mainPlayer = await AdventureGenerators.GenerateWarriorByUser((User) (await _dataBase.UserDb.Get(userId))!, _component.User.Username, _dataBase);
+        Warrior mainPlayer =
+            await AdventureGenerators.GenerateWarriorByUser((User)(await _dataBase.UserDb.Get(userId))!,
+                _component.User.Username, _dataBase);
         Battle newBattle = new Battle
         {
             id = Guid.NewGuid().ToString(),
@@ -75,9 +80,10 @@ public class SelectLocation : IInteractionMaster
 
         await _dataBase.BattlesDb.CreateObject(newBattle);
 
-        await ResponseMessage(EmbedCreater.BattleEmbed(newBattle), component: ButtonSets.BattleButtonSet(newBattle,Convert.ToInt64(userId)));
+        await ResponseMessage(EmbedCreater.BattleEmbed(newBattle),
+            component: ButtonSets.BattleButtonSet(newBattle, Convert.ToInt64(userId)));
     }
-    
+
     private async Task ResponseMessage(Embed embed, MessageComponent? component = null)
     {
         await _component.UpdateAsync(x =>

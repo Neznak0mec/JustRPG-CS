@@ -47,7 +47,7 @@ public class MarketInteractions : IInteractionMaster
                 break;
         }
     }
-    
+
     public async Task PreviousItem(string[] buttonInfo)
     {
         MarketSettings search = (await _dataBase.MarketDb.GetSettings(buttonInfo[1]))!;
@@ -55,7 +55,7 @@ public class MarketInteractions : IInteractionMaster
         await _dataBase.MarketDb.GetUserSlots(search);
         await UpdateMessage(search);
     }
-    
+
     public async Task NextItem(string[] buttonInfo)
     {
         MarketSettings search = (await _dataBase.MarketDb.GetSettings(buttonInfo[1]))!;
@@ -69,65 +69,62 @@ public class MarketInteractions : IInteractionMaster
         SaleItem? saleItem = await GetItem(buttonInfo);
         if (saleItem == null)
             return;
-        
+
         ModalBuilder modalBuilder = new ModalBuilder()
             .WithTitle($"Продажа предмета {saleItem.itemName}")
             .WithCustomId($"Inventory_SetSellItemPrice_{saleItem.id}")
-            .AddTextInput(label: "Цена продажи", placeholder: "Введите цену за которую хотете продать предмет", customId: "price", required:true, minLength:1);
-        
+            .AddTextInput(label: "Цена продажи", placeholder: "Введите цену за которую хотете продать предмет",
+                customId: "price", required: true, minLength: 1);
+
         await _component.RespondWithModalAsync(modalBuilder.Build());
     }
-    
+
     private async Task EditVisible(string[] buttonInfo)
     {
         SaleItem? saleItem = await GetItem(buttonInfo);
         if (saleItem == null)
             return;
-        
-        
+
+
         saleItem.isVisible = !saleItem.isVisible;
         await _dataBase.MarketDb.Update(saleItem);
-        
+
         MarketSettings search = (await _dataBase.MarketDb.GetSettings(buttonInfo[1]))!;
-        
+
         await _dataBase.MarketDb.GetUserSlots(search);
         await UpdateMessage(search);
-        
     }
-    
+
     private async Task RemoveItem(string[] buttonInfo)
     {
         SaleItem? saleItem = await GetItem(buttonInfo);
         if (saleItem == null)
             return;
-        
+
         await _dataBase.MarketDb.Delete(saleItem);
         User user = (User)(await _dataBase.UserDb.Get(buttonInfo[1]))!;
-        List<string> inv = user.inventory.ToList();
-        inv.Add(saleItem.itemId);
-        user.inventory = inv.ToArray();
-        
+        user.inventory.Add(saleItem.itemId);
+
         await _dataBase.UserDb.Update(user);
-        
+
         MarketSettings search = (await _dataBase.MarketDb.GetSettings(buttonInfo[1]))!;
-        
+
         await _dataBase.MarketDb.GetUserSlots(search);
         await UpdateMessage(search);
     }
-    
-    private async Task  ReloadPage(string[] buttonInfo)
+
+    private async Task ReloadPage(string[] buttonInfo)
     {
         MarketSettings search = (await _dataBase.MarketDb.GetSettings(buttonInfo[1]))!;
-        
+
         await _dataBase.MarketDb.GetUserSlots(search);
         await UpdateMessage(search);
-        
     }
-    
+
     private async Task GoBack(string[] buttonInfo)
     {
         MarketSettings settings = (await _dataBase.MarketDb.GetSettings(buttonInfo[1]))!;
-        
+
         if (settings.startPage == "market")
         {
             SearchState searchState = new SearchState()
@@ -139,35 +136,37 @@ public class MarketInteractions : IInteractionMaster
 
             await _dataBase.MarketDb.SearchGetAndUpdate(searchState);
 
-            await _component.UpdateAsync( x=>
-                {
-                    x.Embed = EmbedCreater.MarketPage(searchState);
-                    x.Components = ButtonSets.MarketSortComponents(_component.User.Id,searchState.id);
-                });
+            await _component.UpdateAsync(x =>
+            {
+                x.Embed = EmbedCreater.MarketPage(searchState);
+                x.Components = ButtonSets.MarketSortComponents(_component.User.Id, searchState.id);
+            });
             return;
         }
         else
         {
-            Inventory inventory = (Inventory) (await  _dataBase.InventoryDb.Get( $"Inventory_{_component.User.Id}_{_component.User.Id}"))!;
+            Inventory inventory =
+                (Inventory)(await _dataBase.InventoryDb.Get($"Inventory_{_component.User.Id}_{_component.User.Id}"))!;
             var items = await inventory.GetItems(_dataBase);
 
-            
-            await _component.UpdateAsync( x=>
+
+            await _component.UpdateAsync(x =>
             {
-                x.Embed = EmbedCreater.UserInventory( _component.User, items);
-                x.Components =  ButtonSets.InventoryButtonsSet(_component.User.Id.ToString(), (long)_component.User.Id, inventory, items);
+                x.Embed = EmbedCreater.UserInventory(_component.User, items);
+                x.Components = ButtonSets.InventoryButtonsSet(_component.User.Id.ToString(), (long)_component.User.Id,
+                    inventory, items);
             });
             return;
         }
-            
     }
-    
+
     async Task<SaleItem?> GetItem(string[] buttonInfo)
     {
         SaleItem? saleItem = null;
         MarketSettings settings = (await _dataBase.MarketDb.GetSettings(buttonInfo[1]))!;
-        if (buttonInfo.Length == 3 && settings.SearchResults.Count != 0){
-                saleItem = settings.SearchResults[settings.CurrentItemIndex];
+        if (buttonInfo.Length == 3 && settings.searchResults.Count != 0)
+        {
+            saleItem = settings.searchResults[settings.currentItemIndex];
         }
         else
         {
@@ -180,18 +179,17 @@ public class MarketInteractions : IInteractionMaster
                 await _component.RespondAsync(embed: EmbedCreater.ErrorEmbed("Предмет не найден"));
                 return null;
             }
-
         }
-        
+
         return saleItem;
     }
-    
+
     public async Task UpdateMessage(MarketSettings settings)
     {
         await _component.UpdateAsync(x =>
         {
             x.Embed = EmbedCreater.MarketSettingsPage(settings);
-            x.Components =ButtonSets.MarketSettingComponents(settings);
+            x.Components = ButtonSets.MarketSettingComponents(settings);
         });
     }
 }

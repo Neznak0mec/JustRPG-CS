@@ -6,7 +6,7 @@ using JustRPG.Services;
 
 namespace JustRPG.Modules.Selects;
 
-public class MarketSortSelect  : IInteractionMaster
+public class MarketSortSelect : IInteractionMaster
 {
     private readonly DiscordSocketClient _client;
     private readonly SocketMessageComponent _component;
@@ -39,19 +39,19 @@ public class MarketSortSelect  : IInteractionMaster
     {
         SearchState search = (await _dataBase.MarketDb.GetSearch(buttonInfo[3]))!;
         string[] res = _component.Data.Values.ToArray()[0].Split('-');
-        
-        search.itemLvl = new Tuple<int, int>(Convert.ToInt32( res[0]),Convert.ToInt32( res[1]));
-        
+
+        search.itemLvl = new Tuple<int, int>(Convert.ToInt32(res[0]), Convert.ToInt32(res[1]));
+
         await _dataBase.MarketDb.SearchGetAndUpdate(search);
         await UpdateMessage(search);
     }
-    
+
     public async Task SelectRaty(string[] buttonInfo)
     {
         SearchState search = (await _dataBase.MarketDb.GetSearch(buttonInfo[1]))!;
         string res = _component.Data.Values.ToArray()[0];
-        
-        
+
+
         if (res == "сброс")
             search.itemRarity = null;
         else if (res == "обычное")
@@ -66,17 +66,17 @@ public class MarketSortSelect  : IInteractionMaster
             search.itemRarity = "legendary";
         else
             search.itemRarity = null;
-        
+
         await _dataBase.MarketDb.SearchGetAndUpdate(search);
         await UpdateMessage(search);
     }
-    
+
     public async Task SelectType(string[] buttonInfo)
     {
         SearchState search = (await _dataBase.MarketDb.GetSearch(buttonInfo[1]))!;
         string res = _component.Data.Values.ToArray()[0];
-        
-        
+
+
         if (res == "сброс")
             search.itemType = null;
         else if (res == "шлем")
@@ -93,20 +93,19 @@ public class MarketSortSelect  : IInteractionMaster
             search.itemType = "posion";
         else
             search.itemType = null;
-        
-        
-        
+
+
         await _dataBase.MarketDb.SearchGetAndUpdate(search);
         await UpdateMessage(search);
     }
-    
-    
+
+
     public async Task UpdateMessage(SearchState search)
     {
         await _component.UpdateAsync(x =>
         {
             x.Embed = EmbedCreater.MarketPage(search);
-            x.Components =ButtonSets.MarketSortComponents(_component.User.Id,search.id);
-            });
+            x.Components = ButtonSets.MarketSortComponents(_component.User.Id, search.id);
+        });
     }
 }

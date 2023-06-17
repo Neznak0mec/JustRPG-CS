@@ -13,10 +13,10 @@ public class ActionDB : ICollection
     {
         _collection = mongoDatabase.GetCollection<Action>("interactions");
     }
-    
+
     public async Task<object?> Get(object val, string key = "_id")
     {
-        var filterAction =Builders<Action>.Filter.Eq(key, val);
+        var filterAction = Builders<Action>.Filter.Eq(key, val);
         var res = await _collection.FindAsync(filterAction);
         return await res.FirstOrDefaultAsync();
     }
@@ -31,7 +31,7 @@ public class ActionDB : ICollection
     {
         Action? temp = (Action)obj!;
         FilterDefinition<Action> filterAction = Builders<Action>.Filter.Eq("id", temp.id)!;
-        await _collection.ReplaceOneAsync(filterAction,temp);
+        await _collection.ReplaceOneAsync(filterAction, temp);
     }
 
     public async Task Delete(string id)

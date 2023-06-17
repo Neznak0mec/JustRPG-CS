@@ -9,17 +9,17 @@ namespace JustRPG.Services;
 
 public class SelectHandler
 {
-    
     private DiscordSocketClient _client;
     private IServiceProvider _service;
     private SocketMessageComponent _component;
+
     public SelectHandler(DiscordSocketClient client, SocketMessageComponent component, IServiceProvider service)
     {
         _component = component;
         _client = client;
         _service = service;
     }
-    
+
     public async Task SelectDistributor()
     {
         var selectInfo = _component.Data.CustomId.Split('_');
@@ -50,10 +50,9 @@ public class SelectHandler
 
         await master.Distributor(selectInfo);
     }
-    
+
     private async Task WrongInteraction()
     {
         await _component.RespondAsync(embed: EmbedCreater.ErrorEmbed("Вы не можете с этим взаимодействовать"));
     }
-    
 }

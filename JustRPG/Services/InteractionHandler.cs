@@ -14,7 +14,7 @@ namespace JustRPG.Services
         private readonly InteractionService _commands;
         private readonly IServiceProvider _services;
         private readonly DataBase _dataBase;
-        
+
         public InteractionHandler(DiscordSocketClient client, InteractionService commands, IServiceProvider services)
         {
             _client = client;
@@ -51,32 +51,44 @@ namespace JustRPG.Services
         private async Task OnInteractionExecuted(ICommandInfo command, IInteractionContext context, IResult result)
         {
             Log.Error(result.ErrorReason);
-            if(!result.IsSuccess && result.ErrorReason.StartsWith("Не так быстро") || context.User.Id == 426986442632462347)
+            if (!result.IsSuccess && result.ErrorReason.StartsWith("Не так быстро") ||
+                context.User.Id == 426986442632462347)
             {
-                await context.Interaction.RespondAsync(embed: EmbedCreater.ErrorEmbed(result.ErrorReason), ephemeral: true);
+                await context.Interaction.RespondAsync(embed: EmbedCreater.ErrorEmbed(result.ErrorReason),
+                    ephemeral: true);
             }
-            else if(!result.IsSuccess)
+            else if (!result.IsSuccess)
             {
-                await context.Interaction.RespondAsync(embed: EmbedCreater.ErrorEmbed("Произошла неизвестная ошибка, попробуйте позже"), ephemeral: true);
+                await context.Interaction.RespondAsync(
+                    embed: EmbedCreater.ErrorEmbed("Произошла неизвестная ошибка, попробуйте позже"), ephemeral: true);
             }
         }
 
         private Task ButtonInteraction(SocketMessageComponent component)
         {
-            _ = Task.Run(() => { new ButtonHandler(_client, component, _services).ButtonDistributor().RunSynchronously(); });
+            _ = Task.Run(() =>
+            {
+                new ButtonHandler(_client, component, _services).ButtonDistributor().RunSynchronously();
+            });
             return Task.CompletedTask;
         }
 
         private Task SelectInteraction(SocketMessageComponent component)
         {
-            _ = Task.Run(() => { new SelectHandler(_client, component, _services).SelectDistributor().RunSynchronously(); });
+            _ = Task.Run(() =>
+            {
+                new SelectHandler(_client, component, _services).SelectDistributor().RunSynchronously();
+            });
             return Task.CompletedTask;
         }
 
         private Task ModalInteraction(SocketModal component)
         {
-            _ = Task.Run(() => { new ModalHandler(_client, component, _services).ModalDistributor().RunSynchronously(); });
+            _ = Task.Run(() =>
+            {
+                new ModalHandler(_client, component, _services).ModalDistributor().RunSynchronously();
+            });
             return Task.CompletedTask;
         }
     }
-} 
+}

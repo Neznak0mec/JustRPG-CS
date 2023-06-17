@@ -35,7 +35,8 @@ public class Cooldown : PreconditionAttribute
             var difference = endsAt.Subtract(DateTime.UtcNow);
             if (difference.Ticks > 0)
             {
-                return Task.FromResult(PreconditionResult.FromError($"Не так быстро. Вы сможете повторно использовать эту команду через `{(int)difference.TotalSeconds}` секунд"));
+                return Task.FromResult(PreconditionResult.FromError(
+                    $"Не так быстро. Вы сможете повторно использовать эту команду через `{(int)difference.TotalSeconds}` секунд"));
             }
 
             var time = DateTime.UtcNow.Add(CooldownLength);

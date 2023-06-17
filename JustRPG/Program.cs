@@ -1,7 +1,7 @@
-﻿﻿using Discord;
+﻿using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
-using JustRPG_CS.Features;
+using JustRPG.Features;
 using JustRPG.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;

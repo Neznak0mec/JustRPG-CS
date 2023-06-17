@@ -17,8 +17,8 @@ namespace JustRPG.Modules
         [SlashCommand("ping", "Reciave a ping message")]
         public async Task Ping()
         {
-            await RespondAsync($"{( DateTimeOffset.Now - Context.Interaction.CreatedAt).TotalMilliseconds} ms to server");
+            await RespondAsync(
+                $"{(DateTimeOffset.Now - Context.Interaction.CreatedAt).TotalMilliseconds} ms to server");
         }
     }
-
 }

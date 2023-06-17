@@ -19,8 +19,8 @@ public class ProfileInteractions : IInteractionMaster
         _component = component;
         _dataBase = (DataBase)service.GetService(typeof(DataBase))!;
     }
-    
-    public async Task Distributor(string[] buttonInfo) 
+
+    public async Task Distributor(string[] buttonInfo)
     {
         switch (buttonInfo[0])
         {
@@ -41,11 +41,11 @@ public class ProfileInteractions : IInteractionMaster
                 break;
         }
     }
-    
+
     private async Task ProfileButtonResponse(string memberId)
     {
         var user = _client.GetUser(Convert.ToUInt64(memberId));
-        var userDb = (User) (await _dataBase.UserDb.Get(memberId))!;
+        var userDb = (User)(await _dataBase.UserDb.Get(memberId))!;
 
         await ResponseMessage(EmbedCreater.UserProfile(userDb, user),
             ButtonSets.ProfileButtonsSet(_component.User.Id.ToString(), memberId));
@@ -54,7 +54,7 @@ public class ProfileInteractions : IInteractionMaster
     private async Task EquipmentButtonResponse(string memberId)
     {
         var user = _client.GetUser(Convert.ToUInt64(memberId));
-        var userDb = (User) (await _dataBase.UserDb.Get( memberId))!;
+        var userDb = (User)(await _dataBase.UserDb.Get(memberId))!;
 
         await ResponseMessage(await EmbedCreater.UserEquipmentEmbed(userDb, user, _dataBase),
             ButtonSets.ProfileButtonsSet(_component.User.Id.ToString(), memberId, "Equipment"));
@@ -62,34 +62,34 @@ public class ProfileInteractions : IInteractionMaster
 
     private async Task UpSkillsButtonResponse(string memberId)
     {
-        var userDb = (User) (await _dataBase.UserDb.Get(memberId))!;
+        var userDb = (User)(await _dataBase.UserDb.Get(memberId))!;
         await ResponseMessage(EmbedCreater.UpSkills(), ButtonSets.UpUserSkills(memberId, userDb));
     }
 
     public async Task InventoryButtonResponse(string memberId)
     {
         var member = _client.GetUser(Convert.ToUInt64(memberId));
-        Inventory inventory = (Inventory) (await  _dataBase.InventoryDb.Get( $"Inventory_{memberId}_{_component.User.Id.ToString()}"))!;
+        Inventory inventory =
+            (Inventory)(await _dataBase.InventoryDb.Get($"Inventory_{memberId}_{_component.User.Id.ToString()}"))!;
         var items = await inventory.GetItems(_dataBase);
 
-        await ResponseMessage( EmbedCreater.UserInventory( member, items),
+        await ResponseMessage(EmbedCreater.UserInventory(member, items),
             ButtonSets.InventoryButtonsSet(_component.User.Id.ToString(), Convert.ToInt64(memberId), inventory, items));
-
     }
 
     private async Task UpSkill(string memberId, string skill)
     {
-        
-        var userDb = (User) (await _dataBase.UserDb.Get(memberId))!;
+        var userDb = (User)(await _dataBase.UserDb.Get(memberId))!;
         if (userDb!.skillPoints <= 0)
         {
-            await _component.RespondAsync( embed: EmbedCreater.ErrorEmbed("У вас недостаточно скилл поинтов"), ephemeral: true);
+            await _component.RespondAsync(embed: EmbedCreater.ErrorEmbed("У вас недостаточно скилл поинтов"),
+                ephemeral: true);
             return;
         }
 
-        await _dataBase.UserDb.Add(userDb,skill,1);
+        await _dataBase.UserDb.Add(userDb, skill, 1);
         await _dataBase.UserDb.Add(userDb, "skill_points", -1);
-        userDb = (User) (await _dataBase.UserDb.Get(userDb.id))!;
+        userDb = (User)(await _dataBase.UserDb.Get(userDb.id))!;
 
         await ResponseMessage(EmbedCreater.UpSkills(), ButtonSets.UpUserSkills(memberId, userDb!));
     }

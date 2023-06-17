@@ -1,7 +1,7 @@
 using Discord;
 using Discord.Rest;
 using Discord.WebSocket;
-using JustRPG_CS.Features;
+using JustRPG.Features;
 using JustRPG.Generators;
 using JustRPG.Interfaces;
 using JustRPG.Services;

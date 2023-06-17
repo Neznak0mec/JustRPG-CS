@@ -4,8 +4,6 @@ using MongoDB.Driver;
 
 namespace JustRPG.Services.Collections;
 
-
-
 public class UserDb : ICollection
 {
     private readonly IMongoCollection<User?> _collection;
@@ -16,25 +14,26 @@ public class UserDb : ICollection
         _collection = mongoDatabase.GetCollection<User>("users")!;
         usersIdCache = new List<ulong>();
     }
-    
-    public async Task<object?> Get(object val,string key="id")
+
+    public async Task<object?> Get(object val, string key = "id")
     {
-        FilterDefinition<User> filterUser =Builders<User>.Filter.Eq(key, val);
+        FilterDefinition<User> filterUser = Builders<User>.Filter.Eq(key, val);
         return await (await _collection!.FindAsync(filterUser)).FirstOrDefaultAsync();
     }
 
     public async Task<object?> CreateObject(object? id)
     {
-        User? newUser = new User{id  = Convert.ToInt64(id)};
+        User? newUser = new User { id = Convert.ToInt64(id) };
         await _collection.InsertOneAsync(newUser);
         return newUser;
     }
 
-    public async Task Add(object where,string fieldKey, int value)
+    public async Task Add(object where, string fieldKey, int value)
     {
         User temp = (User)where;
         FilterDefinition<User> filterUser = Builders<User>.Filter.Eq("id", temp.id);
-        UpdateDefinition<User> updateUser = fieldKey == "exp" ? UpdateLvl(temp, value) : Builders<User>.Update.Inc(fieldKey, value);
+        UpdateDefinition<User> updateUser =
+            fieldKey == "exp" ? UpdateLvl(temp, value) : Builders<User>.Update.Inc(fieldKey, value);
 
         await _collection.UpdateOneAsync(filterUser!, updateUser!);
     }
@@ -58,14 +57,14 @@ public class UserDb : ICollection
     public async Task Update(object? obj)
     {
         User temp = (User)obj!;
-        FilterDefinition<User> filterUser =Builders<User>.Filter.Eq("id", temp.id);
-        await _collection.ReplaceOneAsync(filterUser!,temp);
+        FilterDefinition<User> filterUser = Builders<User>.Filter.Eq("id", temp.id);
+        await _collection.ReplaceOneAsync(filterUser!, temp);
     }
 
     public async Task Cache(ulong userId)
     {
         if (usersIdCache.Contains(userId))
-          return;
+            return;
 
         var user = Get(userId);
         if (user == null)

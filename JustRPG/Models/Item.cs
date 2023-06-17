@@ -5,17 +5,17 @@ namespace JustRPG.Models;
 
 public class Item
 {
-    [BsonElement("id")]public string id { get; set; }
-    [BsonElement("name")]public string name { get; set; } = "";
-    [BsonElement("lvl")]public int lvl { get; set;  } = 0;
-    [BsonElement("type")]public string type { get; set; } = "";
-    [BsonElement("price")]public int price { get; set; } = 0;
-    [BsonElement("description")]public string description { get; set; } = "";
-    [BsonElement("rarity")]public string rarity { get; set; } = "";
-    [BsonElement("give_stats")]public Stats? giveStats { get; set; }
-    [BsonElement("generated")]public bool generated { get; set; } = false;
-    
-    [BsonElement("preset")]public string preset { get; set; } = "";
+    [BsonElement("id")] public string id { get; set; }
+    [BsonElement("name")] public string name { get; set; } = "";
+    [BsonElement("lvl")] public int lvl { get; set; } = 0;
+    [BsonElement("type")] public string type { get; set; } = "";
+    [BsonElement("price")] public int price { get; set; } = 0;
+    [BsonElement("description")] public string description { get; set; } = "";
+    [BsonElement("rarity")] public string rarity { get; set; } = "";
+    [BsonElement("give_stats")] public Stats? giveStats { get; set; }
+    [BsonElement("generated")] public bool generated { get; set; } = false;
+
+    [BsonElement("preset")] public string preset { get; set; } = "";
 
     public override string ToString()
     {
@@ -31,19 +31,19 @@ public class Item
     {
         string res = ToString();
         res += "| редкость: " +
-            rarity switch
-            {
-                "common" => "⬜",
-                "uncommon" => "🟦",
-                "rare" => "🟪",
-                "epic" => "🟨",
-                "legendary" => "🟥",
-                "impossible" => "👾",
-                "exotic" =>  "🔳",
-                "prize" => "🎁",
-                "event" => "✨",
-                _ => "⬜"
-            };
+               rarity switch
+               {
+                   "common" => "⬜",
+                   "uncommon" => "🟦",
+                   "rare" => "🟪",
+                   "epic" => "🟨",
+                   "legendary" => "🟥",
+                   "impossible" => "👾",
+                   "exotic" => "🔳",
+                   "prize" => "🎁",
+                   "event" => "✨",
+                   _ => "⬜"
+               };
         return res;
     }
 
@@ -51,5 +51,4 @@ public class Item
     {
         return type is "helmet" or "armor" or "gloves" or "pants" or "weapon";
     }
-
 }

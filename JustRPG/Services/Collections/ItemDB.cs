@@ -21,9 +21,9 @@ public class ItemDB : ICollection
 
     public async Task<object?> CreateObject(object? id)
     {
-        Item? newItem = new Item{id  = id!.ToString()!};
-        await _collection.InsertOneAsync(newItem);
-        return newItem;
+        Item temp = (Item)id;
+        await _collection.InsertOneAsync(temp);
+        return temp;
     }
 
     public async Task Add(object where,string fieldKey, int value)

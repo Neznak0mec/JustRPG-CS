@@ -30,4 +30,29 @@ public class SecondaryFunctions
 
         return new Tuple<string, string>(emoji,$"{warrior.stats.hp/warrior.stats.MaxHP*100}%");
     }
+
+    public static Tuple<string, string>? GetRandomKeyValuePair(Dictionary<string, string> dictionary)
+    {
+    if (dictionary.Count == 0)
+    {
+        return null;
+    }
+
+    var random = new Random();
+    int randomIndex = random.Next(0, dictionary.Count);
+    KeyValuePair<string, string> randomPair = new KeyValuePair<string, string>();
+
+    int currentIndex = 0;
+    foreach (var kv in dictionary)
+    {
+        if (currentIndex == randomIndex)
+        {
+            randomPair = kv;
+            break;
+        }
+        currentIndex++;
+    }
+
+    return new Tuple<string, string>(randomPair.Key, randomPair.Value);
+    }
 }

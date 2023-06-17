@@ -12,7 +12,7 @@ public class Battle
     [BsonElement("selected_enemy")] public short selectedEnemy{ get; set; } = 0;
     [BsonElement("current_user")] public short currentUser{ get; set; } = 0;
     [BsonElement("last_activity")] public long lastActivity{ get; set; }
-    [BsonElement("drop")] public Dictionary<string,int> drop{ get; set; }
+    [BsonElement("drop")] public Dictionary<string,string> drop{ get; set; }
     [BsonIgnore]public string log{ get; set; } = "";
 }
 

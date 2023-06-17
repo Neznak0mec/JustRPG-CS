@@ -11,5 +11,5 @@ public class Location
     [BsonElement("lvl")]public int lvl { get; set; }
     [BsonElement("type")] public string type { get; set; }
     [BsonElement("monsters")] public Dictionary<string,string> monsters { get; set;}
-    [BsonElement("drops")] public Dictionary<string, int> drops { get; set; } = new Dictionary<string, int>();
+    [BsonElement("drops")] public Dictionary<string, string> drops { get; set; } = new Dictionary<string, string>();
 }

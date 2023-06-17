@@ -5,7 +5,7 @@ namespace JustRPG.Models;
 
 public class Item
 {
-    [BsonElement("id")]public string id { get; set; } = "";
+    [BsonElement("id")]public string id { get; set; }
     [BsonElement("name")]public string name { get; set; } = "";
     [BsonElement("lvl")]public int lvl { get; set;  } = 0;
     [BsonElement("type")]public string type { get; set; } = "";

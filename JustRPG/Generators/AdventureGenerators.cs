@@ -1,4 +1,6 @@
+using JustRPG.Features;
 using JustRPG.Models;
+using JustRPG.Models.Enums;
 using JustRPG.Models.SubClasses;
 using JustRPG.Services;
 
@@ -40,9 +42,31 @@ public static class AdventureGenerators
         {
 
             //todo:  reward players who alive
-            foreach (var player in battle.players.Where(x =>x.stats.hp >0))
+             for (int i = 0; i < battle.players.Length; i++)
             {
+                if (battle.players[i].stats.hp <= 0 )
+                    continue;
 
+                List<String> inventory = users[i]!.inventory.ToList();
+
+
+                int countOfDropedItem = (battle.type == "dungeon" ? 1 : 0);
+                countOfDropedItem += GetRandomNumberForDrop();
+                for (int j = 0; j < countOfDropedItem; j++)
+                {
+                    Tuple<string,string>? itemname = SecondaryFunctions.GetRandomKeyValuePair(battle.drop);
+                    if (itemname == null)
+                        break;
+                    Item item = GenerateEquipmentItem(itemname.Item1, Random.Shared.Next(battle.enemies.First().lvl,battle.enemies.First().lvl+2),itemname.Item2);
+                    inventory.Add(item.id);
+
+                    await dataBase.ItemDb.CreateObject(item);
+                    battle.log+= $"{battle.players[i]} получил {item.name} | {item.lvl}\n";
+                }
+
+
+
+                users[i]!.inventory = inventory.ToArray();
             }
         }
 
@@ -135,5 +159,128 @@ public static class AdventureGenerators
         };
 
         return mobStats;
+    }
+
+
+
+    public static int GetRandomNumberForDrop()
+    {
+        Random random = new Random();
+        double probability = random.NextDouble();
+
+        if (probability <= 0.5)
+            return 0;
+        else if (probability <= 0.7)
+            return 1;
+        else if (probability <= 85)
+            return 2;
+        else if (probability <= 99)
+            return 3;
+        else
+            return 4;
+    }
+
+    public static int GenEquipmentItemRarity()
+    {
+        int[] weights = { 50, 25, 15, 7, 3 };
+        int totalWheight = 100;
+
+        int randomNumber = new Random().Next(0, totalWheight);
+        int currentwheight = 0;
+
+        for (int i = 0; i < weights.Length; i++)
+        {
+            currentwheight += weights[i];
+            if (randomNumber <= currentwheight)
+                return i;
+        }
+
+        return 0;
+    }
+
+    public static Item GenerateEquipmentItem(string type, int lvl, string name)
+    {
+        Stats stats = new Stats();
+
+        int rarity = GenEquipmentItemRarity();
+
+        if (true)
+        {
+            stats = new Stats()
+            {
+                damage = 1,
+                defence = 1,
+                hp = 100,
+                speed = 1,
+                luck = 1
+            };
+        }
+        else
+        {
+            stats = type switch
+            {
+                "armor" => new Stats()
+                {
+                    damage = 1,
+                    defence = 1,
+                    hp = 100,
+                    speed = 1,
+                    luck = 1
+                },
+                "weapon" => new Stats()
+                {
+                    damage = 1,
+                    defence = 1,
+                    hp = 100,
+                    speed = 1,
+                    luck = 1
+                },
+                "gloves" => new Stats()
+                {
+                    damage = 1,
+                    defence = 1,
+                    hp = 100,
+                    speed = 1,
+                    luck = 1
+                },
+                "pants" => new Stats()
+                {
+                    damage = 1,
+                    defence = 1,
+                    hp = 100,
+                    speed = 1,
+                    luck = 1
+                },
+                "shoes" => new Stats()
+                {
+                    damage = 1,
+                    defence = 1,
+                    hp = 100,
+                    speed = 1,
+                    luck = 1
+                },
+                "helmet" => new Stats()
+                {
+                    damage = 1,
+                    defence = 1,
+                    hp = 100,
+                    speed = 1,
+                    luck = 1
+                },
+                _ => stats
+            };
+        }
+
+        Item item = new Item()
+        {
+            id = Guid.NewGuid().ToString(),
+            name = name,
+            lvl = lvl,
+            generated = true,
+            giveStats = stats,
+            rarity = Enum.GetName(typeof(Rarity), rarity)!,
+            type = type
+        };
+        return item;
     }
 }

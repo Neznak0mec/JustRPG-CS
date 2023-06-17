@@ -23,11 +23,18 @@ public static class AdventureGenerators
             int mmrDifference = Math.Abs(users[loserIndex]!.mmr - users[winerIndex]!.mmr);
             int transferPoints = Math.Max(mmrDifference / 2, 5);
 
+            if (users[loserIndex]!.mmr < 5)
+            {
+                battle.log += $"${battle.players[loserIndex].name} не потерял mmr\n";
+            }
+            else
+            {
+                users[loserIndex]!.mmr -= transferPoints;
+                battle.log += $"${battle.players[loserIndex].name} потерял {transferPoints} mmr\n";
+            }
 
-            users[loserIndex]!.mmr -= transferPoints;
-            battle.log += $"${battle.players[loserIndex].name} потерял {transferPoints}mmr\n";
             users[winerIndex]!.mmr += transferPoints;
-            battle.log += $"${battle.players[winerIndex].name} получил {transferPoints}mmr\n";
+            battle.log += $"${battle.players[winerIndex].name} получил {transferPoints} mmr\n";
         }
         else
         {

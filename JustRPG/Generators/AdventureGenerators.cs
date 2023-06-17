@@ -27,16 +27,16 @@ public static class AdventureGenerators
 
             if (users[loserIndex]!.mmr < 5)
             {
-                battle.log += $"${battle.players[loserIndex].name} не потерял mmr\n";
+                battle.log += $"{battle.players[loserIndex].name} не потерял mmr\n";
             }
             else
             {
                 users[loserIndex]!.mmr -= transferPoints;
-                battle.log += $"${battle.players[loserIndex].name} потерял {transferPoints} mmr\n";
+                battle.log += $"{battle.players[loserIndex].name} потерял {transferPoints} mmr\n";
             }
 
             users[winerIndex]!.mmr += transferPoints;
-            battle.log += $"${battle.players[winerIndex].name} получил {transferPoints} mmr\n";
+            battle.log += $"{battle.players[winerIndex].name} получил {transferPoints} mmr\n";
         }
         else
         {
@@ -61,7 +61,7 @@ public static class AdventureGenerators
                     inventory.Add(item.id);
 
                     await dataBase.ItemDb.CreateObject(item);
-                    battle.log+= $"{battle.players[i]} получил {item.name} | {item.lvl}\n";
+                    battle.log+= $"{battle.players[i].name} получил {item.name} | {item.lvl}\n";
                 }
 
 

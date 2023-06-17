@@ -10,9 +10,9 @@ public class SecondaryFunctions
         int filledBlocks = percent / 10;
         int unfilledBlocks = 9 - filledBlocks;
         string progress = "["
-                      + new string('█', filledBlocks)
+                      + (filledBlocks > 0 ? new string('█', filledBlocks) : "")
                       + (percent % 10 >= 5 ? '█' : '▒')
-                      + new string('-', unfilledBlocks)
+                      + (unfilledBlocks > 0 ? new string('-', unfilledBlocks) : "")
                       + $"] {current:F2}/{max:F0}";
 
     return progress;

@@ -10,7 +10,7 @@ public class GuildDB : ICollection
 
     public GuildDB(IMongoDatabase mongoDatabase)
     {
-        _collection = mongoDatabase.GetCollection<Guild>("servers");
+        _collection = mongoDatabase.GetCollection<Guild>("guilds");
     }
 
     public async Task<object?> Get(object val, string key = "_id")
@@ -21,23 +21,14 @@ public class GuildDB : ICollection
 
     public async Task<object?> CreateObject(object? id)
     {
-        Guild? newGuild = new Guild { id = Convert.ToInt64(id) };
-        await _collection.InsertOneAsync(newGuild);
-        return newGuild;
-    }
-
-    public async Task Add(object where, string fieldKey, int value)
-    {
-        Guild temp = (Guild)where;
-        FilterDefinition<Guild> filterGuild = Builders<Guild>.Filter.Eq("id", temp.id);
-        UpdateDefinition<Guild> updateGuild = Builders<Guild>.Update.Inc(fieldKey, value);
-        await _collection.UpdateOneAsync(filterGuild!, updateGuild!);
+        await _collection.InsertOneAsync((Guild)id!);
+        return id;
     }
 
     public async Task Update(object? obj)
     {
         Guild? temp = (Guild)obj!;
-        FilterDefinition<Guild> filterGuild = Builders<Guild>.Filter.Eq("id", temp.id);
+        FilterDefinition<Guild> filterGuild = Builders<Guild>.Filter.Eq("id", temp.tag);
         await _collection.ReplaceOneAsync(filterGuild!, temp);
     }
 }

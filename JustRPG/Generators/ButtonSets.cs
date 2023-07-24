@@ -1,6 +1,7 @@
 using Discord;
 using JustRPG.Features;
 using JustRPG.Models;
+using JustRPG.Models.Enums;
 
 namespace JustRPG.Generators;
 
@@ -12,27 +13,7 @@ public static class ButtonSets
             .WithButton(label: "Профиль", customId: $"Profile_{finder}_{toFind}", disabled: currentButton == "Profile")
             .WithButton(label: "Экипировка", customId: $"Equipment_{finder}_{toFind}",
                 disabled: currentButton == "Equipment")
-            .WithButton(label: "Инвентарь", customId: $"Inventory_{finder}_{toFind}")
-            .WithButton(label: "Прокачка навыков", customId: $"UpSkills_{finder}", disabled: finder != toFind, row: 1);
-
-        return builder.Build();
-    }
-
-    public static MessageComponent UpUserSkills(string finder, User user)
-    {
-        int lvl = user.lvl;
-        bool canUpSkills = user.skillPoints > 0;
-        var builder = new ComponentBuilder()
-            .WithButton(label: $"{user.stats.hp} - хп", customId: "nothing", row: 0, disabled: true)
-            .WithButton(label: $"{user.stats.defence} - броня", customId: $"UpSkill_{finder}_defence", row: 0,
-                disabled: user.stats.defence >= lvl || !canUpSkills)
-            .WithButton(label: $"{user.stats.damage} - урон", customId: $"UpSkill_{finder}_damage", row: 1,
-                disabled: user.stats.damage >= lvl || !canUpSkills)
-            .WithButton(label: $"{user.stats.speed} - ловкость", customId: $"UpSkill_{finder}_speed", row: 1,
-                disabled: user.stats.speed >= lvl || !canUpSkills)
-            .WithButton(label: $"{user.stats.luck} - удача", customId: $"UpSkill_{finder}_luck", row: 2,
-                disabled: user.stats.luck >= lvl || !canUpSkills)
-            .WithButton(label: "К профилю", customId: $"Profile_{finder}_{finder}", row: 3, emote: Emoji.Parse("🔙"));
+            .WithButton(label: "Инвентарь", customId: $"Inventory_{finder}_{toFind}");
 
         return builder.Build();
     }
@@ -88,7 +69,6 @@ public static class ButtonSets
             else if (inventory.interactionType == "info" || finder == userId.ToString())
             {
                 customId = $"Inventary_{finder}_{userId}_{inventory.interactionType}_{i}";
-                ;
 
                 if (inventory.interactionType == "equip")
                     disabled = !items[i]!.IsEquippable();
@@ -143,7 +123,7 @@ public static class ButtonSets
             .WithButton(label: "Побег", customId: $"Battle_{userId}_Run_{battle.id}", disabled: disableButtons,
                 style: ButtonStyle.Danger);
 
-        if (battle.type == "dungeon")
+        if (battle.type == BattleType.dungeon)
         {
             SelectMenuBuilder select = new SelectMenuBuilder()
                 .WithPlaceholder("Выберите противника")
@@ -241,7 +221,7 @@ public static class ButtonSets
         return builder.Build();
     }
 
-    public static MessageComponent MarketSettingComponents(MarketSettings settings)
+    public static MessageComponent MarketSettingComponents(MarketSlotsSettings settings)
     {
         var builder = new ComponentBuilder()
             .WithButton(label: "↑", customId: $"Market_{settings.userId}_prewItem", row: 0,
@@ -262,4 +242,16 @@ public static class ButtonSets
 
         return builder.Build();
     }
+
+    public static MessageComponent GuildComponents(Guild guild, ulong userId)
+    {
+        var builder = new ComponentBuilder();
+        if (guild.members.Contains(userId))
+            builder.WithButton(emote: Emoji.Parse(":outbox_tray:"),customId:$"Guild_{userId}_leave_{guild.tag}");
+        else
+            builder.WithButton(emote: Emoji.Parse(":inbox_tray:"),customId:$"Guild_{userId}_join_{guild.tag}");
+
+        return builder.Build();
+    }
+
 }

@@ -33,12 +33,6 @@ public class ProfileInteractions : IInteractionMaster
             case "Inventory":
                 await InventoryButtonResponse(buttonInfo[2]);
                 break;
-            case "UpSkills":
-                await UpSkillsButtonResponse(buttonInfo[1]);
-                break;
-            case "UpSkill":
-                await UpSkill(buttonInfo[1], buttonInfo[2]);
-                break;
         }
     }
 
@@ -60,12 +54,6 @@ public class ProfileInteractions : IInteractionMaster
             ButtonSets.ProfileButtonsSet(_component.User.Id.ToString(), memberId, "Equipment"));
     }
 
-    private async Task UpSkillsButtonResponse(string memberId)
-    {
-        var userDb = (User)(await _dataBase.UserDb.Get(memberId))!;
-        await ResponseMessage(EmbedCreater.UpSkills(), ButtonSets.UpUserSkills(memberId, userDb));
-    }
-
     public async Task InventoryButtonResponse(string memberId)
     {
         var member = _client.GetUser(Convert.ToUInt64(memberId));
@@ -74,24 +62,8 @@ public class ProfileInteractions : IInteractionMaster
         var items = await inventory.GetItems(_dataBase);
 
         await ResponseMessage(EmbedCreater.UserInventory(member, items),
-            ButtonSets.InventoryButtonsSet(_component.User.Id.ToString(), Convert.ToInt64(memberId), inventory, items));
-    }
-
-    private async Task UpSkill(string memberId, string skill)
-    {
-        var userDb = (User)(await _dataBase.UserDb.Get(memberId))!;
-        if (userDb!.skillPoints <= 0)
-        {
-            await _component.RespondAsync(embed: EmbedCreater.ErrorEmbed("У вас недостаточно скилл поинтов"),
-                ephemeral: true);
-            return;
-        }
-
-        await _dataBase.UserDb.Add(userDb, skill, 1);
-        await _dataBase.UserDb.Add(userDb, "skill_points", -1);
-        userDb = (User)(await _dataBase.UserDb.Get(userDb.id))!;
-
-        await ResponseMessage(EmbedCreater.UpSkills(), ButtonSets.UpUserSkills(memberId, userDb!));
+            ButtonSets.InventoryButtonsSet(_component.User.Id.ToString(), Convert.ToInt64(memberId), inventory, items)
+            );
     }
 
     private async Task ResponseMessage(Embed embed, MessageComponent component)

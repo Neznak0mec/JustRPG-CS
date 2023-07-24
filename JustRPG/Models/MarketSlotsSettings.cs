@@ -3,7 +3,7 @@ using MongoDB.Bson.Serialization.Attributes;
 
 namespace JustRPG.Models;
 
-public class MarketSettings
+public class MarketSlotsSettings
 {
     [BsonElement("_id")] public string id { get; set; }
     [BsonElement("user_id")] public ulong userId { get; set; }

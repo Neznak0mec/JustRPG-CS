@@ -4,6 +4,7 @@ using JustRPG.Models;
 using JustRPG.Models.SubClasses;
 using JustRPG.Services;
 using JustRPG.Features;
+using JustRPG.Models.Enums;
 
 namespace JustRPG.Generators;
 
@@ -61,7 +62,6 @@ public class EmbedCreater
             .AddField("Опыт", $"{Math.Round(user.expToLvl, 2)}\\{(int)user.exp}", inline: true)
             .AddField("Баланс", $"{user.cash}", inline: true)
             .AddField("Очки рейтинга", $"{user.mmr}", inline: true)
-            .AddField("Очки навыков", $"{user.skillPoints}", inline: true)
             .AddField(name: "Статы",
                 value:
                 $"<:health:997889169567260714> : {user.stats.hp} |  <:strength:997889205684420718> : {user.stats.damage} " +
@@ -134,15 +134,15 @@ public class EmbedCreater
 
         Color temp = item.rarity switch
         {
-            "common" => 0xffffff,
-            "uncommon" => 0x0033cc,
-            "rare" => 0x6600ff,
-            "epic" => 0xffcc00,
-            "legendary" => 0xcc0000,
-            "impossible" => 0x000000,
-            "exotic" => 0xcc0066,
-            "prize" => 0xcccc00,
-            "event" => 0x666600,
+            Rarity.common => 0xffffff,
+            Rarity.uncommon => 0x0033cc,
+            Rarity.rare => 0x6600ff,
+            Rarity.epic => 0xffcc00,
+            Rarity.legendary => 0xcc0000,
+            Rarity.impossible => 0x000000,
+            Rarity.exotic => 0xcc0066,
+            Rarity.prize => 0xcccc00,
+            Rarity.eventt => 0x666600,
             _ => 0xffffff
         };
 
@@ -184,11 +184,11 @@ public class EmbedCreater
         var progressBar = SecondaryFunctions.ProgressBar;
         switch (battle!.type)
         {
-            case "adventure" or "dungeon":
+            case BattleType.adventure or BattleType.dungeon:
                 currentWarrior = battle.players[battle.currentUser];
                 selectedEnemy = battle.enemies[battle.selectedEnemy];
                 break;
-            case "arena":
+            case BattleType.arena:
                 currentWarrior = battle.players[battle.currentUser];
                 selectedEnemy = battle.players[battle.currentUser == 1 ? 0 : 1];
                 break;
@@ -199,11 +199,11 @@ public class EmbedCreater
         embed = new EmbedBuilder
         {
             Title = $"Бой {currentWarrior.name} - {selectedEnemy.name}",
-            Description = battle.type == "arena" ? $"Сейчас ходит {currentWarrior.name}" : ""
+            Description = battle.type == BattleType.arena ? $"Сейчас ходит {currentWarrior.name}" : ""
         };
 
 
-        if (battle.type is "adventure" or "dungeon")
+        if (battle.type is BattleType.adventure or BattleType.dungeon)
             embed.WithThumbnailUrl(selectedEnemy.url);
         else
             embed.WithThumbnailUrl(currentWarrior.url);
@@ -243,7 +243,7 @@ public class EmbedCreater
         return embed.Build();
     }
 
-    public static Embed MarketPage(SearchState searchState)
+    public static Embed MarketPage(MarketSearchState searchState)
     {
         var emb = new EmbedBuilder { Title = $"Маркет" };
         List<SaleItem> items = searchState.GetItemsOnPage(searchState.currentPage);
@@ -260,7 +260,7 @@ public class EmbedCreater
         return emb.Build();
     }
 
-    public static Embed MarketSettingsPage(MarketSettings searchState)
+    public static Embed MarketSettingsPage(MarketSlotsSettings searchState)
     {
         List<SaleItem> items = searchState.searchResults;
         var emb = new EmbedBuilder
@@ -279,5 +279,15 @@ public class EmbedCreater
             }
 
         return emb.Build();
+    }
+
+    public static Embed GuildEmbed(Guild guild)
+    {
+        var builder = new EmbedBuilder()
+            .WithTitle($"Гильдия {guild.tag}")
+            .AddField("Количество участников", $"{guild.members.Count}/30")
+            .AddField("Глава гильдии", $"<@{guild.leader}>", true);
+
+        return builder.Build();
     }
 }

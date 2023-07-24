@@ -4,6 +4,7 @@ using JustRPG.Features;
 using JustRPG.Generators;
 using JustRPG.Interfaces;
 using JustRPG.Models;
+using JustRPG.Models.Enums;
 using JustRPG.Models.SubClasses;
 using JustRPG.Services;
 
@@ -50,7 +51,7 @@ public class BattleInteractions : IInteractionMaster {
     
     async Task Attack(Battle battle)
     {
-        if (battle.type is "adventure" or "dungeon")
+        if (battle.type is BattleType.adventure or BattleType.dungeon)
         {
             Warrior user = battle.players[0];
             Warrior enemy = battle.enemies[battle.selectedEnemy];
@@ -64,7 +65,7 @@ public class BattleInteractions : IInteractionMaster {
                 return;
             }
             
-            if (battle.type == "adventure")
+            if (battle.type == BattleType.adventure)
                 enemy.Attack(battle,user);
             else
                 foreach (var enem in battle.enemies){
@@ -78,7 +79,7 @@ public class BattleInteractions : IInteractionMaster {
             }
         }
 
-        if (battle.type is "arena")
+        if (battle.type is BattleType.arena)
         {
             Warrior user = battle.players[battle.currentUser];
             Warrior enemy = battle.players[battle.currentUser == 1 ? 0 : 1];
@@ -111,12 +112,12 @@ public class BattleInteractions : IInteractionMaster {
                 $"Покапашившись в сумке {battle.players[battle.currentUser].name} не нашёл у себя зелье для восстановления ";
         }
 
-        if (battle.type is "adventure" or "dungeon")
+        if (battle.type is BattleType.adventure or BattleType.dungeon)
         {
             Warrior user = battle.players[0];
             Warrior enemy = battle.enemies[0];
             
-            if (battle.type == "adventure")
+            if (battle.type == BattleType.adventure)
                 enemy.Attack(battle,user);
             else
                 foreach (var enem in battle.enemies){
@@ -136,7 +137,7 @@ public class BattleInteractions : IInteractionMaster {
     async Task Run(Battle battle)
     {
         
-        if (battle.type is "adventure" or "dungeon")
+        if (battle.type is BattleType.adventure or BattleType.dungeon)
         {
             
             Warrior user = battle.players[0];
@@ -151,7 +152,7 @@ public class BattleInteractions : IInteractionMaster {
             else
                 battle.log += "Вам не удалось сбежать\n";
 
-            if (battle.type == "adventure")
+            if (battle.type == BattleType.adventure)
                 enemy.Attack(battle,user);
             else
                 foreach (var enem in battle.enemies){
@@ -165,7 +166,7 @@ public class BattleInteractions : IInteractionMaster {
             }
         }
 
-        if (battle.type is "arena")
+        if (battle.type is BattleType.arena)
         {
 
             Warrior user = battle.players[battle.currentUser];
@@ -192,7 +193,7 @@ public class BattleInteractions : IInteractionMaster {
     
     async Task UpdateBattle(Battle battle, bool gameEnded = false, bool disableSelectEnemy = false)
     {
-        if (battle.type == "arena")
+        if (battle.type == BattleType.arena)
             battle.currentUser = (short)(battle.currentUser == 1 ? 0 : 1);
 
         if (gameEnded){
@@ -213,7 +214,7 @@ public class BattleInteractions : IInteractionMaster {
             x.Components = component;
         });
 
-        if (battle.type == "arena")
+        if (battle.type == BattleType.arena)
         {
             var pvp = _dataBase.ArenaDb.GetPVP(battle.id);
             foreach (var i in pvp.msgLocations.Where(i => i != _component))

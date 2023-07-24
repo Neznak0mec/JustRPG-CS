@@ -1,3 +1,4 @@
+using JustRPG.Models.Enums;
 using JustRPG.Models.SubClasses;
 using MongoDB.Bson.Serialization.Attributes;
 
@@ -6,7 +7,7 @@ namespace JustRPG.Models;
 public class Battle
 {
     [BsonElement("_id")] public string id { get; set; }
-    [BsonElement("type")] public string type { get; set; }
+    [BsonElement("type")] public BattleType type { get; set; }
     [BsonElement("players")] public Warrior[] players { get; set; }
     [BsonElement("enemies")] public Warrior[] enemies { get; set; }
     [BsonElement("selected_enemy")] public short selectedEnemy { get; set; } = 0;
@@ -28,10 +29,11 @@ public class Warrior
 
     public double GetDamage(int startDamage)
     {
+
         int proc = startDamage / 5 * 100;
         double damage = startDamage + Random.Shared.Next(-proc, proc) / 100.0;
 
-        if (Random.Shared.Next(1, 100) < 1 + stats.luck)
+        if (Random.Shared.Next(1, 100) < (stats.speed > 75 ? 75 : stats.speed))
             return -1;
 
 
@@ -50,11 +52,11 @@ public class Warrior
         return damage;
     }
 
-    public void Attack(Battle? battle, Warrior enemy)
+    public void Attack(Battle battle, Warrior enemy)
     {
         double damage;
         string msg;
-        if (Random.Shared.Next(1, 100) < 1 + stats.luck)
+        if (Random.Shared.Next(1, 100) < 1 + (stats.luck > 75 ? 75 : stats.luck))
         {
             damage = enemy.GetDamage(stats.damage * 2);
             msg = $"{name} нанес критический удар {enemy.name}, тем самым нанеся {damage:f2} урона\n";
@@ -62,14 +64,14 @@ public class Warrior
         else
         {
             damage = enemy.GetDamage(stats.damage);
-            msg = $"{name} нанес {damage:f2} урона по {enemy.name}\n";
+            msg = $"{name} нанёс {damage:f2} урона по {enemy.name}\n";
         }
 
         if (damage == -1)
-            msg = $"{enemy.name} удалось укланиться\n";
+            msg = $"{enemy.name} удалось уклониться\n";
 
 
-        battle!.log += msg;
+        battle.log += msg;
     }
 
     public double Heal()

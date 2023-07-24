@@ -3,6 +3,7 @@ using Discord.WebSocket;
 using JustRPG.Generators;
 using JustRPG.Interfaces;
 using JustRPG.Models;
+using JustRPG.Models.Enums;
 using JustRPG.Services;
 
 namespace JustRPG.Modules.Selects;
@@ -35,7 +36,7 @@ public class SelectLocation : IInteractionMaster
 
     private async Task GenerateDungeon(string userId)
     {
-        Location location = _dataBase.LocationsDb.Get(_component.Data.Values.ToArray()[0]);
+        Location location = await _dataBase.LocationsDb.Get(_component.Data.Values.ToArray()[0]);
         Warrior mainPlayer =
             await AdventureGenerators.GenerateWarriorByUser((User)(await _dataBase.UserDb.Get(userId))!,
                 _component.User.Username, _dataBase);
@@ -43,13 +44,13 @@ public class SelectLocation : IInteractionMaster
         List<Warrior> enemies = new List<Warrior>();
         for (int i = 0; i < Random.Shared.Next(1, 3); i++)
         {
-            enemies.Add(AdventureGenerators.GenerateMob(location, mainPlayer.stats));
+            enemies.Add(AdventureGenerators.GenerateMob(location));
         }
 
         Battle newBattle = new Battle
         {
             id = Guid.NewGuid().ToString(),
-            type = "dungeon",
+            type = BattleType.dungeon,
             drop = location.drops,
             players = new[] { mainPlayer },
             enemies = enemies.ToArray(),
@@ -64,17 +65,17 @@ public class SelectLocation : IInteractionMaster
 
     async Task GenerateAdventure(string userId)
     {
-        Location location = _dataBase.LocationsDb.Get(_component.Data.Values.ToArray()[0]);
+        Location location = await _dataBase.LocationsDb.Get(_component.Data.Values.ToArray()[0]);
         Warrior mainPlayer =
             await AdventureGenerators.GenerateWarriorByUser((User)(await _dataBase.UserDb.Get(userId))!,
                 _component.User.Username, _dataBase);
         Battle newBattle = new Battle
         {
             id = Guid.NewGuid().ToString(),
-            type = "adventure",
+            type = BattleType.adventure,
             drop = location.drops,
             players = new[] { mainPlayer },
-            enemies = new[] { AdventureGenerators.GenerateMob(location, mainPlayer.stats) },
+            enemies = new[] { AdventureGenerators.GenerateMob(location) },
             log = "-"
         };
 

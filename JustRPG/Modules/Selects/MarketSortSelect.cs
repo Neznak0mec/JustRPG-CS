@@ -37,7 +37,7 @@ public class MarketSortSelect : IInteractionMaster
 
     public async Task SelectLvl(string[] buttonInfo)
     {
-        SearchState search = (await _dataBase.MarketDb.GetSearch(buttonInfo[3]))!;
+        MarketSearchState search = (await _dataBase.MarketDb.GetSearch(buttonInfo[3]))!;
         string[] res = _component.Data.Values.ToArray()[0].Split('-');
 
         search.itemLvl = new Tuple<int, int>(Convert.ToInt32(res[0]), Convert.ToInt32(res[1]));
@@ -48,7 +48,7 @@ public class MarketSortSelect : IInteractionMaster
 
     public async Task SelectRaty(string[] buttonInfo)
     {
-        SearchState search = (await _dataBase.MarketDb.GetSearch(buttonInfo[1]))!;
+        MarketSearchState search = (await _dataBase.MarketDb.GetSearch(buttonInfo[1]))!;
         string res = _component.Data.Values.ToArray()[0];
 
 
@@ -73,7 +73,7 @@ public class MarketSortSelect : IInteractionMaster
 
     public async Task SelectType(string[] buttonInfo)
     {
-        SearchState search = (await _dataBase.MarketDb.GetSearch(buttonInfo[1]))!;
+        MarketSearchState search = (await _dataBase.MarketDb.GetSearch(buttonInfo[1]))!;
         string res = _component.Data.Values.ToArray()[0];
 
 
@@ -100,7 +100,7 @@ public class MarketSortSelect : IInteractionMaster
     }
 
 
-    public async Task UpdateMessage(SearchState search)
+    public async Task UpdateMessage(MarketSearchState search)
     {
         await _component.UpdateAsync(x =>
         {

@@ -50,9 +50,8 @@ namespace JustRPG.Services
 
         private async Task OnInteractionExecuted(ICommandInfo command, IInteractionContext context, IResult result)
         {
-            Log.Error(result.ErrorReason);
-            if (!result.IsSuccess && result.ErrorReason.StartsWith("Не так быстро") ||
-                context.User.Id == 426986442632462347)
+            if (!result.IsSuccess && (result.ErrorReason.StartsWith("Не так быстро") ||
+                context.User.Id == 426986442632462347))
             {
                 await context.Interaction.RespondAsync(embed: EmbedCreater.ErrorEmbed(result.ErrorReason),
                     ephemeral: true);

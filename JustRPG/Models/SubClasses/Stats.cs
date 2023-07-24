@@ -6,10 +6,10 @@ namespace JustRPG.Models.SubClasses;
 public class Stats
 {
     [BsonElement("hp")] public double hp { get; set; } = 100;
-    [BsonElement("damage")] public int damage { get; set; } = 20;
-    [BsonElement("defence")] public double defence { get; set; } = 1;
-    [BsonElement("luck")] public int luck { get; set; } = 1;
-    [BsonElement("speed")] public int speed { get; set; } = 1;
+    [BsonElement("damage")] public int damage { get; set; } = 25;
+    [BsonElement("defence")] public double defence { get; set; } = 20;
+    [BsonElement("luck")] public int luck { get; set; } = 7;
+    [BsonElement("speed")] public int speed { get; set; } = 5;
 }
 
 public class BattleStats : Stats

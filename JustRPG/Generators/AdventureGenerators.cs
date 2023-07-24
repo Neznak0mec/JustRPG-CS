@@ -3,6 +3,7 @@ using JustRPG.Models;
 using JustRPG.Models.Enums;
 using JustRPG.Models.SubClasses;
 using JustRPG.Services;
+using Serilog;
 
 namespace JustRPG.Generators;
 
@@ -17,7 +18,7 @@ public static class AdventureGenerators
             users.Add(user);
         }
 
-        if (battle.type == "arena")
+        if (battle.type == BattleType.arena)
         {
             int loserIndex = users.IndexOf(users.First(x => x!.id == battle.players.First(x => x.stats.hp <= 0).id));
             int winerIndex = users.IndexOf(users.First(x => x!.id == battle.players.First(x => x.stats.hp > 0).id));
@@ -46,26 +47,21 @@ public static class AdventureGenerators
                 if (battle.players[i].stats.hp <= 0)
                     continue;
 
-                List<String> inventory = users[i]!.inventory.ToList();
-
-
-                int countOfDropedItem = (battle.type == "dungeon" ? 1 : 0);
-                countOfDropedItem += GetRandomNumberForDrop();
-                for (int j = 0; j < countOfDropedItem; j++)
+                int countOfDroppedItem = (battle.type == BattleType.dungeon ? 1 : 0);
+                countOfDroppedItem += GetRandomNumberForDrop();
+                for (int j = 0; j < countOfDroppedItem; j++)
                 {
-                    Tuple<string, string>? itemname = SecondaryFunctions.GetRandomKeyValuePair(battle.drop);
-                    if (itemname == null)
+                    Tuple<string, string>? itemName = SecondaryFunctions.GetRandomKeyValuePair(battle.drop);
+                    if (itemName == null)
                         break;
-                    Item item = GenerateEquipmentItem(itemname.Item1,
-                        Random.Shared.Next(battle.enemies.First().lvl, battle.enemies.First().lvl + 2), itemname.Item2);
-                    inventory.Add(item.id);
+                    Item item = GenerateEquipmentItem(itemName.Item1,
+                        battle.enemies.First().lvl, itemName.Item2);
+                    users[i]!.inventory.Add(item.id);
 
                     await dataBase.ItemDb.CreateObject(item);
                     battle.log += $"{battle.players[i].name} получил {item.name} | {item.lvl}\n";
                 }
 
-
-                users[i]!.inventory = inventory;
             }
         }
 
@@ -73,15 +69,12 @@ public static class AdventureGenerators
         // restore Heal poition
         for (int i = 0; i < battle.players.Length; i++)
         {
-            List<String> inventory = users[i]!.inventory;
             foreach (var item in battle.players[i].inventory)
             {
-                if (inventory.Count >= 30)
+                if (users[i]!.inventory.Count >= 30)
                     break;
-                inventory.Add(item.Item1);
+                users[i]!.inventory.Add(item.Item1);
             }
-
-            users[i]!.inventory = inventory;
         }
 
         foreach (var user in users)
@@ -132,42 +125,42 @@ public static class AdventureGenerators
     }
 
 
-    public static Warrior GenerateMob(Location location, BattleStats player)
+    public static Warrior GenerateMob(Location location)
     {
-        var names = location.monsters.Keys;
-        Warrior mob = new Warrior();
-        mob.lvl = Random.Shared.Next(location.lvl, location.lvl + 4);
-        mob.name = names.ToArray()[Random.Shared.Next(0, names.Count)];
-        mob.stats = GenerateRandomStats(player, mob.lvl);
-        mob.url = location.monsters[mob.name];
+        Tuple<string,string> monster = SecondaryFunctions.GetRandomKeyValuePair(location.monsters)!;
+        Warrior mob = new Warrior
+        {
+            name = monster.Item1,
+            lvl = Random.Shared.Next(location.lvl, location.lvl + 4),
+            url = monster.Item2
+        };
+        mob.stats = GenerateRandomStatsForMob(mob.lvl);
+
+
         return mob;
     }
 
-    public static BattleStats GenerateRandomStats(BattleStats player, int lvl)
+    public static BattleStats GenerateRandomStatsForMob(int mobLvl)
     {
-        BattleStats mobStats = new BattleStats
+         Stats mobStats = new Stats()
         {
-            damage = 1,
-            defence = 1,
-            hp = 100,
-            speed = 1,
-            luck = 1,
-            MaxHP = 100,
-            MaxDef = 1
+            damage = 15 + 5 * mobLvl,
+            defence = 20 + 3 * mobLvl,
+            hp = 50 + 10 * mobLvl,
+            speed = 2 + 1 * mobLvl,
+            luck = 3 + 1 * mobLvl
         };
 
-        return mobStats;
+         return new BattleStats(mobStats);
     }
 
 
     public static int GetRandomNumberForDrop()
     {
-        Random random = new Random();
-        double probability = random.NextDouble();
-
-        if (probability <= 0.5)
+        int probability = Random.Shared.Next(0,100);
+        if (probability <= 50)
             return 0;
-        else if (probability <= 0.7)
+        else if (probability <= 70)
             return 1;
         else if (probability <= 85)
             return 2;
@@ -179,10 +172,10 @@ public static class AdventureGenerators
 
     public static int GenEquipmentItemRarity()
     {
-        int[] weights = { 50, 25, 15, 7, 3 };
+         int[] weights = { 50, 25, 15, 7, 3 };
         int totalWheight = 100;
 
-        int randomNumber = new Random().Next(0, totalWheight);
+        int randomNumber = Random.Shared.Next(0, totalWheight);
         int currentwheight = 0;
 
         for (int i = 0; i < weights.Length; i++)
@@ -197,20 +190,19 @@ public static class AdventureGenerators
 
     public static Item GenerateEquipmentItem(string type, int lvl, string name)
     {
-        Stats stats;
+        Stats stats = new Stats();
 
         int rarity = GenEquipmentItemRarity();
-
-        if (true)
+        if (false)
         {
-            stats = new Stats()
-            {
-                damage = 1,
-                defence = 1,
-                hp = 100,
-                speed = 1,
-                luck = 1
-            };
+//            stats = new Stats()
+//            {
+//                damage = 7 + dmgMltp * lvl,
+//                defence = 10 + defMltp * lvl,
+//                hp = 25 + hpMltp * lvl,
+//                speed = 3 + spdMltp * lvl,
+//                luck = 2 + luckMltp * lvl
+//            };
         }
         else
         {
@@ -218,51 +210,51 @@ public static class AdventureGenerators
             {
                 "armor" => new Stats()
                 {
-                    damage = 1,
-                    defence = 1,
-                    hp = 100,
-                    speed = 1,
-                    luck = 1
+                    damage = 1 + new Random().Next(3, 7) * lvl,
+                    defence = 10 + new Random().Next(5, 9) * lvl,
+                    hp = 25 + new Random().Next(8, 12) * lvl,
+                    speed = 3 + new Random().Next(1, 5) * lvl,
+                    luck = 2 + new Random().Next(0, 4) * lvl
                 },
                 "weapon" => new Stats()
                 {
-                    damage = 1,
-                    defence = 1,
-                    hp = 100,
-                    speed = 1,
-                    luck = 1
+                    damage = 1 + new Random().Next(3, 7) * lvl,
+                    defence = 10 + new Random().Next(5, 9) * lvl,
+                    hp = 25 + new Random().Next(8, 12) * lvl,
+                    speed = 3 + new Random().Next(1, 5) * lvl,
+                    luck = 2 + new Random().Next(0, 4) * lvl
                 },
                 "gloves" => new Stats()
                 {
-                    damage = 1,
-                    defence = 1,
-                    hp = 100,
-                    speed = 1,
-                    luck = 1
+                    damage = 1 + new Random().Next(3, 7) * lvl,
+                    defence = 10 + new Random().Next(5, 9) * lvl,
+                    hp = 25 + new Random().Next(8, 12) * lvl,
+                    speed = 3 + new Random().Next(1, 5) * lvl,
+                    luck = 2 + new Random().Next(0, 4) * lvl
                 },
                 "pants" => new Stats()
                 {
-                    damage = 1,
-                    defence = 1,
-                    hp = 100,
-                    speed = 1,
-                    luck = 1
+                    damage = 1 + new Random().Next(3, 7) * lvl,
+                    defence = 10 + new Random().Next(5, 9) * lvl,
+                    hp = 25 + new Random().Next(8, 12) * lvl,
+                    speed = 3 + new Random().Next(1, 5) * lvl,
+                    luck = 2 + new Random().Next(0, 4) * lvl
                 },
                 "shoes" => new Stats()
                 {
-                    damage = 1,
-                    defence = 1,
-                    hp = 100,
-                    speed = 1,
-                    luck = 1
+                    damage = 1 + new Random().Next(3, 7) * lvl,
+                    defence = 10 + new Random().Next(5, 9) * lvl,
+                    hp = 25 + new Random().Next(8, 12) * lvl,
+                    speed = 3 + new Random().Next(1, 5) * lvl,
+                    luck = 2 + new Random().Next(0, 4) * lvl
                 },
                 "helmet" => new Stats()
                 {
-                    damage = 1,
-                    defence = 1,
-                    hp = 100,
-                    speed = 1,
-                    luck = 1
+                    damage = 1 + new Random().Next(3, 7) * lvl,
+                    defence = 10 + new Random().Next(5, 9) * lvl,
+                    hp = 25 + new Random().Next(8, 12) * lvl,
+                    speed = 3 + new Random().Next(1, 5) * lvl,
+                    luck = 2 + new Random().Next(0, 4) * lvl
                 },
                 _ => stats
             };
@@ -271,12 +263,11 @@ public static class AdventureGenerators
         Item item = new Item()
         {
             id = Guid.NewGuid().ToString(),
-            name = name,
-            lvl = lvl,
-            generated = true,
+            lvl = lvl,name = name,
+            type = type,
             giveStats = stats,
-            rarity = Enum.GetName(typeof(Rarity), rarity)!,
-            type = type
+            rarity = (Rarity)rarity,
+            generated = true
         };
         return item;
     }

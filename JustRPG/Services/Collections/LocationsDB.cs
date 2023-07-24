@@ -18,15 +18,15 @@ public class LocationsDB
         return (await _collection.FindAsync(filterAction)).ToList();
     }
 
-    public List<Location> GetAdventuresLocations()
+    public async Task<List<Location>> GetAdventuresLocations()
     {
         var filterAction = Builders<Location>.Filter.Eq("type", "adventure");
-        return _collection.Find(filterAction).ToList();
+        return( await _collection.FindAsync(filterAction)).ToList();
     }
 
-    public Location Get(string val, string key = "_id")
+    public async Task<Location> Get(string val, string key = "_id")
     {
         var filterItem = Builders<Location>.Filter.Eq(key, val);
-        return _collection.Find(filterItem).FirstOrDefault();
+        return await (await _collection.FindAsync(filterItem)).FirstOrDefaultAsync();
     }
 }

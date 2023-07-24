@@ -314,7 +314,7 @@ public class InventoryInteractions : IInteractionMaster
 
     private async Task OpenSlotsSettings(string[] buttonInfo)
     {
-        MarketSettings marketSettings = new MarketSettings
+        MarketSlotsSettings marketSettings = new MarketSlotsSettings
         {
             userId = _component.User.Id,
             id = Guid.NewGuid().ToString(),

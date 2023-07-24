@@ -21,7 +21,7 @@ public class ItemDB : ICollection
 
     public async Task<object?> CreateObject(object? id)
     {
-        Item temp = (Item)id;
+        Item temp = (Item)id!;
         await _collection.InsertOneAsync(temp);
         return temp;
     }

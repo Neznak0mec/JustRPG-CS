@@ -1,3 +1,4 @@
+using JustRPG.Models.Enums;
 using JustRPG.Models.SubClasses;
 using MongoDB.Bson.Serialization.Attributes;
 
@@ -11,7 +12,7 @@ public class Item
     [BsonElement("type")] public string type { get; set; } = "";
     [BsonElement("price")] public int price { get; set; } = 0;
     [BsonElement("description")] public string description { get; set; } = "";
-    [BsonElement("rarity")] public string rarity { get; set; } = "";
+    [BsonElement("rarity")] public Rarity rarity { get; set; } = Rarity.common;
     [BsonElement("give_stats")] public Stats? giveStats { get; set; }
     [BsonElement("generated")] public bool generated { get; set; } = false;
 
@@ -33,15 +34,15 @@ public class Item
         res += "| редкость: " +
                rarity switch
                {
-                   "common" => "⬜",
-                   "uncommon" => "🟦",
-                   "rare" => "🟪",
-                   "epic" => "🟨",
-                   "legendary" => "🟥",
-                   "impossible" => "👾",
-                   "exotic" => "🔳",
-                   "prize" => "🎁",
-                   "event" => "✨",
+                   Rarity.common => "⬜",
+                   Rarity.uncommon => "🟦",
+                   Rarity.rare => "🟪",
+                   Rarity.epic => "🟨",
+                   Rarity.legendary => "🟥",
+                   Rarity.impossible => "👾",
+                   Rarity.exotic => "🔳",
+                   Rarity.prize => "🎁",
+                   Rarity.eventt => "✨",
                    _ => "⬜"
                };
         return res;

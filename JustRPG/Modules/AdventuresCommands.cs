@@ -22,7 +22,7 @@ public class AdventuresCommands : InteractionModuleBase<SocketInteractionContext
     [SlashCommand(name: "adventure", description: "...")]
     public async Task Adventure()
     {
-        var locations = _dataBase.LocationsDb.GetAdventuresLocations();
+        var locations =  await _dataBase.LocationsDb.GetAdventuresLocations();
         await RespondAsync(embed: EmbedCreater.SelectAdventureEmbed(),
             components: ButtonSets.SelectLocation(
                 "adventure",
@@ -35,7 +35,7 @@ public class AdventuresCommands : InteractionModuleBase<SocketInteractionContext
     [SlashCommand(name: "dungeon", description: "...")]
     public async Task Dungeon()
     {
-        var locations = _dataBase.LocationsDb.GetAdventuresLocations();
+        var locations = await _dataBase.LocationsDb.GetDungeons();
         await RespondAsync(embed: EmbedCreater.SelectAdventureEmbed(),
             components: ButtonSets.SelectLocation(
                 "dungeon",

@@ -30,32 +30,37 @@ public class ButtonHandler
             return;
         }
 
-        if (buttonInfo[0] == "Profile" || buttonInfo[0] == "Equipment" || buttonInfo[0] == "Inventory" ||
-            buttonInfo[0] == "UpSkills" || buttonInfo[0] == "UpSkill")
-            master = new ProfileInteractions(_client, _component, _service);
-
-        else if (buttonInfo[0] == "Inventary")
-            master = new InventoryInteractions(_client, _component, _service);
-
-        else if (buttonInfo[0] == "Action")
-            master = new ActionInteractions(_client, _component, _service);
-
-        else if (buttonInfo[0] == "Battle")
-            master = new BattleInteractions(_client, _component, _service);
-
-        else if (buttonInfo[0] == "FindPvp")
-            master = new FindPvpInteractions(_client, _component, _service);
-
-        else if (buttonInfo[0] == "Market")
-            master = new MarketInteractions(_client, _component, _service);
-
-        else if (buttonInfo[0] == "MarketSort")
-            master = new MarketSortInteractions(_client, _component, _service);
-
-        else
+        switch (buttonInfo[0])
         {
-            await WrongInteraction("Кнопка не найдена, попробуйте вызвать меню ещё раз");
-            return;
+            case "Profile":
+            case "Equipment":
+            case "Inventory":
+                master = new ProfileInteractions(_client, _component, _service);
+                break;
+            case "Inventary":
+                master = new InventoryInteractions(_client, _component, _service);
+                break;
+            case "Action":
+                master = new ActionInteractions(_client, _component, _service);
+                break;
+            case "Battle":
+                master = new BattleInteractions(_client, _component, _service);
+                break;
+            case "FindPvp":
+                master = new FindPvpInteractions(_client, _component, _service);
+                break;
+            case "Market":
+                master = new MarketInteractions(_client, _component, _service);
+                break;
+            case "MarketSort":
+                master = new MarketSortInteractions(_client, _component, _service);
+                break;
+            case "Guild":
+                master = new GuildInteractions(_client, _component, _service);
+                break;
+            default:
+                await WrongInteraction("Кнопка не найдена, попробуйте вызвать меню ещё раз");
+                return;
         }
 
 

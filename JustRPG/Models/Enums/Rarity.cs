@@ -6,5 +6,13 @@ public enum Rarity
     uncommon = 1,
     rare = 2,
     epic = 3,
-    legendary = 4
+    legendary = 4,
+
+    //  =============
+
+    impossible = 10,
+    exotic = 11,
+    prize = 12,
+    eventt = 13
+
 }

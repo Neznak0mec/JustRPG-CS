@@ -50,7 +50,7 @@ public class MarketInteractions : IInteractionMaster
 
     public async Task PreviousItem(string[] buttonInfo)
     {
-        MarketSettings search = (await _dataBase.MarketDb.GetSettings(buttonInfo[1]))!;
+        MarketSlotsSettings search = (await _dataBase.MarketDb.GetSettings(buttonInfo[1]))!;
         search.DecrementItemIndex();
         await _dataBase.MarketDb.GetUserSlots(search);
         await UpdateMessage(search);
@@ -58,7 +58,7 @@ public class MarketInteractions : IInteractionMaster
 
     public async Task NextItem(string[] buttonInfo)
     {
-        MarketSettings search = (await _dataBase.MarketDb.GetSettings(buttonInfo[1]))!;
+        MarketSlotsSettings search = (await _dataBase.MarketDb.GetSettings(buttonInfo[1]))!;
         search.IncrementItemIndex();
         await _dataBase.MarketDb.GetUserSlots(search);
         await UpdateMessage(search);
@@ -89,7 +89,7 @@ public class MarketInteractions : IInteractionMaster
         saleItem.isVisible = !saleItem.isVisible;
         await _dataBase.MarketDb.Update(saleItem);
 
-        MarketSettings search = (await _dataBase.MarketDb.GetSettings(buttonInfo[1]))!;
+        MarketSlotsSettings search = (await _dataBase.MarketDb.GetSettings(buttonInfo[1]))!;
 
         await _dataBase.MarketDb.GetUserSlots(search);
         await UpdateMessage(search);
@@ -107,7 +107,7 @@ public class MarketInteractions : IInteractionMaster
 
         await _dataBase.UserDb.Update(user);
 
-        MarketSettings search = (await _dataBase.MarketDb.GetSettings(buttonInfo[1]))!;
+        MarketSlotsSettings search = (await _dataBase.MarketDb.GetSettings(buttonInfo[1]))!;
 
         await _dataBase.MarketDb.GetUserSlots(search);
         await UpdateMessage(search);
@@ -115,7 +115,7 @@ public class MarketInteractions : IInteractionMaster
 
     private async Task ReloadPage(string[] buttonInfo)
     {
-        MarketSettings search = (await _dataBase.MarketDb.GetSettings(buttonInfo[1]))!;
+        MarketSlotsSettings search = (await _dataBase.MarketDb.GetSettings(buttonInfo[1]))!;
 
         await _dataBase.MarketDb.GetUserSlots(search);
         await UpdateMessage(search);
@@ -123,11 +123,11 @@ public class MarketInteractions : IInteractionMaster
 
     private async Task GoBack(string[] buttonInfo)
     {
-        MarketSettings settings = (await _dataBase.MarketDb.GetSettings(buttonInfo[1]))!;
+        MarketSlotsSettings settings = (await _dataBase.MarketDb.GetSettings(buttonInfo[1]))!;
 
         if (settings.startPage == "market")
         {
-            SearchState searchState = new SearchState()
+            MarketSearchState searchState = new MarketSearchState()
             {
                 id = Guid.NewGuid().ToString(),
                 userId = _component.User.Id
@@ -163,7 +163,7 @@ public class MarketInteractions : IInteractionMaster
     async Task<SaleItem?> GetItem(string[] buttonInfo)
     {
         SaleItem? saleItem = null;
-        MarketSettings settings = (await _dataBase.MarketDb.GetSettings(buttonInfo[1]))!;
+        MarketSlotsSettings settings = (await _dataBase.MarketDb.GetSettings(buttonInfo[1]))!;
         if (buttonInfo.Length == 3 && settings.searchResults.Count != 0)
         {
             saleItem = settings.searchResults[settings.currentItemIndex];
@@ -184,7 +184,7 @@ public class MarketInteractions : IInteractionMaster
         return saleItem;
     }
 
-    public async Task UpdateMessage(MarketSettings settings)
+    public async Task UpdateMessage(MarketSlotsSettings settings)
     {
         await _component.UpdateAsync(x =>
         {

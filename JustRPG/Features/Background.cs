@@ -3,6 +3,7 @@ using Discord.WebSocket;
 using JustRPG.Models;
 using JustRPG.Generators;
 using JustRPG.Models;
+using JustRPG.Models.Enums;
 using JustRPG.Services;
 using Serilog;
 
@@ -79,7 +80,7 @@ public class Background
             Battle? battle = new Battle()
             {
                 id = Guid.NewGuid().ToString(),
-                type = "arena",
+                type = BattleType.arena,
                 drop = { },
                 players = new[] { w1, w2 },
                 enemies = { },

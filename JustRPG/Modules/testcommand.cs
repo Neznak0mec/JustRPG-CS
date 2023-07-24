@@ -20,5 +20,6 @@ namespace JustRPG.Modules
             await RespondAsync(
                 $"{(DateTimeOffset.Now - Context.Interaction.CreatedAt).TotalMilliseconds} ms to server");
         }
+        
     }
 }

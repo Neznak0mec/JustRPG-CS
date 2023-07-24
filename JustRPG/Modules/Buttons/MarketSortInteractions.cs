@@ -61,7 +61,7 @@ public class MarketSortInteractions : IInteractionMaster
 
     private async Task OpenSlotsSettings(string[] buttonInfo)
     {
-        MarketSettings marketSettings = new MarketSettings
+        MarketSlotsSettings marketSettings = new MarketSlotsSettings
         {
             userId = _component.User.Id,
             id = Guid.NewGuid().ToString(),
@@ -80,7 +80,7 @@ public class MarketSortInteractions : IInteractionMaster
 
     private async Task PriceDown(string[] buttonInfo)
     {
-        SearchState search = (await _dataBase.MarketDb.GetSearch(buttonInfo[1]))!;
+        MarketSearchState search = (await _dataBase.MarketDb.GetSearch(buttonInfo[1]))!;
         await _dataBase.MarketDb.SearchGetAndUpdate(search);
         search.searchResults.Sort((x, y) => x.price - y.price);
         await UpdateMessage(search);
@@ -88,7 +88,7 @@ public class MarketSortInteractions : IInteractionMaster
 
     private async Task PriceUp(string[] buttonInfo)
     {
-        SearchState search = (await _dataBase.MarketDb.GetSearch(buttonInfo[1]))!;
+        MarketSearchState search = (await _dataBase.MarketDb.GetSearch(buttonInfo[1]))!;
         await _dataBase.MarketDb.SearchGetAndUpdate(search);
         search.searchResults.Sort((x, y) => y.price - x.price);
         await UpdateMessage(search);
@@ -96,7 +96,7 @@ public class MarketSortInteractions : IInteractionMaster
 
     public async Task ReloadPage(string[] buttonInfo)
     {
-        SearchState search = (await _dataBase.MarketDb.GetSearch(buttonInfo[1]))!;
+        MarketSearchState search = (await _dataBase.MarketDb.GetSearch(buttonInfo[1]))!;
         search.currentPage = 0;
         search.currentItemIndex = 0;
         search.itemLvl = null;
@@ -108,7 +108,7 @@ public class MarketSortInteractions : IInteractionMaster
 
     public async Task PreviousPage(string[] buttonInfo)
     {
-        SearchState search = (await _dataBase.MarketDb.GetSearch(buttonInfo[1]))!;
+        MarketSearchState search = (await _dataBase.MarketDb.GetSearch(buttonInfo[1]))!;
         search.DecrementPage();
         await _dataBase.MarketDb.SearchGetAndUpdate(search);
         await UpdateMessage(search);
@@ -116,7 +116,7 @@ public class MarketSortInteractions : IInteractionMaster
 
     public async Task PreviousItem(string[] buttonInfo)
     {
-        SearchState search = (await _dataBase.MarketDb.GetSearch(buttonInfo[1]))!;
+        MarketSearchState search = (await _dataBase.MarketDb.GetSearch(buttonInfo[1]))!;
         search.DecrementItemIndex();
         await _dataBase.MarketDb.SearchGetAndUpdate(search);
         await UpdateMessage(search);
@@ -124,7 +124,7 @@ public class MarketSortInteractions : IInteractionMaster
 
     public async Task BuyItem(string[] buttonInfo)
     {
-        SearchState search = (await _dataBase.MarketDb.GetSearch(buttonInfo[1]))!;
+        MarketSearchState search = (await _dataBase.MarketDb.GetSearch(buttonInfo[1]))!;
         SaleItem item;
         try
         {
@@ -160,7 +160,7 @@ public class MarketSortInteractions : IInteractionMaster
 
     public async Task NextItem(string[] buttonInfo)
     {
-        SearchState search = (await _dataBase.MarketDb.GetSearch(buttonInfo[1]))!;
+        MarketSearchState search = (await _dataBase.MarketDb.GetSearch(buttonInfo[1]))!;
         search.IncrementItemIndex();
         await _dataBase.MarketDb.SearchGetAndUpdate(search);
         await UpdateMessage(search);
@@ -168,13 +168,13 @@ public class MarketSortInteractions : IInteractionMaster
 
     public async Task NextPage(string[] buttonInfo)
     {
-        SearchState search = (await _dataBase.MarketDb.GetSearch(buttonInfo[1]))!;
+        MarketSearchState search = (await _dataBase.MarketDb.GetSearch(buttonInfo[1]))!;
         search.IncrementPage();
         await _dataBase.MarketDb.SearchGetAndUpdate(search);
         await UpdateMessage(search);
     }
 
-    public async Task UpdateMessage(SearchState search)
+    public async Task UpdateMessage(MarketSearchState search)
     {
         await _component.UpdateAsync(x =>
         {

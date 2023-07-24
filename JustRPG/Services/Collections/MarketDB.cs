@@ -7,14 +7,14 @@ namespace JustRPG.Services.Collections;
 public class MarketDB : ICollection
 {
     private readonly IMongoCollection<SaleItem> _collection;
-    private readonly IMongoCollection<SearchState> _interaction;
-    private readonly IMongoCollection<MarketSettings> _settings;
+    private readonly IMongoCollection<MarketSearchState> _interaction;
+    private readonly IMongoCollection<MarketSlotsSettings> _settings;
 
     public MarketDB(IMongoDatabase mongoDatabase)
     {
         _collection = mongoDatabase.GetCollection<SaleItem>("market");
-        _interaction = mongoDatabase.GetCollection<SearchState>("interactions");
-        _settings = mongoDatabase.GetCollection<MarketSettings>("interactions");
+        _interaction = mongoDatabase.GetCollection<MarketSearchState>("interactions");
+        _settings = mongoDatabase.GetCollection<MarketSlotsSettings>("interactions");
     }
 
     public async Task<object?> Get(object val, string key = "id")
@@ -42,18 +42,18 @@ public class MarketDB : ICollection
     }
 
 
-    public async Task CreateSearch(SearchState search)
+    public async Task CreateSearch(MarketSearchState search)
     {
         await _interaction.DeleteManyAsync(x => x.userId == search.userId);
         await _interaction.InsertOneAsync(search);
     }
 
-    public async Task<SearchState?> GetSearch(string userId)
+    public async Task<MarketSearchState?> GetSearch(string userId)
     {
         return await (await _interaction.FindAsync(x => x.userId == Convert.ToUInt64(userId))).FirstOrDefaultAsync();
     }
 
-    public async Task SearchGetAndUpdate(SearchState searchState)
+    public async Task SearchGetAndUpdate(MarketSearchState searchState)
     {
         FilterDefinition<SaleItem> filter = Builders<SaleItem>.Filter.Empty;
 
@@ -79,28 +79,28 @@ public class MarketDB : ICollection
         var res = await _collection.FindAsync(filter);
         searchState.searchResults = res.ToList();
 
-        FilterDefinition<SearchState> filterItem = Builders<SearchState>.Filter.Eq("id", searchState.id);
+        FilterDefinition<MarketSearchState> filterItem = Builders<MarketSearchState>.Filter.Eq("id", searchState.id);
         await _interaction.ReplaceOneAsync(filterItem, searchState);
     }
 
 
-    public async Task CreateSettings(MarketSettings settings)
+    public async Task CreateSettings(MarketSlotsSettings settings)
     {
         await _settings.DeleteManyAsync(x => x.userId == settings.userId);
         await _settings.InsertOneAsync(settings);
     }
 
-    public async Task<MarketSettings?> GetSettings(string userId)
+    public async Task<MarketSlotsSettings?> GetSettings(string userId)
     {
         return await (await _settings.FindAsync(x => x.userId == Convert.ToUInt64(userId))).FirstOrDefaultAsync();
     }
 
-    public async Task GetUserSlots(MarketSettings settings)
+    public async Task GetUserSlots(MarketSlotsSettings settings)
     {
         List<SaleItem> res = await (await _collection.FindAsync(x => x.userId == settings.userId)).ToListAsync();
         settings.searchResults = res;
 
-        FilterDefinition<MarketSettings> filterItem = Builders<MarketSettings>.Filter.Eq("id", settings.id);
+        FilterDefinition<MarketSlotsSettings> filterItem = Builders<MarketSlotsSettings>.Filter.Eq("id", settings.id);
         await _settings.ReplaceOneAsync(filterItem, settings);
     }
 

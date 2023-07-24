@@ -32,7 +32,7 @@ public class Profilecommands : InteractionModuleBase<SocketInteractionContext>
                 components: ButtonSets.ProfileButtonsSet(Context.User.Id.ToString(), user.id.ToString()));
     }
 
-//    [Cooldown(300)]
+    [Cooldown(300)]
     [SlashCommand("work", "Помочь в городе")]
     public async Task Work()
     {

@@ -15,7 +15,9 @@ public class BattlesDB : ICollection
 
     public Task<object?> Get(object val, string key = "_id")
     {
-        return Task.FromResult<object?>(_collection.Where(x => x.id == (string)val).ToList()[0]);
+        Battle temp = _collection.First(x => x.id == (string)val);
+        temp.log = "";
+        return Task.FromResult<object?>(temp);
     }
 
     public Task<object?> CreateObject(object? id)

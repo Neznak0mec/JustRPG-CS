@@ -8,7 +8,7 @@ public class User
 {
     [BsonElement("_id")] public long id { get; init; }
     [BsonElement("cash")] public int cash { get; set; } = 0;
-    [BsonElement("lvl")] public int lvl { get; set; } = 0;
+    [BsonElement("lvl")] public int lvl { get; set; } = 1;
     [BsonElement("exp")] public double exp { get; set; } = 0;
     [BsonElement("mmr")] public int mmr { get; set; } = 0;
     [BsonElement("exp_to_lvl")] public double expToLvl { get; set; } = 100;

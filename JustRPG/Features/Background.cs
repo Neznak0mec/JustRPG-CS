@@ -150,20 +150,7 @@ public class Background
             Warrior w1 = await AdventureGenerators.GenerateWarriorByUser(u1, m1.Username, _dataBase, m1.GetAvatarUrl());
             Warrior w2 = await AdventureGenerators.GenerateWarriorByUser(u2, m2.Username, _dataBase, m2.GetAvatarUrl());
 
-            Battle? battle = new Battle()
-//            {
-//                id = Guid.NewGuid().ToString(),
-//                type = BattleType.arena,
-//                drop = { },
-//                players = new[] { w1, w2 },
-//                enemies = { },
-//                originalInteraction ={
-//                    pair.Item1.msgLocation,
-//                    pair.Item2.msgLocation
-//                },
-//                log = "-"
-//            };
-                ;
+            Battle? battle = new Battle();
             battle.id = Guid.NewGuid().ToString();
             battle.type = BattleType.arena;
             battle.drop = new Dictionary<string,string>();

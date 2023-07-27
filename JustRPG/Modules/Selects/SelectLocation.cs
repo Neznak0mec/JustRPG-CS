@@ -55,7 +55,7 @@ public class SelectLocation : IInteractionMaster
             drop = location.drops,
             players = new[] { mainPlayer },
             enemies = enemies.ToArray(),
-            originalInteraction = new List<object> {_component.Message},
+            originalInteraction = new List<object> {_component},
             log = "-"
         };
 

@@ -1,3 +1,6 @@
+using Discord;
+using Discord.Rest;
+using Discord.WebSocket;
 using JustRPG.Models.Enums;
 using JustRPG.Models.SubClasses;
 using MongoDB.Bson.Serialization.Attributes;
@@ -14,6 +17,7 @@ public class Battle
     [BsonElement("current_user")] public short currentUser { get; set; } = 0;
     [BsonElement("last_activity")] public long lastActivity { get; set; }
     [BsonElement("drop")] public Dictionary<string, string> drop { get; set; }
+    [BsonIgnore] public List<object> originalInteraction {get;set;}
     [BsonIgnore] public string log { get; set; } = "";
 }
 

@@ -198,15 +198,14 @@ public class EmbedCreater
 
         embed = new EmbedBuilder
         {
-            Title = $"Бой {currentWarrior.name} - {selectedEnemy.name}",
+            Title = $"Бой {battle.players[0].name} - {battle.players[1].name}",
             Description = battle.type == BattleType.arena ? $"Сейчас ходит {currentWarrior.name}" : ""
         };
 
 
-        if (battle.type is BattleType.adventure or BattleType.dungeon)
-            embed.WithThumbnailUrl(selectedEnemy.url);
-        else
-            embed.WithThumbnailUrl(currentWarrior.url);
+        embed.WithThumbnailUrl(battle.type is BattleType.adventure or BattleType.dungeon
+            ? selectedEnemy.url
+            : currentWarrior.url);
 
         if (!gameEnded)
         {

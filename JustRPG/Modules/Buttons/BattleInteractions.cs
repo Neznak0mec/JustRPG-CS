@@ -198,7 +198,6 @@ public class BattleInteractions : IInteractionMaster {
 
         if (gameEnded){
             await AdventureGenerators.Reward(battle,_dataBase);
-            await _dataBase.BattlesDb.Delete(battle);
         }
         else
             await _dataBase.BattlesDb.Update(battle);
@@ -216,21 +215,15 @@ public class BattleInteractions : IInteractionMaster {
 
         if (battle.type == BattleType.arena)
         {
-            var pvp = _dataBase.ArenaDb.GetPVP(battle.id);
-            foreach (var i in pvp.msgLocations.Where(i => i != _component))
+            foreach (SocketInteraction i in battle.originalInteraction)
             {
-
-                await i.ModifyOriginalResponseAsync(x =>
-                {
-                    x.Embed = embed;
-                    x.Components = component;
-                });
+                if (await i.GetOriginalResponseAsync() != await _component.GetOriginalResponseAsync())
+                    await i.ModifyOriginalResponseAsync(x =>
+                    {
+                        x.Embed = embed;
+                        x.Components = component;
+                    });
             }
-
-            if (battle.players.Any(x=> x.stats.hp <= 0))
-                _dataBase.ArenaDb.RemovePVP(pvp);
-            else
-                _dataBase.ArenaDb.UpdatePVP(pvp);
         }
     }
     

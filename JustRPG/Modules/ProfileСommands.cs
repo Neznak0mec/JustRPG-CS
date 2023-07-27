@@ -6,11 +6,11 @@ using JustRPG.Services;
 
 namespace JustRPG.Modules;
 
-public class Profilecommands : InteractionModuleBase<SocketInteractionContext>
+public class ProfileСommands : InteractionModuleBase<SocketInteractionContext>
 {
     private readonly DataBase _dataBase;
 
-    public Profilecommands(DataBase service)
+    public ProfileСommands(DataBase service)
     {
         _dataBase = service;
     }

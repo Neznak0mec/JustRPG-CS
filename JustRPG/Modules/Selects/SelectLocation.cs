@@ -1,4 +1,5 @@
 using Discord;
+using Discord.Rest;
 using Discord.WebSocket;
 using JustRPG.Generators;
 using JustRPG.Interfaces;
@@ -54,8 +55,10 @@ public class SelectLocation : IInteractionMaster
             drop = location.drops,
             players = new[] { mainPlayer },
             enemies = enemies.ToArray(),
+            originalInteraction = new List<object> {_component.Message},
             log = "-"
         };
+
 
         await _dataBase.BattlesDb.CreateObject(newBattle);
 
@@ -69,12 +72,14 @@ public class SelectLocation : IInteractionMaster
         Warrior mainPlayer =
             await AdventureGenerators.GenerateWarriorByUser((User)(await _dataBase.UserDb.Get(userId))!,
                 _component.User.Username, _dataBase);
+
         Battle newBattle = new Battle
         {
             id = Guid.NewGuid().ToString(),
             type = BattleType.adventure,
             drop = location.drops,
             players = new[] { mainPlayer },
+            originalInteraction = new List<object> {_component},
             enemies = new[] { AdventureGenerators.GenerateMob(location) },
             log = "-"
         };
@@ -83,6 +88,8 @@ public class SelectLocation : IInteractionMaster
 
         await ResponseMessage(EmbedCreater.BattleEmbed(newBattle),
             component: ButtonSets.BattleButtonSet(newBattle, Convert.ToInt64(userId)));
+        
+        await _component.Message.ModifyAsync(x=> x.Content = "biba");
     }
 
     private async Task ResponseMessage(Embed embed, MessageComponent? component = null)

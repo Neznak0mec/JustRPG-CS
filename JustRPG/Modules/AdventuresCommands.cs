@@ -1,4 +1,5 @@
 using Discord.Interactions;
+using Discord.WebSocket;
 using JustRPG.Features;
 using JustRPG.Models;
 using JustRPG.Features.Cooldown;

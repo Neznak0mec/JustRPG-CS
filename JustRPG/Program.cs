@@ -75,7 +75,7 @@ public class Program
             Log.Information("commands are loaded");
         };
 
-        await client.LoginAsync(TokenType.Bot, Environment.GetEnvironmentVariable("BotToken"));
+        await client.LoginAsync(TokenType.Bot, Environment.GetEnvironmentVariable("TestBotToken"));
         await client.StartAsync();
 
         await Task.Delay(-1);

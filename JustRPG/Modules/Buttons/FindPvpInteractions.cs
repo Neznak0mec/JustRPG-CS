@@ -29,7 +29,6 @@ public class FindPvpInteractions : IInteractionMaster {
         if (buttonInfo[2] == "CancelFind")
         {
             await CancelFind();
-            
         }
     }
 

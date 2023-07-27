@@ -26,11 +26,84 @@ public class Background
         while (true)
         {
             await Task.Delay(5000);
-            await CheckBattles();
+            try {
+                await CheckFindingBattles();}
+            catch
+            {
+            }
+            try {
+                await CheckBattleToEnd();
+            }
+            catch
+            {
+            }
         }
     }
 
-    async Task CheckBattles()
+    private async Task CheckBattleToEnd()
+    {
+        DateTimeOffset currentTime = DateTimeOffset.Now;
+        List<Battle> battles = (List<Battle>)(await _dataBase.BattlesDb.GetAll())!;
+
+        List<Battle> endedBattles = battles.Where(x =>(
+            x.type == BattleType.adventure ||
+            x.type == BattleType.dungeon) &&
+            x.lastActivity < currentTime.AddSeconds(-60).ToUnixTimeSeconds()).ToList();
+
+        endedBattles.AddRange(battles.Where(x =>(
+            x.type == BattleType.arena) &&
+            x.lastActivity < currentTime.AddSeconds(-30).ToUnixTimeSeconds()).ToList());
+
+        foreach (var i in endedBattles)
+        {
+            await EndBattle(i);
+        }
+    }
+
+    async Task EndBattle(Battle battle)
+    {
+        battle.players[battle.currentUser].stats.hp = -1;
+
+        if (battle.type == BattleType.arena)
+        {
+            battle.log = $"{battle.players[battle.currentUser].name} не успел сделать ход за отведённое время. Бой окончен.\n";
+            battle.players[battle.currentUser].stats.hp = -1;
+
+            await AdventureGenerators.Reward(battle, _dataBase);
+
+            var emb = EmbedCreater.BattleEmbed(battle, true);
+            var component = ButtonSets.BattleButtonSet(battle, 0, true, true);
+            foreach (var i in battle.originalInteraction)
+            {
+                SocketInteraction temp = (SocketInteraction)i;
+                await temp.ModifyOriginalResponseAsync( x =>
+                {
+                    x.Embed = emb;
+                    x.Components = component;
+                });
+            }
+
+
+        }
+        else
+        {
+            battle.log = "Вы проиграли\nВы бездействовали слишком долго, и противник отаковал вас в спину\n";
+
+            await AdventureGenerators.Reward(battle, _dataBase);
+
+            var emb = EmbedCreater.BattleEmbed(battle, true);
+            var component = ButtonSets.BattleButtonSet(battle, 0, true, true);
+            SocketMessageComponent temp = (SocketMessageComponent)battle.originalInteraction[0];
+            await temp.ModifyOriginalResponseAsync( x =>
+            {
+                x.Embed = emb;
+                x.Components = component;
+            });
+        }
+
+    }
+
+    async Task CheckFindingBattles()
     {
         List<Tuple<FindPVP, FindPVP>> pvpPairs = new List<Tuple<FindPVP, FindPVP>>();
 
@@ -78,29 +151,38 @@ public class Background
             Warrior w2 = await AdventureGenerators.GenerateWarriorByUser(u2, m2.Username, _dataBase, m2.GetAvatarUrl());
 
             Battle? battle = new Battle()
-            {
-                id = Guid.NewGuid().ToString(),
-                type = BattleType.arena,
-                drop = { },
-                players = new[] { w1, w2 },
-                enemies = { },
-                log = "-"
+//            {
+//                id = Guid.NewGuid().ToString(),
+//                type = BattleType.arena,
+//                drop = { },
+//                players = new[] { w1, w2 },
+//                enemies = { },
+//                originalInteraction ={
+//                    pair.Item1.msgLocation,
+//                    pair.Item2.msgLocation
+//                },
+//                log = "-"
+//            };
+                ;
+            battle.id = Guid.NewGuid().ToString();
+            battle.type = BattleType.arena;
+            battle.drop = new Dictionary<string,string>();
+            battle.players = new[] { w1, w2 };
+            battle.enemies = new Warrior[]{};
+            battle.originalInteraction = new List<object>{
+                pair.Item1.msgLocation,
+                pair.Item2.msgLocation
             };
-
-            PVP pvp = new PVP()
-            {
-                lastInteraction = ((DateTimeOffset)DateTime.Now).ToUnixTimeSeconds(),
-                battleId = battle.id,
-                msgLocations = new List<SocketInteraction> { pair.Item1.msgLocation, pair.Item2.msgLocation }
-            };
+            battle.log = "-";
 
             await _dataBase.BattlesDb.CreateObject(battle);
 
-            foreach (var msg in pvp.msgLocations)
+            foreach (var msg in battle.originalInteraction)
             {
                 var emb = EmbedCreater.BattleEmbed(battle);
                 var component = ButtonSets.BattleButtonSet(battle, u1.id);
-                await msg.ModifyOriginalResponseAsync(x =>
+                SocketInteraction temp = (SocketInteraction)msg;
+                await temp.ModifyOriginalResponseAsync( x =>
                 {
                     x.Embed = emb;
                     x.Components = component;
@@ -110,7 +192,6 @@ public class Background
             _dataBase.ArenaDb.DeletFindPVP(pair.Item1.userId);
             _dataBase.ArenaDb.DeletFindPVP(pair.Item2.userId);
 
-            _dataBase.ArenaDb.AddPVP(pvp);
         }
     }
 }

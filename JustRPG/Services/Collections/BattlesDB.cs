@@ -20,6 +20,11 @@ public class BattlesDB : ICollection
         return Task.FromResult<object?>(temp);
     }
 
+    public Task<object?> GetAll()
+    {
+        return Task.FromResult<object?>(_collection);
+    }
+
     public Task<object?> CreateObject(object? id)
     {
         Battle temp = (Battle)id!;

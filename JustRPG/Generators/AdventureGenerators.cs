@@ -81,6 +81,7 @@ public static class AdventureGenerators
         {
             await dataBase.UserDb.Update(user);
         }
+        await dataBase.BattlesDb.Delete(battle);
     }
 
     public static async Task<Warrior> GenerateWarriorByUser(User user, string username, DataBase dataBase,

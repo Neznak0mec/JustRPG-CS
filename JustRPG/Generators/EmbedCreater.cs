@@ -198,7 +198,7 @@ public class EmbedCreater
 
         embed = new EmbedBuilder
         {
-            Title = $"Бой {battle.players[0].name} - {(battle.type is BattleType.dungeon ? battle.players[1] : selectedEnemy).name}",
+            Title = $"Бой {battle.players[0].name} - {(battle.type is BattleType.arena ? battle.players[1] : selectedEnemy).name}",
             Description = battle.type == BattleType.arena ? $"Сейчас ходит {currentWarrior.name}" : ""
         };
 

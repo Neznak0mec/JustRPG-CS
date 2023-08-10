@@ -46,7 +46,6 @@ public class BattlesDB : ICollection
     public Task Delete(object? obj)
     {
         Battle temp = (Battle)obj!;
-        temp.lastActivity = DateTimeOffset.Now.ToUnixTimeSeconds();
         _collection.Remove(_collection.First(x => x.id == temp.id));
         return Task.CompletedTask;
     }

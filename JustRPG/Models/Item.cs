@@ -8,8 +8,8 @@ public class Item
 {
     [BsonElement("id")] public string id { get; set; }
     [BsonElement("name")] public string name { get; set; } = "";
-    [BsonElement("lvl")] public int lvl { get; set; } = 0;
-    [BsonElement("type")] public string type { get; set; } = "";
+    [BsonElement("lvl")] public int lvl { get; set; }
+    [BsonElement("type")] public ItemType type { get; set; }
     [BsonElement("price")] public int price { get; set; } = 0;
     [BsonElement("description")] public string description { get; set; } = "";
     [BsonElement("rarity")] public Rarity rarity { get; set; } = Rarity.common;
@@ -50,6 +50,12 @@ public class Item
 
     public bool IsEquippable()
     {
-        return type is "helmet" or "armor" or "gloves" or "pants" or "weapon";
+        return type is
+            ItemType.armor or
+            ItemType.shoes or 
+            ItemType.weapon or
+            ItemType.gloves or 
+            ItemType.pants or 
+            ItemType.helmet;
     }
 }

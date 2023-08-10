@@ -149,10 +149,18 @@ public class InventoryInteractions : IInteractionMaster
         if (item != null)
         {
             Item tempItem = (Item)item;
-            string? idItemToChange = _dbUser!.equipment!.GetByName(tempItem.type);
+            string? idItemToChange = _dbUser!.equipment!.GetByType(tempItem.type);
             if (!tempItem.IsEquippable())
             {
                 await _component.RespondAsync(embed: EmbedCreater.ErrorEmbed("Этот предмет нельзя экипировать"),
+                    ephemeral: true);
+                return;
+            }
+
+
+            if (tempItem.lvl > _dbUser.lvl)
+            {
+                await _component.RespondAsync(embed: EmbedCreater.ErrorEmbed("Этот предмет cлишком высокого уровня для вас"),
                     ephemeral: true);
                 return;
             }
@@ -291,7 +299,7 @@ public class InventoryInteractions : IInteractionMaster
                     tempItem.id
                 }
             };
-            embed = EmbedCreater.WarningEmbed($"Вы уверены что хотите уничтожыть `{tempItem.name}`?");
+            embed = EmbedCreater.WarningEmbed($"Вы уверены что хотите уничтожить `{tempItem.name}`?");
         }
         else
         {

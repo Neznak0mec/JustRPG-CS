@@ -59,7 +59,7 @@ public class EmbedCreater
             Title = $"Профиль {member.Username}"
         };
         emb.AddField($"Уровень", $"{user.lvl}", inline: true)
-            .AddField("Опыт", $"{(int)user.exp}\\{Math.Round(user.expToLvl, 2)}", inline: true)
+            .AddField("Опыт", $"{(int)user.Exp}\\{Math.Round(user.expToLvl, 2)}", inline: true)
             .AddField("Баланс", $"{user.cash}", inline: true)
             .AddField("Очки рейтинга", $"{user.mmr}", inline: true)
             .AddField(name: "Статы",

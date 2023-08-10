@@ -9,16 +9,18 @@ namespace JustRPG.Models;
 
 public class Battle
 {
-    [BsonElement("_id")] public string id { get; set; }
-    [BsonElement("type")] public BattleType type { get; set; }
-    [BsonElement("players")] public Warrior[] players { get; set; }
-    [BsonElement("enemies")] public Warrior[] enemies { get; set; }
-    [BsonElement("selected_enemy")] public short selectedEnemy { get; set; } = 0;
-    [BsonElement("current_user")] public short currentUser { get; set; } = 0;
-    [BsonElement("last_activity")] public long lastActivity { get; set; }
-    [BsonElement("drop")] public Dictionary<string, string> drop { get; set; }
-    [BsonIgnore] public List<object> originalInteraction {get;set;}
-    [BsonIgnore] public string log { get; set; } = "";
+    public string id { get; set; }
+    public BattleType type { get; set; }
+
+    public BattleStatus status { get; set; } = BattleStatus.going;
+    public Warrior[] players { get; set; }
+    public Warrior[] enemies { get; set; }
+    public short selectedEnemy { get; set; } = 0;
+    public short currentUser { get; set; } = 0;
+    public long lastActivity { get; set; }
+    public Dictionary<string, string> drop { get; set; }
+    public List<object> originalInteraction {get;set;}
+    public string log { get; set; } = "";
 }
 
 public class Warrior

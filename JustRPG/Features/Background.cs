@@ -57,6 +57,7 @@ public class Background
         foreach (var i in endedBattles)
         {
             await EndBattle(i);
+            await _dataBase.BattlesDb.Delete(i);
         }
     }
 
@@ -88,7 +89,7 @@ public class Background
         else
         {
             battle.log = "Вы проиграли\nВы бездействовали слишком долго, и противник отаковал вас в спину\n";
-
+            battle.status = BattleStatus.playerDead;
             await AdventureGenerators.Reward(battle, _dataBase);
 
             var emb = EmbedCreater.BattleEmbed(battle, true);

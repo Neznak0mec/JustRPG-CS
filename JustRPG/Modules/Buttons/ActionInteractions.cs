@@ -104,13 +104,13 @@ public class ActionInteractions : IInteractionMaster
         if (_dbUser!.inventory.Contains(_action!.args[0]))
         {
             Item item = (Item)(await _dataBase.ItemDb.Get(_action.args[0]))!;
-            string? itemToChangeId = _dbUser.equipment!.GetByName(item.type);
+            string? itemToChangeId = _dbUser.equipment!.GetByType(item.type);
 
             if (itemToChangeId != null)
             {
                 int indexInInventory = _dbUser.inventory.IndexOf(item.id);
                 _dbUser.inventory[indexInInventory] = itemToChangeId;
-                _dbUser.equipment.SetByName(item.type, item.id);
+                _dbUser.equipment.SetByType(item.type, item.id);
 
                 var itemToChange = (Item)(await _dataBase.ItemDb.Get(itemToChangeId))!;
 
@@ -120,7 +120,7 @@ public class ActionInteractions : IInteractionMaster
             {
                 int itemIndex = _dbUser.inventory.IndexOf(item.id);
                 _dbUser.inventory = _dbUser.inventory.Where((x, y) => y != itemIndex).ToList();
-                _dbUser.equipment.SetByName(item.type, item.id);
+                _dbUser.equipment.SetByType(item.type, item.id);
 
                 embed = EmbedCreater.SuccessEmbed($"Вы успешно сняли надели `{item.name}`");
             }

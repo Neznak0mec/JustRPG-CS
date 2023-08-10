@@ -2,11 +2,11 @@ namespace JustRPG.Models.Enums;
 
 public enum Rarity
 {
-    common = 0,
-    uncommon = 1,
-    rare = 2,
-    epic = 3,
-    legendary = 4,
+    common = 1,
+    uncommon = 2,
+    rare = 3,
+    epic = 4,
+    legendary = 5,
 
     //  =============
 

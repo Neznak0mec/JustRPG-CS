@@ -1,3 +1,4 @@
+using JustRPG.Models.Enums;
 using MongoDB.Bson.Serialization.Attributes;
 
 namespace JustRPG.Models.SubClasses;
@@ -11,40 +12,40 @@ public record Equipment
     [BsonElement("gloves")] public string? gloves { get; set; } = null;
     [BsonElement("weapon")] public string? weapon { get; set; } = null;
 
-    public string? GetByName(string name)
+    public string? GetByType(ItemType type)
     {
-        return name switch
+        return type switch
         {
-            ("helmet") => helmet,
-            ("armor") => armor,
-            ("pants") => pants,
-            ("shoes") => shoes,
-            ("gloves") => gloves,
-            ("weapon") => weapon,
+            ItemType.helmet => helmet,
+            ItemType.armor => armor,
+            ItemType.pants => pants,
+            ItemType.shoes => shoes,
+            ItemType.gloves => gloves,
+            ItemType.weapon => weapon,
             _ => null
         };
     }
 
-    public void SetByName(string name, string value)
+    public void SetByType(ItemType type, string value)
     {
-        switch (name)
+        switch (type)
         {
-            case ("helmet"):
+            case ItemType.helmet:
                 helmet = value;
                 break;
-            case ("armor"):
+            case ItemType.armor:
                 armor = value;
                 break;
-            case ("pants"):
+            case ItemType.pants:
                 pants = value;
                 break;
-            case ("shoes"):
+            case ItemType.shoes:
                 shoes = value;
                 break;
-            case ("gloves"):
+            case ItemType.gloves:
                 gloves = value;
                 break;
-            case ("weapon"):
+            case ItemType.weapon:
                 weapon = value;
                 break;
         }

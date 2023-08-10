@@ -120,7 +120,7 @@ public static class ButtonSets
             .WithButton(label: "Атака", customId: $"Battle_{userId}_Attack_{battle!.id}", disabled: disableButtons)
             .WithButton(label: "Хил", customId: $"Battle_{userId}_Heal_{battle.id}", disabled: disableButtons,
                 style: ButtonStyle.Success)
-            .WithButton(label: "Побег", customId: $"Battle_{userId}_Run_{battle.id}", disabled: disableButtons,
+            .WithButton(label: "Побег", customId: $"Battle_{userId}_Run_{battle.id}", disabled: disableButtons || battle.type == BattleType.arena,
                 style: ButtonStyle.Danger);
 
         if (battle.type == BattleType.dungeon)

@@ -61,6 +61,7 @@ public class BattleInteractions : IInteractionMaster {
             if (battle.enemies.All(x => x.stats.hp <= 0))
             {
                 battle.log += "Вы победили\n";
+                battle.status = BattleStatus.playerWin;
                 await UpdateBattle(battle, true);
                 return;
             }
@@ -74,6 +75,7 @@ public class BattleInteractions : IInteractionMaster {
             if (user.stats.hp <= 0)
             {
                 battle.log += "Вы проиграли\n";
+                battle.status = BattleStatus.playerDead;
                 await UpdateBattle(battle, true);
                 return;
             }
@@ -126,6 +128,7 @@ public class BattleInteractions : IInteractionMaster {
             if (user.stats.hp <= 0)
             {
                 battle.log += "Вы проиграли\n";
+                battle.status = BattleStatus.playerDead;
                 await UpdateBattle(battle, true);
                 return;
             }
@@ -146,6 +149,7 @@ public class BattleInteractions : IInteractionMaster {
             if (Random.Shared.Next(1, 100) < 1 + user.stats.luck)
             {
                 battle.log += "Вы успешно сбежали\n";
+                battle.status = BattleStatus.playerRun;
                 await UpdateBattle(battle,true);
                 return;
             }
@@ -161,6 +165,7 @@ public class BattleInteractions : IInteractionMaster {
             if (user.stats.hp <= 0)
             {
                 battle.log += "Вы проиграли\n";
+                battle.status = BattleStatus.playerDead;
                 await UpdateBattle(battle, true);
                 return;
             }
@@ -174,6 +179,7 @@ public class BattleInteractions : IInteractionMaster {
             if (Random.Shared.Next(1, 100) < 1 + user.stats.luck)
             {
                 battle.log += $"{battle.players[battle.currentUser].name} успешно сбежал\n";
+                battle.status = BattleStatus.playerRun;
                 await UpdateBattle(battle, true);
                 return;
             }

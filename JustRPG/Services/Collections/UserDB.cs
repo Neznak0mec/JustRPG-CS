@@ -28,32 +28,6 @@ public class UserDb : ICollection
         return newUser;
     }
 
-    public async Task Add(object where, string fieldKey, int value)
-    {
-        User temp = (User)where;
-        FilterDefinition<User> filterUser = Builders<User>.Filter.Eq("id", temp.id);
-        UpdateDefinition<User> updateUser =
-            fieldKey == "exp" ? UpdateLvl(temp, value) : Builders<User>.Update.Inc(fieldKey, value);
-
-        await _collection.UpdateOneAsync(filterUser!, updateUser!);
-    }
-
-    private UpdateDefinition<User> UpdateLvl(User user, int value)
-    {
-        UpdateDefinition<User> updateUser;
-        if (user.exp + value >= user.expToLvl)
-        {
-            updateUser = Builders<User>.Update.Inc("lvl", 1);
-            updateUser.Inc("skill_points", 3);
-            updateUser.Inc("exp_to_lvl", user.expToLvl / 5);
-            updateUser.Set("exp", 0);
-        }
-        else
-            updateUser = Builders<User>.Update.Inc("exp", value);
-
-        return updateUser;
-    }
-
     public async Task Update(object? obj)
     {
         User temp = (User)obj!;

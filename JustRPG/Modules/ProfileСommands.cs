@@ -41,8 +41,9 @@ public class ProfileСommands : InteractionModuleBase<SocketInteractionContext>
         int exp = 10 + Random.Shared.Next(0, 2 * user.stats.luck);
         int cash = 10 + Random.Shared.Next(0, 2 * user.stats.luck);
 
-        await _dataBase.UserDb.Add(user, "exp", exp);
-        await _dataBase.UserDb.Add(user, "cash", cash);
+        user.Exp += exp;
+        user.cash += cash;
+        await _dataBase.UserDb.Update(user);
 
         await Context.Interaction.RespondAsync(embed: EmbedCreater.WorkEmbed(_dataBase.works!, exp, cash));
     }

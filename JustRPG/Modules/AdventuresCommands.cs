@@ -19,7 +19,7 @@ public class AdventuresCommands : InteractionModuleBase<SocketInteractionContext
         _dataBase = (DataBase?)service.GetService(typeof(DataBase))!;
     }
 
-    [Cooldown(300)]
+//    [Cooldown(300)]
     [SlashCommand(name: "adventure", description: "...")]
     public async Task Adventure()
     {
@@ -32,7 +32,7 @@ public class AdventuresCommands : InteractionModuleBase<SocketInteractionContext
             ));
     }
 
-    [Cooldown(300)]
+//    [Cooldown(300)]
     [SlashCommand(name: "dungeon", description: "...")]
     public async Task Dungeon()
     {

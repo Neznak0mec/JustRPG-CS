@@ -16,5 +16,5 @@ public class SaleItem
     [BsonElement("item_name")] public string itemName { get; set; }
     [BsonElement("item_lvl")] public int itemLvl { get; set; }
     [BsonElement("item_rarity")] public Rarity itemRarity { get; set; }
-    [BsonElement("item_type")] public string itemType { get; set; }
+    [BsonElement("item_type")] public ItemType itemType { get; set; }
 }

@@ -1,9 +1,9 @@
+using Discord.Interactions;
 using Discord.WebSocket;
 using JustRPG.Generators;
 using JustRPG.Interfaces;
 using JustRPG.Models;
 using JustRPG.Services;
-using MongoDB.Driver.Core.WireProtocol.Messages;
 
 namespace JustRPG.Modules.Modals;
 

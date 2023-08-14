@@ -1,6 +1,5 @@
 using JustRPG.Services;
 using MongoDB.Bson.Serialization.Attributes;
-using Serilog;
 
 namespace JustRPG.Models;
 

@@ -18,7 +18,7 @@ public class User
             {
                 value -= expToLvl;
                 lvl++;
-                expToLvl += expToLvl/5;
+                expToLvl += expToLvl/3;
             }
             if (value < 0)
                 value = 0;
@@ -30,7 +30,10 @@ public class User
     [BsonElement("stats")] public Stats stats { get; set; } = new();
     [BsonElement("inventory")] public List<string> inventory { get; set; } = new();
     [BsonElement("equipment")] public Equipment equipment { get; set; } = new();
+    [BsonElement("badges")] public List<string> badges { get; set; } = new();
+
     [BsonElement("guild_tag")] public string? guildTag { get; set; } = null;
+    [BsonElement("guild_emblem")] public string guildEmblem { get; set; } = "";
 
     public async Task<UserEquipment> GetEquipmentAsItems(DataBase dataBase)
     {
@@ -46,21 +49,18 @@ public class User
         return res;
     }
 
-    public void AddExp(int amount)
+    public string GetFullName(string username)
     {
-        exp += amount;
-        if (exp> expToLvl)
+        string bageString = "",resault ="";
+        foreach (var bage in badges)
         {
-            exp -= expToLvl;
-            lvl++;
-
+            bageString += bage+' ';
         }
+        resault+= guildEmblem+' ';
+        resault+= (guildTag ?? "") + ' ';
+        resault+= username;
+        resault+= bageString;
+        return resault;
     }
 
-    public void SubExp(int amount)
-    {
-        exp -= amount;
-        if (exp< 0)
-            exp = 0;
-    }
 }

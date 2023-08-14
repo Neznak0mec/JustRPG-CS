@@ -209,6 +209,7 @@ public static class AdventureGenerators
     {
         id = user.id,
         name = username,
+        fullName = user.GetFullName(username),
         stats = await new BattleStats().BattleStatsAsync(user, dataBase),
         inventory = await InventoryToBattleInventory(user, dataBase),
         lvl = user.lvl,
@@ -252,6 +253,7 @@ public static class AdventureGenerators
         Warrior mob = new Warrior
         {
             name = monster.Item1,
+            fullName = monster.Item1,
             lvl = Random.Shared.Next(location.lvl, location.lvl + 4),
             url = monster.Item2
         };

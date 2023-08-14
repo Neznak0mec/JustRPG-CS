@@ -56,10 +56,10 @@ public class EmbedCreater
     {
         var emb = new EmbedBuilder
         {
-            Title = $"Профиль {member.Username}"
+            Title = $"Профиль {user.GetFullName(member.Username) }"
         };
         emb.AddField($"Уровень", $"{user.lvl}", inline: true)
-            .AddField("Опыт", $"{(int)user.Exp}\\{Math.Round(user.expToLvl, 2)}", inline: true)
+            .AddField("Опыт", $"{(int)user.Exp}\\{(int)user.expToLvl}", inline: true)
             .AddField("Баланс", $"{user.cash}", inline: true)
             .AddField("Очки рейтинга", $"{user.mmr}", inline: true)
             .AddField(name: "Статы",
@@ -74,7 +74,7 @@ public class EmbedCreater
     {
         var embed = new EmbedBuilder
         {
-            Title = $"Экипировка {member.Username}"
+            Title = $"Экипировка {user.GetFullName(member.Username)}"
         };
         UserEquipment equipment = await user.GetEquipmentAsItems(dataBase!);
 
@@ -108,9 +108,9 @@ public class EmbedCreater
         return embed.Build();
     }
 
-    public static Embed UserInventory(IUser member, Item?[] items)
+    public static Embed UserInventory(IUser member, User user,Item?[] items)
     {
-        var emb = new EmbedBuilder { Title = $"Инвентарь {member.Username}" };
+        var emb = new EmbedBuilder { Title = $"Инвентарь {user.GetFullName(member.Username)}" };
         foreach (var item in items)
         {
             if (item == null)
@@ -198,7 +198,7 @@ public class EmbedCreater
 
         embed = new EmbedBuilder
         {
-            Title = $"Бой {battle.players[0].name} - {(battle.type is BattleType.arena ? battle.players[1] : selectedEnemy).name}",
+            Title = $"Бой {battle.players[0].fullName} - {(battle.type is BattleType.arena ? battle.players[1] : selectedEnemy).fullName}",
             Description = battle.type == BattleType.arena ? $"Сейчас ходит {currentWarrior.name}" : ""
         };
 
@@ -209,12 +209,12 @@ public class EmbedCreater
 
         if (!gameEnded)
         {
-            embed.AddField($"{currentWarrior.name} - {currentWarrior.lvl}",
+            embed.AddField($"{currentWarrior.fullName} - {currentWarrior.lvl}",
                 $"<:health:997889169567260714> - {progressBar(currentWarrior.stats.hp, currentWarrior.stats.MaxHP)}\n " +
                 $"<:armor:997889166673186987> - {progressBar(currentWarrior.stats.defence, currentWarrior.stats.MaxDef)}\n" +
                 $"<:strength:997764094125953054> - {currentWarrior.stats.damage}");
 
-            embed.AddField($"{selectedEnemy.name} - {selectedEnemy.lvl}",
+            embed.AddField($"{selectedEnemy.fullName} - {selectedEnemy.lvl}",
                 $"<:health:997889169567260714> - {progressBar(selectedEnemy.stats.hp, selectedEnemy.stats.MaxHP)}\n " +
                 $"<:armor:997889166673186987> - {progressBar(selectedEnemy.stats.defence, selectedEnemy.stats.MaxDef)}\n" +
                 $"<:strength:997764094125953054> - {selectedEnemy.stats.damage}");
@@ -244,7 +244,7 @@ public class EmbedCreater
 
     public static Embed MarketPage(MarketSearchState searchState)
     {
-        var emb = new EmbedBuilder { Title = $"Маркет" };
+        var emb = new EmbedBuilder { Title = "Маркет" };
         List<SaleItem> items = searchState.GetItemsOnPage(searchState.currentPage);
         for (int i = 0; i < 5; i++)
         {

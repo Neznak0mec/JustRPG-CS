@@ -1,3 +1,4 @@
+using Discord.Interactions;
 using Discord.WebSocket;
 using JustRPG.Generators;
 using JustRPG.Interfaces;
@@ -6,39 +7,22 @@ using JustRPG.Services;
 
 namespace JustRPG.Modules.Selects;
 
-public class MarketSortSelect : IInteractionMaster
+public class MarketSortSelect : InteractionModuleBase<SocketInteractionContext<SocketMessageComponent>>
 {
     private readonly DiscordSocketClient _client;
-    private readonly SocketMessageComponent _component;
     private readonly DataBase _dataBase;
 
-    public MarketSortSelect(DiscordSocketClient client, SocketMessageComponent component, IServiceProvider service)
+    public MarketSortSelect(IServiceProvider service)
     {
-        _client = client;
-        _component = component;
-        _dataBase = (DataBase)service.GetService(typeof(DataBase))!;
+         _client = (DiscordSocketClient)service.GetService(typeof(DiscordSocketClient))!;
+         _dataBase = (DataBase)service.GetService(typeof(DataBase))!;
     }
 
-    public async Task Distributor(string[] buttonInfo)
+    [ComponentInteraction("MarketSort_*_byLvl", true)]
+    public async Task SelectLvl(string userId, string[] selected)
     {
-        switch (buttonInfo[2])
-        {
-            case "byLvl":
-                await SelectLvl(buttonInfo);
-                break;
-            case "byRaty":
-                await SelectRaty(buttonInfo);
-                break;
-            case "byType":
-                await SelectType(buttonInfo);
-                break;
-        }
-    }
-
-    public async Task SelectLvl(string[] buttonInfo)
-    {
-        MarketSearchState search = (await _dataBase.MarketDb.GetSearch(buttonInfo[3]))!;
-        string[] res = _component.Data.Values.ToArray()[0].Split('-');
+        MarketSearchState search = (await _dataBase.MarketDb.GetSearch(userId))!;
+        string[] res = selected[0].Split('-');
 
         search.itemLvl = new Tuple<int, int>(Convert.ToInt32(res[0]), Convert.ToInt32(res[1]));
 
@@ -46,10 +30,11 @@ public class MarketSortSelect : IInteractionMaster
         await UpdateMessage(search);
     }
 
-    public async Task SelectRaty(string[] buttonInfo)
+    [ComponentInteraction("MarketSort_*_byRaty", true)]
+    public async Task SelectRaty(string userId, string[] selected)
     {
-        MarketSearchState search = (await _dataBase.MarketDb.GetSearch(buttonInfo[1]))!;
-        string res = _component.Data.Values.ToArray()[0];
+        MarketSearchState search = (await _dataBase.MarketDb.GetSearch(userId))!;
+        string res = selected[0];
 
 
         if (res == "сброс")
@@ -71,10 +56,12 @@ public class MarketSortSelect : IInteractionMaster
         await UpdateMessage(search);
     }
 
-    public async Task SelectType(string[] buttonInfo)
+
+    [ComponentInteraction("MarketSort_*_byType", true)]
+    public async Task SelectType(string userId, string[] selected)
     {
-        MarketSearchState search = (await _dataBase.MarketDb.GetSearch(buttonInfo[1]))!;
-        string res = _component.Data.Values.ToArray()[0];
+        MarketSearchState search = (await _dataBase.MarketDb.GetSearch(userId))!;
+        string res = selected[0];
 
 
         if (res == "сброс")
@@ -102,10 +89,10 @@ public class MarketSortSelect : IInteractionMaster
 
     public async Task UpdateMessage(MarketSearchState search)
     {
-        await _component.UpdateAsync(x =>
+        await Context.Interaction.UpdateAsync(x =>
         {
             x.Embed = EmbedCreater.MarketPage(search);
-            x.Components = ButtonSets.MarketSortComponents(_component.User.Id, search.id);
+            x.Components = ButtonSets.MarketSortComponents(Context.User.Id, search.id);
         });
     }
 }

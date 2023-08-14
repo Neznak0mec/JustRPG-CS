@@ -1,47 +1,33 @@
-using Discord;
-using Discord.Rest;
+using Discord.Interactions;
 using Discord.WebSocket;
 using JustRPG.Features;
 using JustRPG.Generators;
-using JustRPG.Interfaces;
 using JustRPG.Services;
-using MongoDB.Driver.Core.WireProtocol.Messages;
 
 namespace JustRPG.Modules.Buttons;
 
-public class FindPvpInteractions : IInteractionMaster {
+public class FindPvpInteractions : InteractionModuleBase<SocketInteractionContext<SocketMessageComponent>> {
     private DiscordSocketClient _client;
-    private readonly SocketMessageComponent _component;
     private readonly DataBase _dataBase;
-    private readonly Background _background;
 
 
-    public FindPvpInteractions(DiscordSocketClient client, SocketMessageComponent component, IServiceProvider service)
+    public FindPvpInteractions(IServiceProvider service)
     {
-        _client = client;
-        _component = component;
+        _client = (DiscordSocketClient)service.GetService(typeof(DiscordSocketClient))!;
         _dataBase = (DataBase)service.GetService(typeof(DataBase))!;
-        _background = (Background)service.GetService(typeof(Background))!;
     }
 
-    public async Task Distributor(string[] buttonInfo)
+    [ComponentInteraction("FindPvp_*_CancelFind", true)]
+    private async Task CancelFind(string userId)
     {
-        if (buttonInfo[2] == "CancelFind")
-        {
-            await CancelFind();
-        }
-    }
-
-    private async Task CancelFind()
-    {
-        _dataBase.ArenaDb.DeletFindPVP((long)_component.User.Id);
-        await _component.UpdateAsync(x =>
+        _dataBase.ArenaDb.DeletFindPVP((long)Context.User.Id);
+        await Context.Interaction.UpdateAsync(x =>
         {
             x.Embed = EmbedCreater.EmpEmbed("Поиск боя отменён");
             x.Components = null;
         });
         await Task.Delay(5000);
-        var a = await _component.GetOriginalResponseAsync();
+        var a = await GetOriginalResponseAsync();
         await a.DeleteAsync();
     }
 }

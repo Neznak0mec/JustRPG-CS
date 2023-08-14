@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using Discord;
+using Discord.Interactions;
 using Discord.WebSocket;
 using JustRPG.Generators;
 using JustRPG.Interfaces;
@@ -11,125 +12,107 @@ using Action = JustRPG.Models.Action;
 
 namespace JustRPG.Modules.Buttons;
 
-public class InventoryInteractions : IInteractionMaster
+public class InventoryInteractions : InteractionModuleBase<SocketInteractionContext<SocketMessageComponent>>
 {
     private readonly DiscordSocketClient _client;
-    private readonly SocketMessageComponent _component;
     private readonly DataBase _dataBase;
-    private Inventory? _inventory;
-    private User? _dbUser;
-    private SocketUser? _member;
 
-    public InventoryInteractions(DiscordSocketClient client, SocketMessageComponent component, IServiceProvider service)
+    private Inventory _inventory;
+
+    public InventoryInteractions(IServiceProvider service)
     {
-        _client = client;
-        _component = component;
+        _client = (DiscordSocketClient)service.GetService(typeof(DiscordSocketClient))!;
         _dataBase = (DataBase)service.GetService(typeof(DataBase))!;
     }
 
 
-    public async Task Distributor(string[] buttonInfo)
+    public override async Task<Task> BeforeExecuteAsync(ICommandInfo command)
     {
+        var buttonInfo = Context.Interaction.Data.CustomId.Split('_');
         _inventory = (Inventory)(await _dataBase.InventoryDb.Get($"Inventory_{buttonInfo[1]}_{buttonInfo[2]}"))!;
+        return base.BeforeExecuteAsync(command);
+    }
+
+    [ComponentInteraction("Inventary_*_*_PrewPage", true)]
+    private async Task PreviousPage(string finder, string userId)
+    {
+         _inventory.DataBase = _dataBase;
+
+        await _inventory!.PreviousPage();
+        await UpdateMessage(finder, userId);
+    }
+
+    [ComponentInteraction("Inventary_*_*_NextPage", true)]
+    private async Task NextPage(string finder, string userId)
+    {
         _inventory.DataBase = _dataBase;
 
-        _dbUser = (User)(await _dataBase.UserDb.Get(Convert.ToUInt64(buttonInfo[2])))!;
-        _member = _client.GetUser(Convert.ToUInt64(buttonInfo[2]));
-
-
-        switch (buttonInfo[3])
-        {
-            case "PrewPage":
-                await PreviousPage(buttonInfo[1]);
-                return;
-            case "NextPage":
-                await NextPage(buttonInfo[1]);
-                return;
-            case "Reload":
-                await Reload(buttonInfo[1]);
-                return;
-            case "InteractionType":
-                await ChangeInteractionType(buttonInfo[1]);
-                return;
-            case "info":
-                await ItemInfo(buttonInfo[4]);
-                return;
-            case "equip":
-                await EquipItem(buttonInfo[4]);
-                return;
-            case "sell":
-                await SellItem(buttonInfo[4]);
-                return;
-            case "destroy":
-                await DestroyItem(buttonInfo[4]);
-                return;
-            case "OpenSlotsSettings":
-                await OpenSlotsSettings(buttonInfo);
-                return;
-        }
-    }
-
-    private async Task PreviousPage(string finder)
-    {
-        await _inventory!.PreviousPage();
-        await UpdateMessage(finder);
-    }
-
-    private async Task NextPage(string finder)
-    {
         await _inventory!.NextPage();
-        await UpdateMessage(finder);
+        await UpdateMessage(finder, userId);
     }
 
-    private async Task Reload(string finder)
+    [ComponentInteraction("Inventary_*_*_Reload", true)]
+    private async Task Reload(string finder, string userId)
     {
-        await _inventory!.Reload(_dbUser!.inventory);
-        await UpdateMessage(finder);
+        _inventory.DataBase = _dataBase;
+
+        var dbUser = (User)(await _dataBase.UserDb.Get(Convert.ToUInt64(userId)))!;
+
+        await _inventory!.Reload(dbUser!.inventory);
+        await UpdateMessage(finder, userId);
     }
 
-    private async Task ChangeInteractionType(string finder)
+    [ComponentInteraction("Inventary_*_*_InteractionType", true)]
+    private async Task ChangeInteractionType(string finder, string userId,string[] selected)
     {
-        var interaction = string.Join("", _component.Data.Values);
+        _inventory.DataBase = _dataBase;
+
+        var interaction = string.Join("", selected);
         _inventory!.interactionType = interaction;
-        await UpdateMessage(finder);
+        await UpdateMessage(finder, userId);
     }
 
-    private async Task ItemInfo(string buttonInfo)
+    private async Task UpdateMessage(string finder, string userId)
     {
-        var itemId = _inventory!.currentPageItems[Convert.ToInt16(buttonInfo)];
+        _inventory.DataBase = _dataBase;
 
-        Embed embed;
-        if (itemId == null)
-        {
-            embed = EmbedCreater.ErrorEmbed("Произошла ошибка, инвентрать будет обновлён");
-            await _inventory.Reload(_dbUser!.inventory);
-        }
-        else
-        {
-            var item = await _dataBase.ItemDb.Get(itemId);
-            embed = item == null
-                ? EmbedCreater.ErrorEmbed("Этот предмет не найден, странно 🤔")
-                : EmbedCreater.ItemInfo((Item)item);
-        }
-
-        await _component.RespondAsync(embed: embed, ephemeral: true);
-    }
-
-    private async Task UpdateMessage(string finder)
-    {
+        var dbUser = (User)(await _dataBase.UserDb.Get(Convert.ToUInt64(userId)))!;
+        var member = _client.GetUser(Convert.ToUInt64(userId));
         var items = await _inventory!.GetItems(_dataBase);
-        await _component.UpdateAsync(
+
+        await Context.Interaction.UpdateAsync(
             x =>
             {
-                x.Embed = EmbedCreater.UserInventory(_member!, items);
-                x.Components = ButtonSets.InventoryButtonsSet(finder, _dbUser!.id, _inventory, items);
+                x.Embed = EmbedCreater.UserInventory(member!, dbUser!,items);
+                x.Components = ButtonSets.InventoryButtonsSet(finder, dbUser!.id, _inventory, items);
             }
         );
+
     }
 
-    private async Task EquipItem(string buttonInfo)
+    [ComponentInteraction("Inventary_*_*_info_*", true)]
+    private async Task ItemInfo(string finder, string userId, string idString)
     {
-        var itemId = _inventory!.currentPageItems[Convert.ToInt16(buttonInfo)];
+        _inventory.DataBase = _dataBase;
+
+        string itemId = _inventory!.currentPageItems[Convert.ToInt16(idString)]!;
+
+        var item = await _dataBase.ItemDb.Get(itemId);
+        Embed embed = item == null
+            ? EmbedCreater.ErrorEmbed("Этот предмет не найден, странно 🤔")
+            : EmbedCreater.ItemInfo((Item)item);
+
+        await RespondAsync(embed: embed, ephemeral: true);
+    }
+
+    [ComponentInteraction("Inventary_*_*_equip_*", true)]
+    private async Task EquipItem(string finder, string userId, string idString)
+    {
+        _inventory.DataBase = _dataBase;
+
+        var dbUser = (User)(await _dataBase.UserDb.Get(Convert.ToUInt64(userId)))!;
+
+        var itemId = _inventory!.currentPageItems[Convert.ToInt16(idString)];
         Item? itemToChange = null;
         Embed embed;
         Action? action;
@@ -139,7 +122,7 @@ public class InventoryInteractions : IInteractionMaster
         if (itemId == null)
         {
             embed = EmbedCreater.ErrorEmbed("Произошла ошибка, обновите инвентарь");
-            await _component.RespondAsync(embed: embed, ephemeral: true);
+            await RespondAsync(embed: embed, ephemeral: true);
             return;
         }
 
@@ -149,18 +132,18 @@ public class InventoryInteractions : IInteractionMaster
         if (item != null)
         {
             Item tempItem = (Item)item;
-            string? idItemToChange = _dbUser!.equipment!.GetByType(tempItem.type);
+            string? idItemToChange = dbUser!.equipment!.GetByType(tempItem.type);
             if (!tempItem.IsEquippable())
             {
-                await _component.RespondAsync(embed: EmbedCreater.ErrorEmbed("Этот предмет нельзя экипировать"),
+                await RespondAsync(embed: EmbedCreater.ErrorEmbed("Этот предмет нельзя экипировать"),
                     ephemeral: true);
                 return;
             }
 
 
-            if (tempItem.lvl > _dbUser.lvl)
+            if (tempItem.lvl > dbUser.lvl)
             {
-                await _component.RespondAsync(embed: EmbedCreater.ErrorEmbed("Этот предмет cлишком высокого уровня для вас"),
+                await RespondAsync(embed: EmbedCreater.ErrorEmbed("Этот предмет cлишком высокого уровня для вас"),
                     ephemeral: true);
                 return;
             }
@@ -169,7 +152,7 @@ public class InventoryInteractions : IInteractionMaster
             {
                 id = "Action_" + uId,
                 date = DateTimeOffset.Now.ToUnixTimeSeconds(),
-                userId = _dbUser.id,
+                userId = dbUser.id,
                 type = "Equip",
                 args = new[]
                 {
@@ -197,23 +180,26 @@ public class InventoryInteractions : IInteractionMaster
         if (action != null)
         {
             await _dataBase.ActionDb.CreateObject(action);
-            await _component.RespondAsync(embed: embed, components: ButtonSets.AcceptActions(uId, _dbUser!.id),
+            await RespondAsync(embed: embed, components: ButtonSets.AcceptActions(uId, dbUser!.id),
                 ephemeral: true);
         }
         else
         {
-            await _component.RespondAsync(embed: embed, ephemeral: true);
+            await RespondAsync(embed: embed, ephemeral: true);
         }
     }
 
-    private async Task SellItem(string buttonInfo)
+    [ComponentInteraction("Inventary_*_*_sell_*", true)]
+    private async Task SellItem(string finder, string userId, string idString)
     {
-        string itemId = _inventory!.currentPageItems[Convert.ToInt16(buttonInfo)]!;
+        _inventory.DataBase = _dataBase;
 
-        long countOfSaleItems = await _dataBase.MarketDb.GetCountOfUserSlots(_component.User.Id);
+        string itemId = _inventory!.currentPageItems[Convert.ToInt16(idString)]!;
+
+        long countOfSaleItems = await _dataBase.MarketDb.GetCountOfUserSlots(Context.User.Id);
         if (countOfSaleItems >= 5)
         {
-            await _component.RespondAsync(
+            await RespondAsync(
                 embed: EmbedCreater.ErrorEmbed(
                     "Вы достигли лимита по продаже, одновременно можно выставлять только 5 предметов"),
                 ephemeral: true);
@@ -222,11 +208,11 @@ public class InventoryInteractions : IInteractionMaster
 
         Item item;
 
-        User user = (User)(await _dataBase.UserDb.Get(_component.User.Id))!;
+        User user = (User)(await _dataBase.UserDb.Get(Context.User.Id))!;
 
         if (user.inventory.All(x => x != itemId))
         {
-            await _component.RespondAsync(
+            await RespondAsync(
                 embed: EmbedCreater.ErrorEmbed("Данный предмет не найден в вашем инвентаре, перезагрузите инвентарь"),
                 ephemeral: true);
             return;
@@ -237,7 +223,7 @@ public class InventoryInteractions : IInteractionMaster
         SaleItem sellItem = new SaleItem()
         {
             id = Guid.NewGuid().ToString(),
-            userId = _component.User.Id,
+            userId = Context.User.Id,
             itemId = itemId,
             price = -1,
             dateListed = DateTimeOffset.Now.ToUnixTimeSeconds(),
@@ -259,7 +245,7 @@ public class InventoryInteractions : IInteractionMaster
             await _dataBase.UserDb.Update(user);
         }
 
-        await _component.RespondAsync(
+        await RespondAsync(
             embed: EmbedCreater.WarningEmbed(
                 "Предмет добавлен в лоты для продажи, но для начала продаж нужно установить цену"),
             components: new ComponentBuilder()
@@ -268,9 +254,14 @@ public class InventoryInteractions : IInteractionMaster
         );
     }
 
-    private async Task DestroyItem(string buttonInfo)
+    [ComponentInteraction("Inventary_*_*_destroy_*", true)]
+    private async Task DestroyItem(string finder, string userId, string idString)
     {
-        var itemId = _inventory!.currentPageItems[Convert.ToInt16(buttonInfo)];
+        _inventory.DataBase = _dataBase;
+
+        var dbUser = (User)(await _dataBase.UserDb.Get(Convert.ToUInt64(userId)))!;
+
+        var itemId = _inventory!.currentPageItems[Convert.ToInt16(idString)];
         object? item = null;
         Embed embed;
         Action? action;
@@ -279,7 +270,7 @@ public class InventoryInteractions : IInteractionMaster
 
         if (itemId == null)
         {
-            await _inventory.Reload(_dbUser!.inventory);
+            await _inventory.Reload(dbUser!.inventory);
         }
         else
             item = await _dataBase.ItemDb.Get(itemId);
@@ -293,7 +284,7 @@ public class InventoryInteractions : IInteractionMaster
                 id = "Action_" + uId,
                 date = DateTimeOffset.Now.ToUnixTimeSeconds(),
                 type = "Destroy",
-                userId = (long)_component.User.Id,
+                userId = (long)Context.User.Id,
                 args = new[]
                 {
                     tempItem.id
@@ -310,21 +301,21 @@ public class InventoryInteractions : IInteractionMaster
         if (action != null)
         {
             await _dataBase.ActionDb.CreateObject(action);
-            await _component.RespondAsync(embed: embed,
-                components: ButtonSets.AcceptActions(uId, (long)_component.User.Id), ephemeral: true);
+            await RespondAsync(embed: embed,
+                components: ButtonSets.AcceptActions(uId, (long)Context.User.Id), ephemeral: true);
         }
         else
         {
-            await _component.RespondAsync(embed: embed, ephemeral: true);
+            await RespondAsync(embed: embed, ephemeral: true);
         }
     }
 
-
-    private async Task OpenSlotsSettings(string[] buttonInfo)
+    [ComponentInteraction("Inventary_*_*_OpenSlotsSettings", true)]
+    private async Task OpenSlotsSettings(string finder, string userId, string idString)
     {
         MarketSlotsSettings marketSettings = new MarketSlotsSettings
         {
-            userId = _component.User.Id,
+            userId = Context.User.Id,
             id = Guid.NewGuid().ToString(),
             startPage = "inventory"
         };
@@ -332,7 +323,7 @@ public class InventoryInteractions : IInteractionMaster
         await _dataBase.MarketDb.GetUserSlots(marketSettings);
         await _dataBase.MarketDb.CreateSettings(marketSettings);
 
-        await _component.UpdateAsync(x =>
+        await ModifyOriginalResponseAsync(x =>
         {
             x.Embed = EmbedCreater.MarketSettingsPage(marketSettings);
             x.Components = ButtonSets.MarketSettingComponents(marketSettings);

@@ -29,7 +29,6 @@ namespace JustRPG.Services
             _client.InteractionCreated += HandleInteraction;
             _client.ButtonExecuted += ButtonInteraction;
             _client.SelectMenuExecuted += SelectInteraction;
-            _commands.InteractionExecuted += OnInteractionExecuted;
             _client.ModalSubmitted += ModalInteraction;
         }
 
@@ -63,22 +62,25 @@ namespace JustRPG.Services
             }
         }
 
-        private Task ButtonInteraction(SocketMessageComponent component)
+        private async Task ButtonInteraction(SocketMessageComponent component)
         {
-            _ = Task.Run(() =>
-            {
-                new ButtonHandler(_client, component, _services).ButtonDistributor().RunSynchronously();
-            });
-            return Task.CompletedTask;
+            var ctx = new SocketInteractionContext<SocketMessageComponent>(_client, component);
+            if (ctx.Interaction.Data.CustomId.Split('_')[1]==component.User.Id.ToString())
+                    _ = Task.Run(() => { _commands.ExecuteCommandAsync(ctx, _services); });
+            else
+                    await component.RespondAsync(embed: EmbedCreater.ErrorEmbed("Вы не можете с этим взаимодействовать"),
+                                                   ephemeral: true);
+
         }
 
-        private Task SelectInteraction(SocketMessageComponent component)
+        private async Task SelectInteraction(SocketMessageComponent component)
         {
-            _ = Task.Run(() =>
-            {
-                new SelectHandler(_client, component, _services).SelectDistributor().RunSynchronously();
-            });
-            return Task.CompletedTask;
+            var ctx = new SocketInteractionContext<SocketMessageComponent>(_client, component);
+                if (ctx.Interaction.Data.CustomId.Split('_')[1]==component.User.Id.ToString())
+                    _ = Task.Run(() => { _commands.ExecuteCommandAsync(ctx, _services); });
+                else
+                    await component.RespondAsync(embed: EmbedCreater.ErrorEmbed("Вы не можете с этим взаимодействовать"),
+                    ephemeral: true);
         }
 
         private Task ModalInteraction(SocketModal component)

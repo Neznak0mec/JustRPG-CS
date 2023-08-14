@@ -1,4 +1,5 @@
 using Discord;
+using Discord.Interactions;
 using Discord.Rest;
 using Discord.WebSocket;
 using JustRPG.Generators;
@@ -9,38 +10,26 @@ using JustRPG.Services;
 
 namespace JustRPG.Modules.Selects;
 
-public class SelectLocation : IInteractionMaster
+public class SelectLocation : InteractionModuleBase<SocketInteractionContext<SocketMessageComponent>>
 {
-    private DiscordSocketClient _client;
-    private readonly SocketMessageComponent _component;
+    private readonly DiscordSocketClient _client;
     private readonly DataBase _dataBase;
 
-    public SelectLocation(DiscordSocketClient client, SocketMessageComponent component, IServiceProvider service)
+    public SelectLocation(IServiceProvider service)
     {
-        _client = client;
-        _component = component;
-        _dataBase = (DataBase)service.GetService(typeof(DataBase))!;
+         _client = (DiscordSocketClient)service.GetService(typeof(DiscordSocketClient))!;
+         _dataBase = (DataBase)service.GetService(typeof(DataBase))!;
     }
 
-    public async Task Distributor(string[] buttonInfo)
-    {
-        switch (buttonInfo[2])
-        {
-            case "adventure":
-                await GenerateAdventure(buttonInfo[1]);
-                break;
-            case "dungeon":
-                await GenerateDungeon(buttonInfo[1]);
-                break;
-        }
-    }
 
+
+    [ComponentInteraction("SelectLocation_*_dungeon", true)]
     private async Task GenerateDungeon(string userId)
     {
-        Location location = await _dataBase.LocationsDb.Get(_component.Data.Values.ToArray()[0]);
+        Location location = await _dataBase.LocationsDb.Get(Context.Interaction.Data.Values.ToArray()[0]);
         Warrior mainPlayer =
             await AdventureGenerators.GenerateWarriorByUser((User)(await _dataBase.UserDb.Get(userId))!,
-                _component.User.Username, _dataBase);
+            Context.User.Username, _dataBase);
 
         List<Warrior> enemies = new List<Warrior>();
         for (int i = 0; i < Random.Shared.Next(1, 3); i++)
@@ -55,7 +44,7 @@ public class SelectLocation : IInteractionMaster
             drop = location.drops,
             players = new[] { mainPlayer },
             enemies = enemies.ToArray(),
-            originalInteraction = new List<object> {_component},
+            originalInteraction = new List<object> {Context},
             log = "-"
         };
 
@@ -66,12 +55,13 @@ public class SelectLocation : IInteractionMaster
             component: ButtonSets.BattleButtonSet(newBattle, Convert.ToInt64(userId)));
     }
 
+    [ComponentInteraction("SelectLocation_*_adventure", true)]
     async Task GenerateAdventure(string userId)
     {
-        Location location = await _dataBase.LocationsDb.Get(_component.Data.Values.ToArray()[0]);
+        Location location = await _dataBase.LocationsDb.Get(Context.Interaction.Data.Values.ToArray()[0]);
         Warrior mainPlayer =
             await AdventureGenerators.GenerateWarriorByUser((User)(await _dataBase.UserDb.Get(userId))!,
-                _component.User.Username, _dataBase);
+            Context.User.Username, _dataBase);
 
         Battle newBattle = new Battle
         {
@@ -79,7 +69,7 @@ public class SelectLocation : IInteractionMaster
             type = BattleType.adventure,
             drop = location.drops,
             players = new[] { mainPlayer },
-            originalInteraction = new List<object> {_component},
+            originalInteraction = new List<object> {Context},
             enemies = new[] { AdventureGenerators.GenerateMob(location) },
             log = "-"
         };
@@ -89,12 +79,12 @@ public class SelectLocation : IInteractionMaster
         await ResponseMessage(EmbedCreater.BattleEmbed(newBattle),
             component: ButtonSets.BattleButtonSet(newBattle, Convert.ToInt64(userId)));
         
-        await _component.Message.ModifyAsync(x=> x.Content = "biba");
+        await Context.Interaction.Message.ModifyAsync(x=> x.Content = "biba");
     }
 
     private async Task ResponseMessage(Embed embed, MessageComponent? component = null)
     {
-        await _component.UpdateAsync(x =>
+        await Context.Interaction.UpdateAsync(x =>
         {
             x.Embed = embed;
             x.Components = component;

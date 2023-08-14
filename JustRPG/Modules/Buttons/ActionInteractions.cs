@@ -1,52 +1,39 @@
 using Discord;
+using Discord.Interactions;
 using Discord.WebSocket;
 using JustRPG.Generators;
-using JustRPG.Interfaces;
 using JustRPG.Models;
 using JustRPG.Services;
-using Serilog;
 using Action = JustRPG.Models.Action;
 
 namespace JustRPG.Modules.Buttons;
 
-public class ActionInteractions : IInteractionMaster
+public class ActionInteractions : InteractionModuleBase<SocketInteractionContext<SocketMessageComponent>>
 {
-    private DiscordSocketClient _client;
-    private SocketMessageComponent _component;
     private readonly DataBase _dataBase;
     private Action? _action;
     private User? _dbUser;
+    private readonly DiscordSocketClient _client;
 
-    public ActionInteractions(DiscordSocketClient client, SocketMessageComponent component, IServiceProvider service)
+    public ActionInteractions(IServiceProvider service)
     {
-        _client = client;
-        _component = component;
+        _client = (DiscordSocketClient)service.GetService(typeof(DiscordSocketClient))!;
         _dataBase = (DataBase)service.GetService(typeof(DataBase))!;
     }
 
-    public async Task Distributor(string[] buttonInfo)
+    public override async Task<Task> BeforeExecuteAsync(ICommandInfo command)
     {
+        var buttonInfo = Context.Interaction.Data.CustomId.Split('_');
         _action = (Action)(await _dataBase.ActionDb.Get($"Action_{buttonInfo[2]}"))!;
-
-        if (_action == null)
-        {
-            await _component.UpdateAsync(x =>
-            {
-                x.Embed = EmbedCreater.ErrorEmbed("Неизвестная ошибка, попробуйте ещё раз");
-                x.Components = null;
-            });
-            return;
-        }
-
         _dbUser = (User)(await _dataBase.UserDb.Get(Convert.ToUInt64(buttonInfo[1])))!;
+        return base.BeforeExecuteAsync(command);
+    }
 
-        if (buttonInfo[3] == "Denied")
-        {
-            await DeniedAction();
-            return;
-        }
 
-        switch (_action.type)
+    [ComponentInteraction("Action_*_*_Accept", true)]
+    public async Task AcceptDistributor(string userId, string actionId)
+    {
+        switch (_action!.type)
         {
             case "Sell":
                 await AcceptSell();
@@ -63,9 +50,10 @@ public class ActionInteractions : IInteractionMaster
         }
     }
 
-    private async Task DeniedAction()
+    [ComponentInteraction("Action_*_*_Denied", true)]
+    private async Task DeniedAction(string userId, string actionId)
     {
-        await _component.UpdateAsync(x =>
+        await Context.Interaction.UpdateAsync(x =>
         {
             x.Embed = EmbedCreater.EmpEmbed("Действие было отменено");
             x.Components = null;
@@ -91,7 +79,7 @@ public class ActionInteractions : IInteractionMaster
             embed = EmbedCreater.ErrorEmbed("Данный предмет не найден в вашем инвентаре");
         }
 
-        await _component.UpdateAsync(x =>
+        await Context.Interaction.UpdateAsync(x =>
         {
             x.Embed = embed;
             x.Components = null;
@@ -132,7 +120,7 @@ public class ActionInteractions : IInteractionMaster
             embed = EmbedCreater.ErrorEmbed("Данный предмет не найден в вашем инвентаре");
         }
 
-        await _component.UpdateAsync(x =>
+        await Context.Interaction.UpdateAsync(x =>
         {
             x.Embed = embed;
             x.Components = null;
@@ -156,7 +144,7 @@ public class ActionInteractions : IInteractionMaster
             embed = EmbedCreater.ErrorEmbed("Данный предмет не найден в вашем инвентаре");
         }
 
-        await _component.UpdateAsync(x =>
+        await Context.Interaction.UpdateAsync(x =>
         {
             x.Embed = embed;
             x.Components = null;
@@ -171,24 +159,24 @@ public class ActionInteractions : IInteractionMaster
 
         if (temp == null)
         {
-            await _component.UpdateAsync(x =>
+            await Context.Interaction.UpdateAsync(x =>
                 x.Embed = EmbedCreater.ErrorEmbed("Предмет не найден, возможно он уже был продан или снят с продажи"));
             return;
         }
 
         item = (SaleItem)(temp);
-        user = (User)(await _dataBase.UserDb.Get(_component.User.Id))!;
+        user = (User)(await _dataBase.UserDb.Get(Context.User.Id))!;
 
         if (user.cash < item.price)
         {
-            await _component.UpdateAsync(x =>
+            await Context.Interaction.UpdateAsync(x =>
                 x.Embed = EmbedCreater.ErrorEmbed("У вас недостаточно средств для продажи"));
             return;
         }
 
         if (user.inventory.Count >= 30)
         {
-            await _component.UpdateAsync(x =>
+            await Context.Interaction.UpdateAsync(x =>
                 x.Embed = EmbedCreater.ErrorEmbed("У вас недостаточно места в инвентаре"));
             return;
         }
@@ -204,7 +192,7 @@ public class ActionInteractions : IInteractionMaster
         await _dataBase.UserDb.Update(seller);
         await _dataBase.MarketDb.Delete(item);
 
-        await _component.UpdateAsync(x =>
+        await Context.Interaction.UpdateAsync(x =>
         {
             x.Embed = EmbedCreater.SuccessEmbed("Предмет приобретён");
             x.Components = null;

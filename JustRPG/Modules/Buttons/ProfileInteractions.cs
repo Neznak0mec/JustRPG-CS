@@ -1,4 +1,5 @@
 using Discord;
+using Discord.Interactions;
 using Discord.WebSocket;
 using JustRPG.Generators;
 using JustRPG.Interfaces;
@@ -7,68 +8,54 @@ using JustRPG.Services;
 
 namespace JustRPG.Modules.Buttons;
 
-public class ProfileInteractions : IInteractionMaster
+public class ProfileInteractions : InteractionModuleBase<SocketInteractionContext<SocketMessageComponent>>
 {
     private readonly DiscordSocketClient _client;
-    private readonly SocketMessageComponent _component;
     private readonly DataBase _dataBase;
 
-    public ProfileInteractions(DiscordSocketClient client, SocketMessageComponent component, IServiceProvider service)
+    public ProfileInteractions(IServiceProvider service)
     {
-        _client = client;
-        _component = component;
-        _dataBase = (DataBase)service.GetService(typeof(DataBase))!;
+         _client = (DiscordSocketClient)service.GetService(typeof(DiscordSocketClient))!;
+         _dataBase = (DataBase)service.GetService(typeof(DataBase))!;
     }
 
-    public async Task Distributor(string[] buttonInfo)
+    [ComponentInteraction("Profile_*_*", true)]
+    private async Task ProfileButtonResponse(string memberId, string toFind)
     {
-        switch (buttonInfo[0])
-        {
-            case "Profile":
-                await ProfileButtonResponse(buttonInfo[2]);
-                break;
-            case "Equipment":
-                await EquipmentButtonResponse(buttonInfo[2]);
-                break;
-            case "Inventory":
-                await InventoryButtonResponse(buttonInfo[2]);
-                break;
-        }
-    }
-
-    private async Task ProfileButtonResponse(string memberId)
-    {
-        var user = _client.GetUser(Convert.ToUInt64(memberId));
-        var userDb = (User)(await _dataBase.UserDb.Get(memberId))!;
+        var user = _client.GetUser(Convert.ToUInt64(toFind));
+        var userDb = (User)(await _dataBase.UserDb.Get(toFind))!;
 
         await ResponseMessage(EmbedCreater.UserProfile(userDb, user),
-            ButtonSets.ProfileButtonsSet(_component.User.Id.ToString(), memberId));
+            ButtonSets.ProfileButtonsSet(memberId, toFind));
     }
 
-    private async Task EquipmentButtonResponse(string memberId)
+    [ComponentInteraction("Equipment_*_*", true)]
+    private async Task EquipmentButtonResponse(string memberId, string toFind)
     {
-        var user = _client.GetUser(Convert.ToUInt64(memberId));
-        var userDb = (User)(await _dataBase.UserDb.Get(memberId))!;
+        var user = _client.GetUser(Convert.ToUInt64(toFind));
+        var userDb = (User)(await _dataBase.UserDb.Get(toFind))!;
 
         await ResponseMessage(await EmbedCreater.UserEquipmentEmbed(userDb, user, _dataBase),
-            ButtonSets.ProfileButtonsSet(_component.User.Id.ToString(), memberId, "Equipment"));
+            ButtonSets.ProfileButtonsSet(Context.User.Id.ToString(), memberId, "Equipment"));
     }
 
-    public async Task InventoryButtonResponse(string memberId)
+    [ComponentInteraction("Inventory_*_*", true)]
+    public async Task InventoryButtonResponse(string memberId, string toFind)
     {
-        var member = _client.GetUser(Convert.ToUInt64(memberId));
+        var member = _client.GetUser(Convert.ToUInt64(toFind));
         Inventory inventory =
-            (Inventory)(await _dataBase.InventoryDb.Get($"Inventory_{memberId}_{_component.User.Id.ToString()}"))!;
+            (Inventory)(await _dataBase.InventoryDb.Get($"Inventory_{memberId}_{toFind}"))!;
         var items = await inventory.GetItems(_dataBase);
+        User user = (User)(await _dataBase.UserDb.Get(toFind))!;
 
-        await ResponseMessage(EmbedCreater.UserInventory(member, items),
-            ButtonSets.InventoryButtonsSet(_component.User.Id.ToString(), Convert.ToInt64(memberId), inventory, items)
+        await ResponseMessage(EmbedCreater.UserInventory(member, user,items),
+            ButtonSets.InventoryButtonsSet(Context.User.Id.ToString(), Convert.ToInt64(toFind), inventory, items)
             );
     }
 
     private async Task ResponseMessage(Embed embed, MessageComponent component)
     {
-        await _component.UpdateAsync(x =>
+        await Context.Interaction.UpdateAsync(x =>
         {
             x.Embed = embed;
             x.Components = component;

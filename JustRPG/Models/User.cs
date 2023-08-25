@@ -33,7 +33,7 @@ public class User
     [BsonElement("badges")] public List<string> badges { get; set; } = new();
 
     [BsonElement("guild_tag")] public string? guildTag { get; set; } = null;
-    [BsonElement("guild_emblem")] public string guildEmblem { get; set; } = "";
+    [BsonElement("guild_emblem")] public string? guildEmblem { get; set; } = null;
 
     public async Task<UserEquipment> GetEquipmentAsItems(DataBase dataBase)
     {
@@ -51,16 +51,14 @@ public class User
 
     public string GetFullName(string username)
     {
-        string bageString = "",resault ="";
-        foreach (var bage in badges)
-        {
-            bageString += bage+' ';
-        }
-        resault+= guildEmblem+' ';
-        resault+= (guildTag ?? "") + ' ';
-        resault+= username;
-        resault+= bageString;
-        return resault;
+        string badgeString = "",result ="";
+        badgeString = badges.Aggregate(badgeString, (current, badge) => current + (badge + ' '));
+        result+= guildEmblem+' ';
+        if (guildTag != null)
+            result += $"[{guildTag}] ";
+        result+= username+' ';
+        result+= badgeString;
+        return result;
     }
 
 }

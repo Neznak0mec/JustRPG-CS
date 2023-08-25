@@ -1,3 +1,4 @@
+using System.Net.Sockets;
 using Discord;
 using JustRPG.Models;
 using JustRPG.Models;
@@ -56,7 +57,7 @@ public class EmbedCreater
     {
         var emb = new EmbedBuilder
         {
-            Title = $"Профиль {user.GetFullName(member.Username) }"
+            Title = $"Профиль {user.GetFullName(member.Username)}"
         };
         emb.AddField($"Уровень", $"{user.lvl}", inline: true)
             .AddField("Опыт", $"{(int)user.Exp}\\{(int)user.expToLvl}", inline: true)
@@ -108,7 +109,7 @@ public class EmbedCreater
         return embed.Build();
     }
 
-    public static Embed UserInventory(IUser member, User user,Item?[] items)
+    public static Embed UserInventory(IUser member, User user, Item?[] items)
     {
         var emb = new EmbedBuilder { Title = $"Инвентарь {user.GetFullName(member.Username)}" };
         foreach (var item in items)
@@ -198,7 +199,8 @@ public class EmbedCreater
 
         embed = new EmbedBuilder
         {
-            Title = $"Бой {battle.players[0].fullName} - {(battle.type is BattleType.arena ? battle.players[1] : selectedEnemy).fullName}",
+            Title =
+                $"Бой {battle.players[0].fullName} - {(battle.type is BattleType.arena ? battle.players[1] : selectedEnemy).fullName}",
             Description = battle.type == BattleType.arena ? $"Сейчас ходит {currentWarrior.name}" : ""
         };
 
@@ -267,15 +269,15 @@ public class EmbedCreater
             Title = "Настрокйи товаров",
             Description = (items.Count == 0 ? "Вы не выставили предметы на продажу" : null)
         };
-        if (items.Count != 0)
-            for (int i = 0; i < 5; i++)
-            {
-                if (i < items.Count)
-                    emb.AddField(
-                        (searchState.currentItemIndex == i ? "💠 " : "") +
-                        $"{items[i].itemName} | {items[i].price}<:silver:997889161484828826>",
-                        items[i].itemDescription);
-            }
+        if (items.Count == 0) return emb.Build();
+        for (int i = 0; i < 5; i++)
+        {
+            if (i < items.Count)
+                emb.AddField(
+                    (searchState.currentItemIndex == i ? "💠 " : "") +
+                    $"{items[i].itemName} | {items[i].price}<:silver:997889161484828826>",
+                    items[i].itemDescription);
+        }
 
         return emb.Build();
     }
@@ -283,10 +285,62 @@ public class EmbedCreater
     public static Embed GuildEmbed(Guild guild)
     {
         var builder = new EmbedBuilder()
-            .WithTitle($"Гильдия {guild.tag}")
-            .AddField("Количество участников", $"{guild.members.Count}/30")
-            .AddField("Глава гильдии", $"<@{guild.leader}>", true);
+            .WithTitle($"Гильдия {guild.symbol} [{guild.tag}] {guild.name}")
+            .WithThumbnailUrl(guild.logo)
+            .AddField("Глава", $"<@{guild.members.First(x => x.rank == GuildRank.owner).user}>", inline:true)
+            .AddField("Участников", $"{guild.members.Count}/30", inline:true)
+            .AddField("Тег", guild.tag, inline:true);
+        
+        if (guild.premium)
+            builder.AddField("Значок", guild.symbol ?? "Не установлен", inline:true);
+
+        string inviteType = guild.join_type switch
+        {
+            JoinType.open => "Открытый",
+            JoinType.invite => "Через заявку",
+            _ => "Закрыт"
+        };
+
+        builder.AddField("Тип присоединения", inviteType, inline:true);
 
         return builder.Build();
     }
+
+    public static Embed GuildMembers(Guild guild)
+    {
+        var emb = new EmbedBuilder
+        {
+            Title = $"Участники {guild.name}"
+        };
+        foreach (var member in guild.members)
+        {
+            string rank = member.rank switch
+            {
+                GuildRank.owner => "глава",
+                GuildRank.officer => "оффицер",
+                _ => "Участник"
+            };
+            emb.AddField($"<@{member.user}>", $"Звание - `{rank}`");
+        }
+
+        return emb.Build();
+    }
+
+    public static Embed GuildApplications(Guild guild)
+    {
+        List<long> users = guild.wantJoin.Where((x, y) => y <= 25).ToList();
+        var emb = new EmbedBuilder
+        {
+            Title = "Заявки на вступление"
+        };
+        emb.AddField($"� <@{users[0]}>", "");
+        users.Remove(users[0]);
+        foreach (var user in users)
+        {
+            emb.AddField($"<@{user}>", "");
+        }
+
+        return emb.Build();
+    }
+
 }

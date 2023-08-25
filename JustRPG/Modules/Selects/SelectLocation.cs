@@ -21,10 +21,8 @@ public class SelectLocation : InteractionModuleBase<SocketInteractionContext<Soc
          _dataBase = (DataBase)service.GetService(typeof(DataBase))!;
     }
 
-
-
     [ComponentInteraction("SelectLocation_*_dungeon", true)]
-    private async Task GenerateDungeon(string userId)
+    private async Task GenerateDungeon(string userId,string[] selected)
     {
         Location location = await _dataBase.LocationsDb.Get(Context.Interaction.Data.Values.ToArray()[0]);
         Warrior mainPlayer =
@@ -54,13 +52,13 @@ public class SelectLocation : InteractionModuleBase<SocketInteractionContext<Soc
         await ResponseMessage(EmbedCreater.BattleEmbed(newBattle),
             component: ButtonSets.BattleButtonSet(newBattle, Convert.ToInt64(userId)));
     }
-
+    
     [ComponentInteraction("SelectLocation_*_adventure", true)]
-    async Task GenerateAdventure(string userId)
+    async Task GenerateAdventure(string id, string[] selectedRoles)
     {
         Location location = await _dataBase.LocationsDb.Get(Context.Interaction.Data.Values.ToArray()[0]);
         Warrior mainPlayer =
-            await AdventureGenerators.GenerateWarriorByUser((User)(await _dataBase.UserDb.Get(userId))!,
+            await AdventureGenerators.GenerateWarriorByUser((User)(await _dataBase.UserDb.Get(Context.User.Id))!,
             Context.User.Username, _dataBase);
 
         Battle newBattle = new Battle
@@ -77,9 +75,9 @@ public class SelectLocation : InteractionModuleBase<SocketInteractionContext<Soc
         await _dataBase.BattlesDb.CreateObject(newBattle);
 
         await ResponseMessage(EmbedCreater.BattleEmbed(newBattle),
-            component: ButtonSets.BattleButtonSet(newBattle, Convert.ToInt64(userId)));
+            component: ButtonSets.BattleButtonSet(newBattle, (long)Context.User.Id));
         
-        await Context.Interaction.Message.ModifyAsync(x=> x.Content = "biba");
+        // await Context.Interaction.Message.ModifyAsync(x=> x.Content = "biba");
     }
 
     private async Task ResponseMessage(Embed embed, MessageComponent? component = null)

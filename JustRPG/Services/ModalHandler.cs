@@ -32,6 +32,9 @@ public class ModalHandler
                 master = new InventoryModals(_client, _modal, _service);
                 break;
 
+            case "Guild":
+                master = new GuildModals(_client, _modal, _service);
+                break;
             default:
                 await WrongInteraction("Данная форма не найдена, пропробуйте чуть позже");
                 return;

@@ -121,7 +121,7 @@ public class MarketSortInteractions : InteractionModuleBase<SocketInteractionCon
 
         await _dataBase.ActionDb.CreateObject(action);
         Embed embed =
-            EmbedCreater.WarningEmbed($"Вы уверены что хотите уничтожыть `{item.itemName}` за `{item.price}`?");
+            EmbedCreater.WarningEmbed($"Вы уверены что хотите уничтожить `{item.itemName}` за `{item.price}`?");
         await RespondAsync(embed: embed, components: ButtonSets.AcceptActions(uId, (long)Context.User.Id),
             ephemeral: true);
     }

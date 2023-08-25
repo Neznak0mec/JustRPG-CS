@@ -7,12 +7,12 @@ namespace JustRPG.Services.Collections;
 public class UserDb : ICollection
 {
     private readonly IMongoCollection<User?> _collection;
-    private readonly List<ulong> usersIdCache;
+    private readonly List<ulong> _usersIdCache;
 
     public UserDb(IMongoDatabase mongoDatabase)
     {
         _collection = mongoDatabase.GetCollection<User>("users")!;
-        usersIdCache = new List<ulong>();
+        _usersIdCache = new List<ulong>();
     }
 
     public async Task<object?> Get(object val, string key = "id")
@@ -23,7 +23,7 @@ public class UserDb : ICollection
 
     public async Task<object?> CreateObject(object? id)
     {
-        User? newUser = new User { id = Convert.ToInt64(id) };
+        User newUser = new User { id = Convert.ToInt64(id) };
         await _collection.InsertOneAsync(newUser);
         return newUser;
     }
@@ -37,13 +37,12 @@ public class UserDb : ICollection
 
     public async Task Cache(ulong userId)
     {
-        if (usersIdCache.Contains(userId))
+        if (_usersIdCache.Contains(userId))
             return;
 
-        var user = Get(userId);
-        if (user == null)
+        if (await Get(userId) == null)
             await CreateObject(userId);
 
-        usersIdCache.Add(userId);
+        _usersIdCache.Add(userId);
     }
 }

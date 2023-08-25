@@ -30,43 +30,42 @@ namespace JustRPG.Services
             _client.ButtonExecuted += ButtonInteraction;
             _client.SelectMenuExecuted += SelectInteraction;
             _client.ModalSubmitted += ModalInteraction;
+            
+            _commands.InteractionExecuted += OnInteractionExecuted;
         }
 
         private async Task HandleInteraction(SocketInteraction arg)
         {
             await _dataBase.UserDb.Cache(arg.User.Id);
             if (arg.Type == InteractionType.ApplicationCommand)
-                try
-                {
-                    var context = new SocketInteractionContext(_client, arg);
-                    _ = Task.Run(() => { _commands.ExecuteCommandAsync(context, _services); });
-                }
-                catch (Exception e)
-                {
-                    Log.Debug(e.ToString());
-                }
+            {
+                var context = new SocketInteractionContext(_client, arg);
+                _ = Task.Run(() => { _commands.ExecuteCommandAsync(context, _services); });
+            }
         }
 
-        private async Task OnInteractionExecuted(ICommandInfo command, IInteractionContext context, IResult result)
+        private async Task OnInteractionExecuted(ICommandInfo info, IInteractionContext context, IResult result)
         {
             if (!result.IsSuccess && (result.ErrorReason.StartsWith("Не так быстро") ||
-                context.User.Id == 426986442632462347))
+                                      context.User.Id == 426986442632462347))
             {
                 await context.Interaction.RespondAsync(embed: EmbedCreater.ErrorEmbed(result.ErrorReason),
                     ephemeral: true);
+                Log.Debug("{reason}",result.ErrorReason);
             }
             else if (!result.IsSuccess)
             {
                 await context.Interaction.RespondAsync(
                     embed: EmbedCreater.ErrorEmbed("Произошла неизвестная ошибка, попробуйте позже"), ephemeral: true);
+                Log.Debug("{reason}",result.ErrorReason);
             }
         }
 
         private async Task ButtonInteraction(SocketMessageComponent component)
         {
-            var ctx = new SocketInteractionContext<SocketMessageComponent>(_client, component);
-            if (ctx.Interaction.Data.CustomId.Split('_')[1]==component.User.Id.ToString())
-                    _ = Task.Run(() => { _commands.ExecuteCommandAsync(ctx, _services); });
+            var context = new SocketInteractionContext<SocketMessageComponent>(_client, component);
+            if (context.Interaction.Data.CustomId.Split('_')[1]==component.User.Id.ToString())
+                    _ = Task.Run(async () => {await Execute(context); });
             else
                     await component.RespondAsync(embed: EmbedCreater.ErrorEmbed("Вы не можете с этим взаимодействовать"),
                                                    ephemeral: true);
@@ -75,19 +74,31 @@ namespace JustRPG.Services
 
         private async Task SelectInteraction(SocketMessageComponent component)
         {
-            var ctx = new SocketInteractionContext<SocketMessageComponent>(_client, component);
-                if (ctx.Interaction.Data.CustomId.Split('_')[1]==component.User.Id.ToString())
-                    _ = Task.Run(() => { _commands.ExecuteCommandAsync(ctx, _services); });
+            var context = new SocketInteractionContext<SocketMessageComponent>(_client, component);
+                if (context.Interaction.Data.CustomId.Split('_')[1]==component.User.Id.ToString())
+                    _ = Task.Run(async () => {await Execute(context); });
                 else
                     await component.RespondAsync(embed: EmbedCreater.ErrorEmbed("Вы не можете с этим взаимодействовать"),
                     ephemeral: true);
         }
 
+        private async Task Execute(IInteractionContext ctx)
+        {
+            try
+            {
+                await _commands.ExecuteCommandAsync(ctx, _services);
+            }
+            catch (Exception e)
+            {
+                Log.Debug(e.ToString());
+            }
+        }
+
         private Task ModalInteraction(SocketModal component)
         {
-            _ = Task.Run(() =>
+            _ = Task.Run(async () =>
             {
-                new ModalHandler(_client, component, _services).ModalDistributor().RunSynchronously();
+                await new ModalHandler(_client, component, _services).ModalDistributor();
             });
             return Task.CompletedTask;
         }

@@ -246,12 +246,77 @@ public static class ButtonSets
     public static MessageComponent GuildComponents(Guild guild, ulong userId)
     {
         var builder = new ComponentBuilder();
-        if (guild.members.Contains(userId))
-            builder.WithButton(emote: Emoji.Parse(":outbox_tray:"),customId:$"Guild_{userId}_leave_{guild.tag}");
-        else
-            builder.WithButton(emote: Emoji.Parse(":inbox_tray:"),customId:$"Guild_{userId}_join_{guild.tag}");
+        
+        GuildMember? member = guild.members.FirstOrDefault(x => x.user == (long)userId);
+        if (member == null)
+        {
+            builder.WithButton(label: "Участники",$"Guild_{userId}_{guild.tag}_members");
+            switch (guild.join_type)
+            {
+                case JoinType.open:
+                    builder.WithButton("Вступить", $"Guild_{userId}_{guild.tag}_join");
+                    break;
+                case JoinType.invite:
+                    builder.WithButton("Заявка", $"Guild_{userId}_{guild.tag}_join");
+                    break;
+                default:
+                    builder.WithButton("Вступить", $"Guild_{userId}_{guild.tag}_join",disabled:true);
+                    break;
+            }
+        }
+        else switch (member.rank)
+        {
+            case GuildRank.warrior:
+                builder.WithButton("Участники",$"Guild_{userId}_{guild.tag}_members")
+                    .WithButton("Выйти", $"Guild_{userId}_{guild.tag}_leave", style: ButtonStyle.Danger);
+                break;
+            case GuildRank.officer:
+                builder.WithButton("Участники",$"Guild_{userId}_{guild.tag}_members")
+                    .WithButton("Заявки", $"Guild_{userId}_{guild.tag}_applications", disabled: guild.join_type != JoinType.invite)
+                    .WithButton("Выйти", $"Guild_{userId}_{guild.tag}_leave", style: ButtonStyle.Danger);
+                break;
+            default:
+                builder.WithButton("Участники",$"Guild_{userId}_{guild.tag}_members")
+                    .WithButton("Заявки", $"Guild_{userId}_{guild.tag}_applications")
+                    .WithButton("Настройки", $"Guild_{userId}_{guild.tag}_settings");
+                break;
+        }
+
+        return builder.Build();
+    }
+    
+    public static MessageComponent GuildMembers(Guild guild, ulong userId)
+    {
+        var builder = new ComponentBuilder();
+        
+        builder.WithButton("Главная",$"Guild_{userId}_{guild.tag}_main");
+        
+        GuildMember? member = guild.members.FirstOrDefault(x => x.user == (long)userId);
+        if (member is { rank: GuildRank.officer or GuildRank.owner })
+        {
+            builder.WithButton("Кикнуть", customId: $"Guild_{userId}_{guild.tag}_kick");
+        }
+
+        return builder.Build();
+    }
+    
+    public static MessageComponent GuildApplications(Guild guild, ulong userId)
+    {
+        var builder = new ComponentBuilder();
+
+        builder.WithButton("Приянть",$"Guild_{userId}_{guild.tag}_accept")
+            .WithButton("Отклонить",$"Guild_{userId}_{guild.tag}_denied")
+            .WithButton("Главная",$"Guild_{userId}_{guild.tag}_main");
 
         return builder.Build();
     }
 
+    public static MessageComponent GuildCreateComponents(ulong userId)
+    {
+        var builder = new ComponentBuilder();
+
+        builder.WithButton("Создать", $"Guild_{userId}_create");
+
+        return builder.Build();
+    }
 }

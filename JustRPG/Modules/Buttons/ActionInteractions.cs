@@ -47,6 +47,9 @@ public class ActionInteractions : InteractionModuleBase<SocketInteractionContext
             case "MarketBuy":
                 await MarketBuy();
                 break;
+            case "GuildLeave":
+                await GuildLeave();
+                break;
         }
     }
 
@@ -197,5 +200,30 @@ public class ActionInteractions : InteractionModuleBase<SocketInteractionContext
             x.Embed = EmbedCreater.SuccessEmbed("Предмет приобретён");
             x.Components = null;
         });
+    }
+
+    private async Task GuildLeave()
+    {
+        Guild guild = (Guild)(await _dataBase.GuildDb.Get(_action!.args[0]))!;
+        GuildMember? member = guild.members.FirstOrDefault(x => x.user == (long)Context.User.Id);
+        
+        User user = (User)(await _dataBase.UserDb.Get(Context.User.Id))!;
+        
+        if (member == null || user.guildTag != guild.tag)
+        {
+            await RespondAsync(embed: EmbedCreater.ErrorEmbed("Вы не являетесь участником этой гильдии"),
+                ephemeral: true);
+            return;
+        }
+        
+        user.guildTag = null;
+        user.guildEmblem = null;
+
+        guild.members.Remove(member);
+
+        await _dataBase.GuildDb.Update(guild);
+        await _dataBase.UserDb.Update(user);
+
+        await RespondAsync(embed: EmbedCreater.SuccessEmbed("Вы покинули гильдию"), ephemeral: true);
     }
 }

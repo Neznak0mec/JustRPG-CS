@@ -25,7 +25,7 @@ public class BattleInteractions : InteractionModuleBase<SocketInteractionContext
     public override async Task<Task> BeforeExecuteAsync(ICommandInfo command)
     {
         var buttonInfo = Context.Interaction.Data.CustomId.Split('_');
-        object? temp = await _dataBase.BattlesDb.Get(buttonInfo[3]);
+        object? temp = await _dataBase.BattlesDb.Get(buttonInfo[2]);
         if (temp == null){
             await WrongInteraction("Боя не существует или он завершился");
             return Task.CompletedTask;
@@ -36,7 +36,7 @@ public class BattleInteractions : InteractionModuleBase<SocketInteractionContext
         }
     }
 
-    [ComponentInteraction("Battle_*_Attack_*", true)]
+    [ComponentInteraction("Battle|Attack_*_*", true)]
     async Task Attack(string userId, string battleId)
     {
         if (_battle.type is BattleType.adventure or BattleType.dungeon)
@@ -89,7 +89,7 @@ public class BattleInteractions : InteractionModuleBase<SocketInteractionContext
     }
     
 
-    [ComponentInteraction("Battle_*_Heal_*", true)]
+    [ComponentInteraction("Battle|Heal_*_*", true)]
     async Task Heal(string userId, string battleId)
     {
         if (_battle.players[_battle.currentUser].inventory.Any(x => x.Item1 == "fb75ff73-1116-4e95-ae46-8075c4e9a782")){
@@ -128,7 +128,7 @@ public class BattleInteractions : InteractionModuleBase<SocketInteractionContext
     }
     
 
-    [ComponentInteraction("Battle_*_Run_*", true)]
+    [ComponentInteraction("Battle|Run_*_*", true)]
     async Task Run(string userId, string battleId)
     {
         
@@ -182,7 +182,7 @@ public class BattleInteractions : InteractionModuleBase<SocketInteractionContext
         await UpdateBattle();
     }
     
-    [ComponentInteraction("Battle_*_SelectEnemy_*", true)]
+    [ComponentInteraction("Battle|SelectEnemy_*_*", true)]
     async Task SelectEnemy(string userId, string battleId,string[] selected)
     {
         _battle.selectedEnemy = Convert.ToInt16(selected[0]);

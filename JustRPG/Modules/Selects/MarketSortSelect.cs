@@ -18,7 +18,7 @@ public class MarketSortSelect : InteractionModuleBase<SocketInteractionContext<S
          _dataBase = (DataBase)service.GetService(typeof(DataBase))!;
     }
 
-    [ComponentInteraction("MarketSort_*_byLvl", true)]
+    [ComponentInteraction("MarketSort|byLvl_*", true)]
     public async Task SelectLvl(string userId, string[] selected)
     {
         MarketSearchState search = (await _dataBase.MarketDb.GetSearch(userId))!;
@@ -30,7 +30,7 @@ public class MarketSortSelect : InteractionModuleBase<SocketInteractionContext<S
         await UpdateMessage(search);
     }
 
-    [ComponentInteraction("MarketSort_*_byRaty", true)]
+    [ComponentInteraction("MarketSort|byRaty_*", true)]
     public async Task SelectRaty(string userId, string[] selected)
     {
         MarketSearchState search = (await _dataBase.MarketDb.GetSearch(userId))!;
@@ -57,7 +57,7 @@ public class MarketSortSelect : InteractionModuleBase<SocketInteractionContext<S
     }
 
 
-    [ComponentInteraction("MarketSort_*_byType", true)]
+    [ComponentInteraction("MarketSort|byType_*", true)]
     public async Task SelectType(string userId, string[] selected)
     {
         MarketSearchState search = (await _dataBase.MarketDb.GetSearch(userId))!;

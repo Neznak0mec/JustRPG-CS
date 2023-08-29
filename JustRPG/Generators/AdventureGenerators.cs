@@ -144,11 +144,10 @@ public static class AdventureGenerators
                                 break;
                         }
                     }
-                    if (dropedItem != null)
-                    {
-                        Item item = (Item)(await dataBase.ItemDb.Get(dropedItem))!;
-                        battle.log += $"{battle.players[i].name} потерял {item.name}\n";
-                    }
+
+                    if (dropedItem == null) continue;
+                    Item item = (Item)(await dataBase.ItemDb.Get(dropedItem))!;
+                    battle.log += $"{battle.players[i].name} потерял {item.name}\n";
                 }
 
                 break;
@@ -191,11 +190,10 @@ public static class AdventureGenerators
                                     break;
                             }
                         }
-                        if (dropedItem != null)
-                        {
-                            Item item = (Item)(await dataBase.ItemDb.Get(dropedItem))!;
-                            battle.log += $"{battle.players[i].name} потерял {item.name}\n";
-                        }
+
+                        if (dropedItem == null) continue;
+                        Item item = (Item)(await dataBase.ItemDb.Get(dropedItem))!;
+                        battle.log += $"{battle.players[i].name} потерял {item.name}\n";
                     }
                 }
                 break;

@@ -36,9 +36,16 @@ public class Program
                     .AddSingleton<DataBase>(_shareDataBase)
                     .AddSingleton<Background>(_background)
             ).Build();
-
+        
+        Log.Logger = new LoggerConfiguration()
+            .MinimumLevel.Verbose()
+            .Enrich.FromLogContext()
+            .WriteTo.Console()
+            .CreateLogger();
+        
+        _client.Log += LogAsync;
+        
         await Task.WhenAll(RunAsync(host), RunBackgroundTaskAsync());
-
     }
 
     private async Task RunBackgroundTaskAsync()
@@ -50,33 +57,25 @@ public class Program
     {
         using IServiceScope serviceScope = host.Services.CreateScope();
         IServiceProvider provider = serviceScope.ServiceProvider;
-
-        var client = provider.GetRequiredService<DiscordSocketClient>();
+        
         var sCommands = provider.GetRequiredService<InteractionService>();
         await provider.GetRequiredService<InteractionHandler>().InitializeAsync();
         
-        Log.Logger = new LoggerConfiguration()
-            .MinimumLevel.Verbose()
-            .Enrich.FromLogContext()
-            .WriteTo.Console()
-            .CreateLogger();
-        
-        client.Log += LogAsync;
         sCommands.Log += (LogMessage msg) =>
         {
-            Log.Information(msg.Message);
+            Log.Information("{Msg}",msg.Message);
             return Task.CompletedTask;
         };
 
-        client.Ready += async () =>
+        _client!.Ready += async () =>
         {
-            Log.Information("{currentUserId} is logined!", client.CurrentUser.Id);
+            Log.Information("{CurrentUserId} is logined!", _client.CurrentUser.Id);
             await sCommands.RegisterCommandsGloballyAsync();
             Log.Information("commands are loaded");
         };
 
-        await client.LoginAsync(TokenType.Bot, Environment.GetEnvironmentVariable("TestBotToken"));
-        await client.StartAsync();
+        await _client.LoginAsync(TokenType.Bot, Environment.GetEnvironmentVariable("BotToken"));
+        await _client.StartAsync();
 
         await Task.Delay(-1);
     }

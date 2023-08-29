@@ -19,7 +19,7 @@ public class MarketInteractions : InteractionModuleBase<SocketInteractionContext
          _dataBase = (DataBase)service.GetService(typeof(DataBase))!;
     }
 
-    [ComponentInteraction("MarketSort_*_prewItem", true)]
+    [ComponentInteraction("Market|prewItem_*", true)]
     public async Task PreviousItem(string userId)
     {
         MarketSlotsSettings search = (await _dataBase.MarketDb.GetSettings(userId))!;
@@ -28,7 +28,7 @@ public class MarketInteractions : InteractionModuleBase<SocketInteractionContext
         await UpdateMessage(search);
     }
 
-    [ComponentInteraction("MarketSort_*_nextItem", true)]
+    [ComponentInteraction("Market|nextItem_*", true)]
     public async Task NextItem(string userId)
     {
         MarketSlotsSettings search = (await _dataBase.MarketDb.GetSettings(userId))!;
@@ -37,7 +37,7 @@ public class MarketInteractions : InteractionModuleBase<SocketInteractionContext
         await UpdateMessage(search);
     }
 
-    [ComponentInteraction("MarketSort_*_editPrice", true)]
+    [ComponentInteraction("Market|editPrice_*", true)]
     private async Task EditPrice(string userId)
     {
         SaleItem? saleItem = await GetItem(userId);
@@ -45,15 +45,15 @@ public class MarketInteractions : InteractionModuleBase<SocketInteractionContext
             return;
 
         ModalBuilder modalBuilder = new ModalBuilder()
-            .WithTitle($"Продажа предмета {saleItem.itemName}")
+            .WithTitle($"")
             .WithCustomId($"Inventory_SetSellItemPrice_{saleItem.id}")
             .AddTextInput(label: "Цена продажи", placeholder: "Введите цену за которую хотете продать предмет",
                 customId: "price", required: true, minLength: 1);
-
+        
         await RespondWithModalAsync(modalBuilder.Build());
     }
 
-    [ComponentInteraction("MarketSort_*_editVisible", true)]
+    [ComponentInteraction("Market|editVisible_*", true)]
     private async Task EditVisible(string userId)
     {
         SaleItem? saleItem = await GetItem(userId);
@@ -70,7 +70,7 @@ public class MarketInteractions : InteractionModuleBase<SocketInteractionContext
         await UpdateMessage(search);
     }
 
-    [ComponentInteraction("MarketSort_*_Remove", true)]
+    [ComponentInteraction("Market|Remove_*", true)]
     private async Task RemoveItem(string userId)
     {
         SaleItem? saleItem = await GetItem(userId);
@@ -89,7 +89,7 @@ public class MarketInteractions : InteractionModuleBase<SocketInteractionContext
         await UpdateMessage(search);
     }
 
-    [ComponentInteraction("MarketSort_*_reloadPage", true)]
+    [ComponentInteraction("Market|reloadPage_*", true)]
     private async Task ReloadPage(string userId)
     {
         MarketSlotsSettings search = (await _dataBase.MarketDb.GetSettings(userId))!;
@@ -98,7 +98,7 @@ public class MarketInteractions : InteractionModuleBase<SocketInteractionContext
         await UpdateMessage(search);
     }
 
-    [ComponentInteraction("MarketSort_*_goBack", true)]
+    [ComponentInteraction("Market|goBack_*", true)]
     private async Task GoBack(string userId)
     {
         MarketSlotsSettings settings = (await _dataBase.MarketDb.GetSettings(userId))!;

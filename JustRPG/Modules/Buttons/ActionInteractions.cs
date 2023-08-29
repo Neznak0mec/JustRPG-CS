@@ -30,7 +30,7 @@ public class ActionInteractions : InteractionModuleBase<SocketInteractionContext
     }
 
 
-    [ComponentInteraction("Action_*_*_Accept", true)]
+    [ComponentInteraction("Action|Accept_*_*", true)]
     public async Task AcceptDistributor(string userId, string actionId)
     {
         switch (_action!.type)
@@ -53,7 +53,7 @@ public class ActionInteractions : InteractionModuleBase<SocketInteractionContext
         }
     }
 
-    [ComponentInteraction("Action_*_*_Denied", true)]
+    [ComponentInteraction("Action|Denied_*_*", true)]
     private async Task DeniedAction(string userId, string actionId)
     {
         await Context.Interaction.UpdateAsync(x =>

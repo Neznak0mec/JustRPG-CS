@@ -1,4 +1,5 @@
 using Discord;
+using Discord.WebSocket;
 using JustRPG.Features;
 using JustRPG.Models;
 using JustRPG.Models.Enums;
@@ -23,7 +24,7 @@ public static class ButtonSets
         var select = new SelectMenuBuilder()
             .WithPlaceholder(
                 $"Тип взаимодействия: {(inventory!.interactionType == "info" ? "информация" : inventory.interactionType == "sell" ? "продажа" : inventory.interactionType == "destroy" ? "уничтожть" : "экипировать")}")
-            .WithCustomId($"Inventary_{finder}_{userId}_InteractionType")
+            .WithCustomId($"Inventory|InteractionType_{finder}_{userId}")
             .AddOption("Информация", "info")
             .AddOption("Экипировать", "equip")
             .AddOption("Продать", "sell")
@@ -31,13 +32,13 @@ public static class ButtonSets
             .WithDisabled(finder != userId.ToString());
 
         var builder = new ComponentBuilder()
-            .WithButton(label: "⮘", customId: $"Inventary_{finder}_{userId}_PrewPage",
+            .WithButton(label: "⮘", customId: $"Inventory|PrewPage_{finder}_{userId}",
                 disabled: inventory.currentPage == 0, row: 0)
             .WithButton(label: $"{inventory.currentPage + 1}/{inventory.lastPage + 1}", customId: "null1",
                 disabled: true, row: 0)
-            .WithButton(label: "➣", customId: $"Inventary_{finder}_{userId}_NextPage",
+            .WithButton(label: "➣", customId: $"Inventory|NextPage_{finder}_{userId}",
                 disabled: inventory.currentPage >= inventory.lastPage, row: 0)
-            .WithButton(label: "♺", customId: $"Inventary_{finder}_{userId}_Reload")
+            .WithButton(label: "♺", customId: $"Inventory|Reload_{finder}_{userId}")
             .WithSelectMenu(select, row: 1);
 
         ButtonStyle style;
@@ -68,7 +69,7 @@ public static class ButtonSets
             }
             else if (inventory.interactionType == "info" || finder == userId.ToString())
             {
-                customId = $"Inventary_{finder}_{userId}_{inventory.interactionType}_{i}";
+                customId = $"Inventory{finder}_{userId}_{inventory.interactionType}_{i}";
 
                 if (inventory.interactionType == "equip")
                     disabled = !items[i]!.IsEquippable();
@@ -83,7 +84,7 @@ public static class ButtonSets
 
         builder.WithButton(label: "Назад к профилю", customId: $"Equipment_{finder}_{userId}", row: 3)
             .WithButton(emote: Emoji.Parse(":tools:"), label: "🛒",
-                customId: $"Inventary_{finder}_{userId}_OpenSlotsSettings", row: 3);
+                customId: $"Inventory|OpenSlotsSettings_{finder}_{userId}", row: 3);
 
         return builder.Build();
     }
@@ -91,8 +92,8 @@ public static class ButtonSets
     public static MessageComponent AcceptActions(string uid, long userId)
     {
         var builder = new ComponentBuilder()
-            .WithButton(label: "Да", customId: $"Action_{userId}_{uid}_Accept", row: 0, style: ButtonStyle.Success)
-            .WithButton(label: "Нет", customId: $"Action_{userId}_{uid}_Denied", row: 0, style: ButtonStyle.Danger);
+            .WithButton(label: "Да", customId: $"Action|Accept_{userId}_{uid}", row: 0, style: ButtonStyle.Success)
+            .WithButton(label: "Нет", customId: $"Action|Denied_{userId}_{uid}", row: 0, style: ButtonStyle.Danger);
 
         return builder.Build();
     }
@@ -117,17 +118,17 @@ public static class ButtonSets
         bool disableSelectEnemy = false)
     {
         var builder = new ComponentBuilder()
-            .WithButton(label: "Атака", customId: $"Battle_{userId}_Attack_{battle!.id}", disabled: disableButtons)
-            .WithButton(label: "Хил", customId: $"Battle_{userId}_Heal_{battle.id}", disabled: disableButtons,
+            .WithButton(label: "Атака", customId: $"Battle|Attack_{userId}_{battle!.id}", disabled: disableButtons)
+            .WithButton(label: "Хил", customId: $"Battle|Heal_{userId}_{battle.id}", disabled: disableButtons,
                 style: ButtonStyle.Success)
-            .WithButton(label: "Побег", customId: $"Battle_{userId}_Run_{battle.id}", disabled: disableButtons || battle.type == BattleType.arena,
+            .WithButton(label: "Побег", customId: $"Battle|Run_{userId}_{battle.id}", disabled: disableButtons || battle.type == BattleType.arena,
                 style: ButtonStyle.Danger);
 
         if (battle.type == BattleType.dungeon)
         {
             SelectMenuBuilder select = new SelectMenuBuilder()
                 .WithPlaceholder("Выберите противника")
-                .WithCustomId($"Battle_{userId}_SelectEnemy_{battle.id}");
+                .WithCustomId($"Battle|SelectEnemy_{userId}_{battle.id}");
 
             for (int i = 0; i < battle.enemies.Length; i++)
             {
@@ -147,7 +148,7 @@ public static class ButtonSets
     public static MessageComponent CancelFindPvp(ulong userId)
     {
         var builder = new ComponentBuilder()
-            .WithButton(label: "Отмена", customId: $"FindPvp_{userId}_CancelFind", style: ButtonStyle.Danger);
+            .WithButton(label: "Отмена", customId: $"FindPvp|Cancel_{userId}", style: ButtonStyle.Danger);
 
         return builder.Build();
     }
@@ -182,40 +183,40 @@ public static class ButtonSets
 
 
         var selectMenuLvl = new SelectMenuBuilder()
-            .WithCustomId($"MarketSort_{userId}_byLvl")
+            .WithCustomId($"MarketSort|byLvl_{userId}")
             .WithPlaceholder("Выберете уровень предмета")
             .WithOptions(levelOptions.Select(x =>
                 new SelectMenuOptionBuilder().WithLabel($"Уровень {x.range}").WithValue($"{x.range}")).ToList());
 
         var selectMenuRaty = new SelectMenuBuilder()
-            .WithCustomId($"MarketSort_{userId}_byRaty")
+            .WithCustomId($"MarketSort|byRaty_{userId}")
             .WithPlaceholder("Выберете редкость предмета")
             .WithOptions(rarityOptions.Select(x =>
                 new SelectMenuOptionBuilder().WithLabel(x).WithValue($"{x}")).ToList());
 
         var selectMenuType = new SelectMenuBuilder()
-            .WithCustomId($"MarketSort_{userId}_byType")
+            .WithCustomId($"MarketSort|byType_{userId}")
             .WithPlaceholder("Выберете тип предмета")
             .WithOptions(itemTypeOptions.Select(x =>
                 new SelectMenuOptionBuilder().WithLabel(x).WithValue($"{x}")).ToList());
 
 
         var builder = new ComponentBuilder()
-            .WithButton(label: "←", customId: $"MarketSort_{userId}_prewPage", row: 0)
-            .WithButton(label: "↑", customId: $"MarketSort_{userId}_prewItem", row: 0)
-            .WithButton(emote: Emoji.Parse(":shopping_cart:"), customId: $"MarketSort_{userId}_buyItem", row: 0)
-            .WithButton(label: "↓", customId: $"MarketSort_{userId}_nextItem", row: 0)
-            .WithButton(label: "→", customId: $"MarketSort_{userId}_nextPage", row: 0)
+            .WithButton(label: "←", customId: $"MarketSort|prewPage_{userId}", row: 0)
+            .WithButton(label: "↑", customId: $"MarketSort|prewItem_{userId}", row: 0)
+            .WithButton(emote: Emoji.Parse(":shopping_cart:"), customId: $"MarketSort|buyItem_{userId}", row: 0)
+            .WithButton(label: "↓", customId: $"MarketSort|nextItem_{userId}", row: 0)
+            .WithButton(label: "→", customId: $"MarketSort|nextPage_{userId}", row: 0)
             .WithSelectMenu(selectMenuLvl, row: 1)
             .WithSelectMenu(selectMenuRaty, row: 2)
             .WithSelectMenu(selectMenuType, row: 3)
-            .WithButton(emote: Emoji.Parse(":repeat:"), customId: $"MarketSort_{userId}_reloadPage", row: 4)
-            .WithButton(emote: Emoji.Parse("🔍"), customId: $"MarketSort_{userId}_search", row: 4, disabled: true)
+            .WithButton(emote: Emoji.Parse(":repeat:"), customId: $"MarketSort|reloadPage_{userId}", row: 4)
+            .WithButton(emote: Emoji.Parse("🔍"), customId: $"MarketSort|search_{userId}", row: 4, disabled: true)
             .WithButton(emote: Emote.Parse("<:silver:997889161484828826>"), label: "↑",
-                customId: $"MarketSort_{userId}_priceUp", row: 4)
+                customId: $"MarketSort|priceUp_{userId}", row: 4)
             .WithButton(emote: Emote.Parse("<:silver:997889161484828826>"), label: "↓",
-                customId: $"MarketSort_{userId}_priceDown", row: 4)
-            .WithButton(emote: Emoji.Parse(":tools:"), customId: $"MarketSort_{userId}_openSlotsSettings", row: 4);
+                customId: $"MarketSort|priceDown_{userId}", row: 4)
+            .WithButton(emote: Emoji.Parse(":tools:"), customId: $"MarketSort|openSlotsSettings_{userId}", row: 4);
 
 
         return builder.Build();
@@ -224,21 +225,21 @@ public static class ButtonSets
     public static MessageComponent MarketSettingComponents(MarketSlotsSettings settings)
     {
         var builder = new ComponentBuilder()
-            .WithButton(label: "↑", customId: $"Market_{settings.userId}_prewItem", row: 0,
+            .WithButton(label: "↑", customId: $"Market|prewItem_{settings.userId}", row: 0,
                 disabled: settings.searchResults.Count == 0)
-            .WithButton(label: "↓", customId: $"Market_{settings.userId}_nextItem", row: 0,
+            .WithButton(label: "↓", customId: $"Market|nextItem_{settings.userId}", row: 0,
                 disabled: settings.searchResults.Count == 0)
-            .WithButton(emote: Emoji.Parse(":money_with_wings:"), customId: $"Market_{settings.userId}_editPrice",
+            .WithButton(emote: Emoji.Parse(":money_with_wings:"), customId: $"Market|editPrice_{settings.userId}",
                 row: 0, disabled: settings.searchResults.Count == 0)
-            .WithButton(emote: Emoji.Parse(":eye:"), customId: $"Market_{settings.userId}_editVisible", style:
+            .WithButton(emote: Emoji.Parse(":eye:"), customId: $"Market|editVisible_{settings.userId}", style:
                 (settings.searchResults.Count == 0 ? ButtonStyle.Success :
                     settings.searchResults[settings.currentItemIndex].isVisible ? ButtonStyle.Success :
                     ButtonStyle.Danger)
                 , row: 0, disabled: settings.searchResults.Count == 0)
-            .WithButton(label: "Снять с продажи", customId: $"Market_{settings.userId}_Remove", row: 0,
+            .WithButton(label: "Снять с продажи", customId: $"Market|Remove_{settings.userId}", row: 0,
                 disabled: settings.searchResults.Count == 0)
-            .WithButton(emote: Emoji.Parse(":repeat:"), customId: $"Market_{settings.userId}_reloadPage", row: 1)
-            .WithButton(label: "Назад", customId: $"Market_{settings.userId}_goBack", row: 1);
+            .WithButton(emote: Emoji.Parse(":repeat:"), customId: $"Market|reloadPage_{settings.userId}", row: 1)
+            .WithButton(label: "Назад", customId: $"Market|goBack_{settings.userId}", row: 1);
 
         return builder.Build();
     }
@@ -250,34 +251,34 @@ public static class ButtonSets
         GuildMember? member = guild.members.FirstOrDefault(x => x.user == (long)userId);
         if (member == null)
         {
-            builder.WithButton(label: "Участники",$"Guild_{userId}_{guild.tag}_members");
+            builder.WithButton(label: "Участники",$"Guild|Members_{userId}_{guild.tag}");
             switch (guild.join_type)
             {
                 case JoinType.open:
-                    builder.WithButton("Вступить", $"Guild_{userId}_{guild.tag}_join");
+                    builder.WithButton("Вступить", $"Guild|Join_{userId}_{guild.tag}");
                     break;
                 case JoinType.invite:
-                    builder.WithButton("Заявка", $"Guild_{userId}_{guild.tag}_join");
+                    builder.WithButton("Заявка", $"Guild|Join_{userId}_{guild.tag}");
                     break;
                 default:
-                    builder.WithButton("Вступить", $"Guild_{userId}_{guild.tag}_join",disabled:true);
+                    builder.WithButton("Вступить", $"Guild|Join_{userId}_{guild.tag}",disabled:true);
                     break;
             }
         }
         else switch (member.rank)
         {
             case GuildRank.warrior:
-                builder.WithButton("Участники",$"Guild_{userId}_{guild.tag}_members")
-                    .WithButton("Выйти", $"Guild_{userId}_{guild.tag}_leave", style: ButtonStyle.Danger);
+                builder.WithButton("Участники",$"Guild|Members_{userId}_{guild.tag}")
+                    .WithButton("Выйти", $"Guild|Leave_{userId}_{guild.tag}", style: ButtonStyle.Danger);
                 break;
             case GuildRank.officer:
-                builder.WithButton("Участники",$"Guild_{userId}_{guild.tag}_members")
-                    .WithButton("Заявки", $"Guild_{userId}_{guild.tag}_applications", disabled: guild.join_type != JoinType.invite)
-                    .WithButton("Выйти", $"Guild_{userId}_{guild.tag}_leave", style: ButtonStyle.Danger);
+                builder.WithButton("Участники",$"Guild|Members_{userId}_{guild.tag}")
+                    .WithButton("Заявки", $"Guild|Applications_{userId}_{guild.tag}", disabled: guild.join_type != JoinType.invite)
+                    .WithButton("Выйти", $"Guild|Leave_{userId}_{guild.tag}", style: ButtonStyle.Danger);
                 break;
             default:
-                builder.WithButton("Участники",$"Guild_{userId}_{guild.tag}_members")
-                    .WithButton("Заявки", $"Guild_{userId}_{guild.tag}_applications")
+                builder.WithButton("Участники",$"Guild|Members_{userId}_{guild.tag}")
+                    .WithButton("Заявки", $"Guild|Applications_{userId}_{guild.tag}")
                     .WithButton("Настройки", $"Guild_{userId}_{guild.tag}_settings");
                 break;
         }
@@ -285,28 +286,86 @@ public static class ButtonSets
         return builder.Build();
     }
     
-    public static MessageComponent GuildMembers(Guild guild, ulong userId)
+    public static MessageComponent GuildMembers(Guild guild, ulong userId,DiscordSocketClient bot)
     {
         var builder = new ComponentBuilder();
         
-        builder.WithButton("Главная",$"Guild_{userId}_{guild.tag}_main");
+        builder.WithButton("Главная",$"Guild_{userId}_{guild.tag}");
         
         GuildMember? member = guild.members.FirstOrDefault(x => x.user == (long)userId);
         if (member is { rank: GuildRank.officer or GuildRank.owner })
         {
-            builder.WithButton("Кикнуть", customId: $"Guild_{userId}_{guild.tag}_kick");
+            builder.WithButton("Кикнуть", customId: $"Guild|Kick_{userId}_{guild.tag}");
         }
+        // if (member.rank == GuildRank.owner)
+        // {
+        //     List<SelectMenuOptionBuilder> itemTypeOptions = new List<SelectMenuOptionBuilder>();
+        //     guild.members.Shuffle();
+        //     foreach (var members in guild.members)
+        //     {
+        //         if (member.rank == GuildRank.owner)
+        //             continue;
+        //         var memberr = bot.GetUser((ulong)members.user);
+        //         var option = new SelectMenuOptionBuilder().
+        //             WithLabel(memberr.Username)
+        //             .WithValue($"{memberr.Id}")
+        //             .WithDescription($"{memberr.Id}");
+        //         option.WithDefault(members.rank == GuildRank.officer);
+        //         
+        //         itemTypeOptions.Add(option);
+        //         
+        //     }
+        //
+        //     var selectMenuType = new SelectMenuBuilder()
+        //         .WithCustomId($"Guild|officers_{userId}_{guild.tag}")
+        //         .WithPlaceholder("Выберете офицеров")
+        //         .WithOptions(itemTypeOptions.Take(25).ToList())
+        //         .WithDisabled(itemTypeOptions.Count == 0)
+        //         .WithMinValues(0)
+        //         .WithMaxValues(itemTypeOptions.Count == 0 ? 1 : itemTypeOptions.Count);
+        //
+        //     if (itemTypeOptions.Count == 0)
+        //     {
+        //         selectMenuType.AddOption(new SelectMenuOptionBuilder().WithLabel("null").WithValue("null").WithDescription("null"));
+        //     }
+        //     selectMenuType.WithOptions(itemTypeOptions);
+        //
+        //     builder.WithSelectMenu(selectMenuType);
+        //
+        // }
 
         return builder.Build();
+    }
+
+    public static MessageComponent GuildSettings(Guild guild, ulong userId)
+    {
+        var builder = new ComponentBuilder();
+
+        builder.WithButton("Тег", $"Guild|Edit_{userId}_{guild.tag}_tag")
+            .WithButton("Название", $"Guild|Edit_{userId}_{guild.tag}_name")
+            .WithButton("Лого", $"Guild|Edit_{userId}_{guild.tag}_logo")
+            .WithButton("Символ", $"Guild|Edit_{userId}_{guild.tag}_symbol")
+            .WithButton("Обновть", $"Guild|Edit_{userId}_{guild.tag}_reload");
+        
+        var selectMenuType = new SelectMenuBuilder()
+            .WithCustomId($"Guild|joinType_{userId}_{guild.tag}")
+            .WithPlaceholder("Тип входа");
+        
+        selectMenuType.AddOption(new SelectMenuOptionBuilder().WithLabel("Открытый").WithValue("open"));
+        selectMenuType.AddOption(new SelectMenuOptionBuilder().WithLabel("Про инвайтам").WithValue("invite"));
+        selectMenuType.AddOption(new SelectMenuOptionBuilder().WithLabel("Закрыт").WithValue("closed"));
+            
+        
+        return  builder.Build();
     }
     
     public static MessageComponent GuildApplications(Guild guild, ulong userId)
     {
         var builder = new ComponentBuilder();
 
-        builder.WithButton("Приянть",$"Guild_{userId}_{guild.tag}_accept")
-            .WithButton("Отклонить",$"Guild_{userId}_{guild.tag}_denied")
-            .WithButton("Главная",$"Guild_{userId}_{guild.tag}_main");
+        builder.WithButton("Приянть",$"Guild|Accept_{userId}_{guild.tag}")
+            .WithButton("Отклонить",$"Guild|Denied_{userId}_{guild.tag}")
+            .WithButton("Главная",$"Guild_{userId}_{guild.tag}");
 
         return builder.Build();
     }
@@ -315,7 +374,7 @@ public static class ButtonSets
     {
         var builder = new ComponentBuilder();
 
-        builder.WithButton("Создать", $"Guild_{userId}_create");
+        builder.WithButton("Создать", $"Guild|Create_{userId}");
 
         return builder.Build();
     }

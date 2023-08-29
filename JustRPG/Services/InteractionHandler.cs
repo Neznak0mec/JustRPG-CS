@@ -51,7 +51,6 @@ namespace JustRPG.Services
             {
                 await context.Interaction.RespondAsync(embed: EmbedCreater.ErrorEmbed(result.ErrorReason),
                     ephemeral: true);
-                Log.Debug("{reason}",result.ErrorReason);
             }
             else if (!result.IsSuccess)
             {
@@ -85,21 +84,19 @@ namespace JustRPG.Services
         private async Task Execute(IInteractionContext ctx)
         {
             try
-            {
+            { 
                 await _commands.ExecuteCommandAsync(ctx, _services);
             }
             catch (Exception e)
             {
-                Log.Debug(e.ToString());
+                Log.Debug("{error}",e.ToString());
             }
         }
 
         private Task ModalInteraction(SocketModal component)
         {
-            _ = Task.Run(async () =>
-            {
-                await new ModalHandler(_client, component, _services).ModalDistributor();
-            });
+            var context = new SocketInteractionContext<SocketModal>(_client, component);
+            _ = Task.Run(async () => {await Execute(context); });
             return Task.CompletedTask;
         }
     }

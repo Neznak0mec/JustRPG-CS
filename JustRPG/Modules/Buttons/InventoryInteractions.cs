@@ -33,7 +33,7 @@ public class InventoryInteractions : InteractionModuleBase<SocketInteractionCont
         return base.BeforeExecuteAsync(command);
     }
 
-    [ComponentInteraction("Inventary_*_*_PrewPage", true)]
+    [ComponentInteraction("Inventory|PrewPage_*_*", true)]
     private async Task PreviousPage(string finder, string userId)
     {
          _inventory.DataBase = _dataBase;
@@ -42,7 +42,7 @@ public class InventoryInteractions : InteractionModuleBase<SocketInteractionCont
         await UpdateMessage(finder, userId);
     }
 
-    [ComponentInteraction("Inventary_*_*_NextPage", true)]
+    [ComponentInteraction("Inventory|NextPage_*_*", true)]
     private async Task NextPage(string finder, string userId)
     {
         _inventory.DataBase = _dataBase;
@@ -51,7 +51,7 @@ public class InventoryInteractions : InteractionModuleBase<SocketInteractionCont
         await UpdateMessage(finder, userId);
     }
 
-    [ComponentInteraction("Inventary_*_*_Reload", true)]
+    [ComponentInteraction("Inventory|Reload_*_*", true)]
     private async Task Reload(string finder, string userId)
     {
         _inventory.DataBase = _dataBase;
@@ -62,7 +62,7 @@ public class InventoryInteractions : InteractionModuleBase<SocketInteractionCont
         await UpdateMessage(finder, userId);
     }
 
-    [ComponentInteraction("Inventary_*_*_InteractionType", true)]
+    [ComponentInteraction("Inventory|InteractionType_*_*", true)]
     private async Task ChangeInteractionType(string finder, string userId,string[] selected)
     {
         _inventory.DataBase = _dataBase;
@@ -90,7 +90,7 @@ public class InventoryInteractions : InteractionModuleBase<SocketInteractionCont
 
     }
 
-    [ComponentInteraction("Inventary_*_*_info_*", true)]
+    [ComponentInteraction("Inventory_*_*_info_*", true)]
     private async Task ItemInfo(string finder, string userId, string idString)
     {
         _inventory.DataBase = _dataBase;
@@ -105,7 +105,7 @@ public class InventoryInteractions : InteractionModuleBase<SocketInteractionCont
         await RespondAsync(embed: embed, ephemeral: true);
     }
 
-    [ComponentInteraction("Inventary_*_*_equip_*", true)]
+    [ComponentInteraction("Inventory_*_*_equip_*", true)]
     private async Task EquipItem(string finder, string userId, string idString)
     {
         _inventory.DataBase = _dataBase;
@@ -189,7 +189,7 @@ public class InventoryInteractions : InteractionModuleBase<SocketInteractionCont
         }
     }
 
-    [ComponentInteraction("Inventary_*_*_sell_*", true)]
+    [ComponentInteraction("Inventory_*_*_sell_*", true)]
     private async Task SellItem(string finder, string userId, string idString)
     {
         _inventory.DataBase = _dataBase;
@@ -254,7 +254,7 @@ public class InventoryInteractions : InteractionModuleBase<SocketInteractionCont
         );
     }
 
-    [ComponentInteraction("Inventary_*_*_destroy_*", true)]
+    [ComponentInteraction("Inventory_*_*_destroy_*", true)]
     private async Task DestroyItem(string finder, string userId, string idString)
     {
         _inventory.DataBase = _dataBase;
@@ -310,8 +310,8 @@ public class InventoryInteractions : InteractionModuleBase<SocketInteractionCont
         }
     }
 
-    [ComponentInteraction("Inventary_*_*_OpenSlotsSettings", true)]
-    private async Task OpenSlotsSettings(string finder, string userId, string idString)
+    [ComponentInteraction("Inventory|OpenSlotsSettings_*_*", true)]
+    private async Task OpenSlotsSettings(string userId, string idString)
     {
         MarketSlotsSettings marketSettings = new MarketSlotsSettings
         {

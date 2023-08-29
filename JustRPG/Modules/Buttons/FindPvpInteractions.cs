@@ -17,7 +17,7 @@ public class FindPvpInteractions : InteractionModuleBase<SocketInteractionContex
         _dataBase = (DataBase)service.GetService(typeof(DataBase))!;
     }
 
-    [ComponentInteraction("FindPvp_*_CancelFind", true)]
+    [ComponentInteraction("FindPvp|Cancel_*", true)]
     private async Task CancelFind(string userId)
     {
         _dataBase.ArenaDb.DeletFindPVP((long)Context.User.Id);

@@ -21,7 +21,7 @@ public class SelectLocation : InteractionModuleBase<SocketInteractionContext<Soc
          _dataBase = (DataBase)service.GetService(typeof(DataBase))!;
     }
 
-    [ComponentInteraction("SelectLocation_*_dungeon", true)]
+    [ComponentInteraction("SelectLocation|dungeon_*", true)]
     private async Task GenerateDungeon(string userId,string[] selected)
     {
         Location location = await _dataBase.LocationsDb.Get(Context.Interaction.Data.Values.ToArray()[0]);
@@ -53,7 +53,7 @@ public class SelectLocation : InteractionModuleBase<SocketInteractionContext<Soc
             component: ButtonSets.BattleButtonSet(newBattle, Convert.ToInt64(userId)));
     }
     
-    [ComponentInteraction("SelectLocation_*_adventure", true)]
+    [ComponentInteraction("SelectLocation|adventure_*", true)]
     async Task GenerateAdventure(string id, string[] selectedRoles)
     {
         Location location = await _dataBase.LocationsDb.Get(Context.Interaction.Data.Values.ToArray()[0]);

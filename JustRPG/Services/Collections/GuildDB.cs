@@ -28,7 +28,7 @@ public class GuildDB : ICollection
     public async Task Update(object? obj)
     {
         Guild? temp = (Guild)obj!;
-        FilterDefinition<Guild> filterGuild = Builders<Guild>.Filter.Eq("id", temp.tag);
+        FilterDefinition<Guild> filterGuild = Builders<Guild>.Filter.Eq("_id", temp.tag);
         await _collection.ReplaceOneAsync(filterGuild!, temp);
     }
 }

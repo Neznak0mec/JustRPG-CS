@@ -20,7 +20,7 @@ public class MarketSortInteractions : InteractionModuleBase<SocketInteractionCon
        _dataBase = (DataBase)service.GetService(typeof(DataBase))!;
     }
 
-    [ComponentInteraction("MarketSort_*_openSlotsSettings", true)]
+    [ComponentInteraction("MarketSort|openSlotsSettings_*", true)]
     private async Task OpenSlotsSettings(string userId)
     {
         MarketSlotsSettings marketSettings = new MarketSlotsSettings
@@ -40,7 +40,7 @@ public class MarketSortInteractions : InteractionModuleBase<SocketInteractionCon
         });
     }
 
-    [ComponentInteraction("MarketSort_*_priceDown", true)]
+    [ComponentInteraction("MarketSort|priceDown_*", true)]
     private async Task PriceDown(string userId)
     {
         MarketSearchState search = (await _dataBase.MarketDb.GetSearch(userId))!;
@@ -49,7 +49,7 @@ public class MarketSortInteractions : InteractionModuleBase<SocketInteractionCon
         await UpdateMessage(search);
     }
 
-    [ComponentInteraction("MarketSort_*_priceUp", true)]
+    [ComponentInteraction("MarketSort|priceUp_*", true)]
     private async Task PriceUp(string userId)
     {
         MarketSearchState search = (await _dataBase.MarketDb.GetSearch(userId))!;
@@ -58,7 +58,7 @@ public class MarketSortInteractions : InteractionModuleBase<SocketInteractionCon
         await UpdateMessage(search);
     }
 
-    [ComponentInteraction("MarketSort_*_reloadPage", true)]
+    [ComponentInteraction("MarketSort|reloadPage_*", true)]
     public async Task ReloadPage(string userId)
     {
         MarketSearchState search = (await _dataBase.MarketDb.GetSearch(userId))!;
@@ -71,7 +71,7 @@ public class MarketSortInteractions : InteractionModuleBase<SocketInteractionCon
         await UpdateMessage(search);
     }
 
-    [ComponentInteraction("MarketSort_*_prewPage", true)]
+    [ComponentInteraction("MarketSort|prewPage_*", true)]
     public async Task PreviousPage(string userId)
     {
         MarketSearchState search = (await _dataBase.MarketDb.GetSearch(userId))!;
@@ -80,7 +80,7 @@ public class MarketSortInteractions : InteractionModuleBase<SocketInteractionCon
         await UpdateMessage(search);
     }
 
-    [ComponentInteraction("MarketSort_*_prewItem", true)]
+    [ComponentInteraction("MarketSort|prewItem_*", true)]
     public async Task PreviousItem(string userId)
     {
         MarketSearchState search = (await _dataBase.MarketDb.GetSearch(userId))!;
@@ -89,7 +89,7 @@ public class MarketSortInteractions : InteractionModuleBase<SocketInteractionCon
         await UpdateMessage(search);
     }
 
-    [ComponentInteraction("MarketSort_*_buyItem", true)]
+    [ComponentInteraction("MarketSort|buyItem_*", true)]
     public async Task BuyItem(string userId)
     {
         MarketSearchState search = (await _dataBase.MarketDb.GetSearch(userId))!;
@@ -126,7 +126,7 @@ public class MarketSortInteractions : InteractionModuleBase<SocketInteractionCon
             ephemeral: true);
     }
 
-    [ComponentInteraction("MarketSort_*_nextItem", true)]
+    [ComponentInteraction("MarketSort|_nextItem_*", true)]
     public async Task NextItem(string userId)
     {
         MarketSearchState search = (await _dataBase.MarketDb.GetSearch(userId))!;
@@ -135,7 +135,7 @@ public class MarketSortInteractions : InteractionModuleBase<SocketInteractionCon
         await UpdateMessage(search);
     }
 
-    [ComponentInteraction("MarketSort_*_nextPage", true)]
+    [ComponentInteraction("MarketSort|nextPage_*", true)]
     public async Task NextPage(string userId)
     {
         MarketSearchState search = (await _dataBase.MarketDb.GetSearch(userId))!;

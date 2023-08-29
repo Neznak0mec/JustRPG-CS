@@ -11,7 +11,7 @@ namespace JustRPG.Modules.Buttons;
 
 public class GuildInteractions : InteractionModuleBase<SocketInteractionContext<SocketMessageComponent>>
 {
-    private DiscordSocketClient _client;
+    private readonly DiscordSocketClient _client;
     private readonly DataBase _dataBase;
 
 
@@ -21,7 +21,7 @@ public class GuildInteractions : InteractionModuleBase<SocketInteractionContext<
         _dataBase = (DataBase)service.GetService(typeof(DataBase))!;
     }
     
-    [ComponentInteraction("Guild_*_*_main", true)]
+    [ComponentInteraction("Guild_*_*", true)]
     private async Task GuildMain(string userId, string guildTag)
     {
         Guild guild = (Guild)(await _dataBase.GuildDb.Get(guildTag))!;
@@ -29,7 +29,7 @@ public class GuildInteractions : InteractionModuleBase<SocketInteractionContext<
         await UpdateMessage(embed: EmbedCreater.GuildEmbed(guild),components:ButtonSets.GuildComponents(guild,Context.User.Id));
     }
 
-    [ComponentInteraction("Guild_*_*_leave", true)]
+    [ComponentInteraction("Guild|Leave_*_*", true)]
     private async Task LeaveGuild(string userId, string guildTag)
     {
         Guild guild = (Guild)(await _dataBase.GuildDb.Get(guildTag))!;
@@ -63,7 +63,7 @@ public class GuildInteractions : InteractionModuleBase<SocketInteractionContext<
             ephemeral: true);
     }
 
-    [ComponentInteraction("Guild_*_*_join", true)]
+    [ComponentInteraction("Guild|Join_*_*", true)]
     private async Task JoinGuild(string userId, string guildTag)
     {
         Guild guild = (Guild)(await _dataBase.GuildDb.Get(guildTag))!;
@@ -96,7 +96,10 @@ public class GuildInteractions : InteractionModuleBase<SocketInteractionContext<
             user.guildTag = guild.tag;
             user.guildEmblem = guild.symbol;
 
-            guild.members.Add(new GuildMember{user = user.id, rank = GuildRank.warrior});
+
+            var members = guild.members;
+            members.Add(new GuildMember{user = user.id, rank = GuildRank.warrior});
+            guild.members = members;
 
             await _dataBase.GuildDb.Update(guild);
             await _dataBase.UserDb.Update(user);
@@ -110,15 +113,15 @@ public class GuildInteractions : InteractionModuleBase<SocketInteractionContext<
         }
     }
 
-    [ComponentInteraction("Guild_*_*_members", true)]
+    [ComponentInteraction("Guild|Members_*_*", true)]
     private async Task GuildMembers(string userId, string guildTag)
     {
         Guild guild = (Guild)(await _dataBase.GuildDb.Get(guildTag))!;
         
-        await UpdateMessage(embed: EmbedCreater.GuildMembers(guild),components: ButtonSets.GuildMembers(guild,Context.User.Id));
+        await UpdateMessage(embed: EmbedCreater.GuildMembers(guild),components: ButtonSets.GuildMembers(guild,Context.User.Id,_client));
     }
     
-    [ComponentInteraction("Guild_*_*_applications", true)]
+    [ComponentInteraction("Guild|Applications_*_*", true)]
     private async Task GuildApplications(string userId, string guildTag)
     {
         Guild guild = (Guild)(await _dataBase.GuildDb.Get(guildTag))!;
@@ -126,15 +129,16 @@ public class GuildInteractions : InteractionModuleBase<SocketInteractionContext<
         await UpdateMessage(embed: EmbedCreater.GuildApplications(guild),components: ButtonSets.GuildApplications(guild,Context.User.Id) );
     }
     
-    [ComponentInteraction("Guild_*_*_kick", true)]
+    [ComponentInteraction($"Guild|Kick_*_*", true)]
     private async Task GuildKick(string userId, string guildTag)
     {
         Guild guild = (Guild)(await _dataBase.GuildDb.Get(guildTag))!;
         
-        await RespondWithModalAsync(ModalCreator.GuildKickModal(guild.tag));
+        await RespondWithModalAsync<GuildKickModal>($"Guild|Kick_{guild.tag}");
+        // await RespondWithModalAsync(ModalCreator.GuildKickModal(guild.tag));
     }
     
-    [ComponentInteraction("Guild_*_*_accept", true)]
+    [ComponentInteraction("Guild|Accept_*_*", true)]
     private async Task GuildAccept(string userId, string guildTag)
     {
         Guild guild = (Guild)(await _dataBase.GuildDb.Get(guildTag))!;
@@ -187,7 +191,7 @@ public class GuildInteractions : InteractionModuleBase<SocketInteractionContext<
         }
     }
 
-    [ComponentInteraction("Guild_*_*_denied", true)]
+    [ComponentInteraction("Guild|Denied_*_*", true)]
     private async Task GuildDenied(string userId, string guildTag)
     {
         Guild guild = (Guild)(await _dataBase.GuildDb.Get(guildTag))!;
@@ -210,10 +214,10 @@ public class GuildInteractions : InteractionModuleBase<SocketInteractionContext<
         }
     }
 
-    [ComponentInteraction("Guild_*_create", true)]
+    [ComponentInteraction("Guild|Create_*", true)]
     private async Task GuildCreate(string userId)
     {
-        await RespondWithModalAsync(ModalCreator.CreateGuild());
+        await RespondWithModalAsync<GuildCreateModal>("Guild|Create");
     }
     
     public async Task UpdateMessage(Embed embed, MessageComponent components)

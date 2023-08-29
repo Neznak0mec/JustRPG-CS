@@ -7,42 +7,25 @@ using JustRPG.Services;
 
 namespace JustRPG.Modules.Modals;
 
-public class InventoryModals : IModalMaster
+public class InventoryModals : InteractionModuleBase<SocketInteractionContext<SocketModal>>
 {
-    DiscordSocketClient _client;
-    SocketModal _modal;
-    DataBase _dataBase;
+    private DiscordSocketClient _client;
+    private readonly DataBase _dataBase;
 
 
-    public InventoryModals(DiscordSocketClient client, SocketModal modal, IServiceProvider service)
+    public InventoryModals(IServiceProvider service)
     {
-        _client = client;
-        _modal = modal;
+        _client = (DiscordSocketClient)service.GetService(typeof(DiscordSocketClient))!;
         _dataBase = (DataBase)service.GetService(typeof(DataBase))!;
     }
 
-    public async Task Distributor(string[] modalInfo)
+    [ModalInteraction("Inventory_SetSellItemPrice_*", true)]
+    private async Task SetSellItemPrice(string id,SellItemModal modal)
     {
-        switch (modalInfo[1])
-        {
-            case "SetSellItemPrice":
-                await SetSellItemPrice(modalInfo);
-                break;
-            default:
-                await WrongInteraction("Что-то пошло не так");
-                break;
-        }
-    }
-
-    private async Task SetSellItemPrice(string[] modalInfo)
-    {
-        List<SocketMessageComponentData> components = _modal.Data.Components.ToList();
-
-        string stringPrice = components.First(x => x.CustomId == "price").Value;
         int price;
         try
         {
-            price = Convert.ToInt32(stringPrice);
+            price = Convert.ToInt32(modal.Price);
             if (price < 0)
                 throw new Exception();
         }
@@ -52,17 +35,17 @@ public class InventoryModals : IModalMaster
             return;
         }
 
-        SaleItem saleItem = (SaleItem)(await _dataBase.MarketDb.Get(modalInfo[2]))!;
+        SaleItem saleItem = (SaleItem)(await _dataBase.MarketDb.Get(id))!;
         saleItem.price = price;
         saleItem.isVisible = true;
         await _dataBase.MarketDb.Update(saleItem);
 
-        await _modal.RespondAsync(embed: EmbedCreater.SuccessEmbed($"Цена на предмет успешно изменена на {price}"),
+        await RespondAsync(embed: EmbedCreater.SuccessEmbed($"Цена на предмет успешно изменена на {price}"),
             ephemeral: true);
     }
 
     private async Task WrongInteraction(string text)
     {
-        await _modal.RespondAsync(embed: EmbedCreater.ErrorEmbed(text), ephemeral: true);
+        await RespondAsync(embed: EmbedCreater.ErrorEmbed(text), ephemeral: true);
     }
 }

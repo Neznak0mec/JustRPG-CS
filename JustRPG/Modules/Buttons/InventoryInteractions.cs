@@ -68,10 +68,12 @@ public class InventoryInteractions : InteractionModuleBase<SocketInteractionCont
         var dbUser = (User)(await _dataBase.UserDb.Get(Convert.ToUInt64(userId)))!;
         var member = _client.GetUser(Convert.ToUInt64(userId));
         var items = _inventory!.GetItems();
+        
+        var embed = await EmbedCreater.UserInventory(member!, dbUser!, items, _dataBase);
 
-        await Context.Interaction.UpdateAsync(async x =>
+        await Context.Interaction.UpdateAsync(x =>
             {
-                x.Embed = await EmbedCreater.UserInventory(member!, dbUser!, items, _dataBase);
+                x.Embed = embed;
                 x.Components = ButtonSets.InventoryButtonsSet(finder, dbUser!.id, _inventory, items);
             }
         );
@@ -82,7 +84,7 @@ public class InventoryInteractions : InteractionModuleBase<SocketInteractionCont
     [ComponentInteraction("Inventory|info_*_*_*", true)]
     private async Task ItemInfo(string finder, string userId, string idString)
     {
-        Item item = _inventory!.items[Convert.ToInt16(idString)]!;
+        Item item = _inventory!.GetItems()[Convert.ToInt16(idString)]!;
 
         await RespondAsync(embed: EmbedCreater.ItemInfo(item), ephemeral: true);
     }

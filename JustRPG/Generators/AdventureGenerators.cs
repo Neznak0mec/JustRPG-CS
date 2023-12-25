@@ -119,40 +119,40 @@ public static class AdventureGenerators
                     if (users[i]!.exp < 0)
                         users[i]!.exp = 0;
 
-                    string? dropedItem = null;
-                    if (Random.Shared.Next(0, 100) < 20)
+                    string? droppedItem = null;
+                    if (Random.Shared.Next(0, 100) < 40)
                     {
                         switch (Random.Shared.Next(0,6))
                         {
                             case 1:
-                                dropedItem = users[i]!.equipment.helmet;
+                                droppedItem = users[i]!.equipment.helmet;
                                 users[i]!.equipment.helmet = null;
                                 break;
                             case 2:
-                                dropedItem = users[i]!.equipment.armor;
+                                droppedItem = users[i]!.equipment.armor;
                                 users[i]!.equipment.armor = null;
                                 break;
                             case 3:
-                                dropedItem = users[i]!.equipment.gloves;
+                                droppedItem = users[i]!.equipment.gloves;
                                 users[i]!.equipment.gloves = null;
                                 break;
                             case 4:
-                                dropedItem = users[i]!.equipment.weapon;
+                                droppedItem = users[i]!.equipment.weapon;
                                 users[i]!.equipment.weapon = null;
                                 break;
                             case 5:
-                                dropedItem = users[i]!.equipment.pants;
+                                droppedItem = users[i]!.equipment.pants;
                                 users[i]!.equipment.pants = null;
                                 break;
                             case 6:
-                                dropedItem = users[i]!.equipment.shoes;
+                                droppedItem = users[i]!.equipment.shoes;
                                 users[i]!.equipment.shoes = null;
                                 break;
                         }
                     }
 
-                    if (dropedItem == null) continue;
-                    Item item = (Item)(await dataBase.ItemDb.Get(dropedItem))!;
+                    if (droppedItem == null) continue;
+                    Item item = (Item)(await dataBase.ItemDb.Get(droppedItem))!;
                     battle.log += $"{battle.players[i].name} потерял {item.name}\n";
                 }
 

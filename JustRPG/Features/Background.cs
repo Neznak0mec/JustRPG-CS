@@ -1,11 +1,8 @@
-using Discord;
 using Discord.WebSocket;
 using JustRPG.Models;
 using JustRPG.Generators;
-using JustRPG.Models;
 using JustRPG.Models.Enums;
 using JustRPG.Services;
-using Serilog;
 
 namespace JustRPG.Features;
 
@@ -26,12 +23,16 @@ public class Background
         while (true)
         {
             await Task.Delay(5000);
-            try {
-                await CheckFindingBattles();}
+            try
+            {
+                await CheckFindingBattles();
+            }
             catch
             {
             }
-            try {
+
+            try
+            {
                 await CheckBattleToEnd();
             }
             catch
@@ -45,14 +46,16 @@ public class Background
         DateTimeOffset currentTime = DateTimeOffset.Now;
         List<Battle> battles = (List<Battle>)(await _dataBase.BattlesDb.GetAll())!;
 
-        List<Battle> endedBattles = battles.Where(x =>(
-            x.type == BattleType.adventure ||
-            x.type == BattleType.dungeon) &&
-            x.lastActivity < currentTime.AddSeconds(-60).ToUnixTimeSeconds()).ToList();
+        List<Battle> endedBattles = battles.Where(x => (
+                                                           x.type == BattleType.adventure ||
+                                                           x.type == BattleType.dungeon) &&
+                                                       x.lastActivity < currentTime.AddSeconds(-60).ToUnixTimeSeconds())
+            .ToList();
 
-        endedBattles.AddRange(battles.Where(x =>(
-            x.type == BattleType.arena) &&
-            x.lastActivity < currentTime.AddSeconds(-30).ToUnixTimeSeconds()).ToList());
+        endedBattles.AddRange(battles.Where(x => (
+                                                     x.type == BattleType.arena) &&
+                                                 x.lastActivity < currentTime.AddSeconds(-30).ToUnixTimeSeconds())
+            .ToList());
 
         foreach (var i in endedBattles)
         {
@@ -67,7 +70,8 @@ public class Background
 
         if (battle.type == BattleType.arena)
         {
-            battle.log = $"{battle.players[battle.currentUser].name} не успел сделать ход за отведённое время. Бой окончен.\n";
+            battle.log =
+                $"{battle.players[battle.currentUser].name} не успел сделать ход за отведённое время. Бой окончен.\n";
             battle.players[battle.currentUser].stats.hp = -1;
 
             await AdventureGenerators.Reward(battle, _dataBase);
@@ -77,14 +81,12 @@ public class Background
             foreach (var i in battle.originalInteraction)
             {
                 SocketInteraction temp = (SocketInteraction)i;
-                await temp.ModifyOriginalResponseAsync( x =>
+                await temp.ModifyOriginalResponseAsync(x =>
                 {
                     x.Embed = emb;
                     x.Components = component;
                 });
             }
-
-
         }
         else
         {
@@ -95,13 +97,12 @@ public class Background
             var emb = EmbedCreater.BattleEmbed(battle, true);
             var component = ButtonSets.BattleButtonSet(battle, 0, true, true);
             SocketMessageComponent temp = (SocketMessageComponent)battle.originalInteraction[0];
-            await temp.ModifyOriginalResponseAsync( x =>
+            await temp.ModifyOriginalResponseAsync(x =>
             {
                 x.Embed = emb;
                 x.Components = component;
             });
         }
-
     }
 
     async Task CheckFindingBattles()
@@ -154,10 +155,11 @@ public class Background
             Battle? battle = new Battle();
             battle.id = Guid.NewGuid().ToString();
             battle.type = BattleType.arena;
-            battle.drop = new Dictionary<string,string>();
+            battle.drop = new Dictionary<string, string>();
             battle.players = new[] { w1, w2 };
-            battle.enemies = new Warrior[]{};
-            battle.originalInteraction = new List<object>{
+            battle.enemies = new Warrior[] { };
+            battle.originalInteraction = new List<object>
+            {
                 pair.Item1.msgLocation,
                 pair.Item2.msgLocation
             };
@@ -170,7 +172,7 @@ public class Background
                 var emb = EmbedCreater.BattleEmbed(battle);
                 var component = ButtonSets.BattleButtonSet(battle, u1.id);
                 SocketInteraction temp = (SocketInteraction)msg;
-                await temp.ModifyOriginalResponseAsync( x =>
+                await temp.ModifyOriginalResponseAsync(x =>
                 {
                     x.Embed = emb;
                     x.Components = component;
@@ -179,7 +181,6 @@ public class Background
 
             _dataBase.ArenaDb.DeletFindPVP(pair.Item1.userId);
             _dataBase.ArenaDb.DeletFindPVP(pair.Item2.userId);
-
         }
     }
 }

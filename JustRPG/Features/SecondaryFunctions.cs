@@ -1,11 +1,13 @@
+using Discord;
+using Discord.WebSocket;
 using JustRPG.Models;
 
 namespace JustRPG.Features;
 
 public static class SecondaryFunctions
 {
-    private static Random rng = new Random();  
-    
+    private static Random rng = new Random();
+
     public static string ProgressBar(double current, double max = 100)
     {
         int percent = (int)(current / max * 100);
@@ -58,14 +60,25 @@ public static class SecondaryFunctions
 
         return new Tuple<string, string>(randomPair.Key, randomPair.Value);
     }
-    
-    public static void Shuffle<T>(this IList<T> list)  
-    {  
-        int n = list.Count;  
-        while (n > 1) {  
-            n--;  
-            int k = rng.Next(n + 1);  
+
+    public static void Shuffle<T>(this IList<T> list)
+    {
+        int n = list.Count;
+        while (n > 1)
+        {
+            n--;
+            int k = rng.Next(n + 1);
             (list[k], list[n]) = (list[n], list[k]);
-        }  
+        }
+    }
+
+    public static async Task<string> GetUserName(long id, DiscordSocketClient client)
+    {
+        IUser? socketUser = client.GetUser((ulong)id) ?? await client.GetUserAsync((ulong)id);
+
+        string? userName = socketUser.GlobalName;
+        userName ??= $"{socketUser.Username}#{socketUser.Discriminator}";
+
+        return userName;
     }
 }

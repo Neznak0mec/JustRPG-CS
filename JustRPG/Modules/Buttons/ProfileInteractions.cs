@@ -25,7 +25,7 @@ public class ProfileInteractions : InteractionModuleBase<SocketInteractionContex
         var user = _client.GetUser(Convert.ToUInt64(toFind));
         var userDb = (User)(await _dataBase.UserDb.Get(toFind))!;
 
-        await ResponseMessage(EmbedCreater.UserProfile(userDb, user),
+        await ResponseMessage(await EmbedCreater.UserProfile(userDb, user,_dataBase),
             ButtonSets.ProfileButtonsSet(memberId, toFind));
     }
 
@@ -45,10 +45,10 @@ public class ProfileInteractions : InteractionModuleBase<SocketInteractionContex
         var member = _client.GetUser(Convert.ToUInt64(toFind));
         Inventory inventory =
             (Inventory)(await _dataBase.InventoryDb.Get($"Inventory_{memberId}_{toFind}"))!;
-        var items = await inventory.GetItems(_dataBase);
+        var items = inventory.GetItems();
         User user = (User)(await _dataBase.UserDb.Get(toFind))!;
 
-        await ResponseMessage(EmbedCreater.UserInventory(member, user,items),
+        await ResponseMessage(await EmbedCreater.UserInventory(member, user,items, _dataBase),
             ButtonSets.InventoryButtonsSet(Context.User.Id.ToString(), Convert.ToInt64(toFind), inventory, items)
             );
     }

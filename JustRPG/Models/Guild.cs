@@ -10,10 +10,10 @@ public record Guild
     [BsonElement("logo")] public string logo { get; set; } = "";
 
     [BsonElement("premium")] public bool premium { get; set; } = false;
-    
+
     [BsonElement("members")] public  List<GuildMember> members { get; set; } = new();
     [BsonElement("join_type")] public JoinType join_type { get; set; } = JoinType.close;
-    [BsonElement("want_join")] public List<long> wantJoin { get; set; } = new List<long>();
-    
-    [BsonElement("symbol")] public string symbol { get; set; } = null;
+    [BsonElement("want_join")] public List<long> wantJoin { get; set; } = new();
+
+    [BsonElement("symbol")] public string symbol { get; set; } = "";
 }

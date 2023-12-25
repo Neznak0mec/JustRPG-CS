@@ -20,7 +20,7 @@ public class InventoryModals : InteractionModuleBase<SocketInteractionContext<So
     }
 
     [ModalInteraction("Inventory_SetSellItemPrice_*", true)]
-    private async Task SetSellItemPrice(string id,SellItemModal modal)
+    private async Task SetSellItemPrice(string id, SellItemModal modal)
     {
         int price;
         try

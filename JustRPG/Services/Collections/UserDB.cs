@@ -31,6 +31,20 @@ public class UserDb : ICollection
     public async Task Update(object? obj)
     {
         User temp = (User)obj!;
+
+        if (temp.expToLvl < temp.exp)
+        {
+            temp.exp -= temp.expToLvl;
+            temp.lvl++;
+            temp.expToLvl += temp.expToLvl / 3;
+        }
+
+        if (temp.exp < 0)
+            temp.exp = 0;
+        
+        if (temp.cash < 0)
+            temp.cash = 0;
+
         FilterDefinition<User> filterUser = Builders<User>.Filter.Eq("id", temp.id);
         await _collection.ReplaceOneAsync(filterUser!, temp);
     }

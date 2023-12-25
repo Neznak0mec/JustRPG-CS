@@ -101,7 +101,7 @@ public class BattleInteractions : InteractionModuleBase<SocketInteractionContext
         else
         {
             _battle.log +=
-                $"Покапашившись в сумке {_battle.players[_battle.currentUser].name} не нашёл у себя зелье для восстановления ";
+                $"Покапавшись в сумке {_battle.players[_battle.currentUser].name} не нашёл у себя зелье для восстановления ";
         }
 
         if (_battle.type is BattleType.adventure or BattleType.dungeon)

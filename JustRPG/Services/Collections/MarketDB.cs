@@ -44,8 +44,15 @@ public class MarketDB : ICollection
 
     public async Task CreateSearch(MarketSearchState search)
     {
-        await _interaction.DeleteManyAsync(x => x.userId == search.userId);
-        await _interaction.InsertOneAsync(search);
+        var temp = await GetSearch(search.userId.ToString());
+        if(temp != null)
+        {
+            search.id = temp.id;
+            await _interaction.ReplaceOneAsync(x => x.userId == search.userId, search);
+        }
+        else
+            await _interaction.InsertOneAsync(search);
+        
     }
 
     public async Task<MarketSearchState?> GetSearch(string userId)
@@ -59,22 +66,30 @@ public class MarketDB : ICollection
 
         if (searchState.itemLvl != null)
         {
-            var f1 = Builders<SaleItem>.Filter.Gt("item_lvl", searchState.itemLvl.Item1);
-            var f2 = Builders<SaleItem>.Filter.Lt("item_lvl", searchState.itemLvl.Item2);
+            var f1 = Builders<SaleItem>.Filter.Gt(x=> x.itemLvl, searchState.itemLvl.Item1);
+            var f2 = Builders<SaleItem>.Filter.Lt(x=> x.itemLvl, searchState.itemLvl.Item2);
             filter = filter & f1 & f2;
+        }
+        else
+        {
+            var f1 = Builders<SaleItem>.Filter.Gt(x=> x.itemLvl, 0);
+            filter &= f1;
         }
 
         if (searchState.itemRarity != null)
         {
             var f3 = Builders<SaleItem>.Filter.Eq("item_rarity", searchState.itemRarity);
-            filter = filter & f3;
+            filter &= f3;
         }
-
+        
         if (searchState.itemType != null)
         {
             var f4 = Builders<SaleItem>.Filter.Eq("item_type", searchState.itemType);
-            filter = filter & f4;
+            filter &= f4;
         }
+
+        var f5 = Builders<SaleItem>.Filter.Eq(x => x.isVisible, true);
+        filter &= f5;
 
         var res = await _collection.FindAsync(filter);
         searchState.searchResults = res.ToList();

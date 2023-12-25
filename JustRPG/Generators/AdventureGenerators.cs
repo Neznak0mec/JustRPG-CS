@@ -42,9 +42,9 @@ public static class AdventureGenerators
         await dataBase.BattlesDb.Delete(battle);
     }
 
-    static List<User?> BattleArenaEnd(Battle? battle,List<User?> users)
+    static List<User?> BattleArenaEnd(Battle battle,List<User?> users)
     {
-        int loserIndex = users.IndexOf(users.First(x => x!.id == battle.players.First(x => x.stats.hp <= 0).id));
+        int loserIndex = users.IndexOf(users.First(x => x!.id == battle.players.First(warrior => warrior.stats.hp <= 0).id));
         int winnerIndex = users.IndexOf(users.First(x => x!.id == battle.players.First(x => x.stats.hp > 0).id));
 
         int mmrDifference = Math.Abs(users[loserIndex]!.mmr - users[winnerIndex]!.mmr);
@@ -67,7 +67,7 @@ public static class AdventureGenerators
 
     static async Task<List<User?>>  BattleEnd(Battle? battle,List<User?> users, DataBase dataBase)
     {
-        switch (battle.status)
+        switch (battle!.status)
         {
             case BattleStatus.playerWin:
             {
@@ -93,7 +93,7 @@ public static class AdventureGenerators
 
                     int exp = Random.Shared.Next(battle.enemies.First().lvl * 3, battle.enemies.First().lvl * 5) + Random.Shared.Next(0, 7 *  users[i]!.stats.luck);
                     int coins = battle.enemies.First().lvl * 3 + Random.Shared.Next(0, 7 * users[i]!.stats.luck);
-                    users[i]!.Exp += exp;
+                    users[i]!.exp += exp;
                     users[i]!.cash += coins;
 
                     battle.log += $"{battle.players[i].name} получил {exp} опыта и {coins} монет\n";
@@ -107,11 +107,17 @@ public static class AdventureGenerators
                 {
                     if (battle.players[i].stats.hp > 0)
                         continue;
-                    int looseCash = users[i]!.cash / 5;
-                    int looseExp = users[i]!.cash / 5;
+                    int looseCash = Random.Shared.Next(0, users[i]!.cash / 5);
+                    int looseExp = Random.Shared.Next(0, (int)users[i]!.exp / 5);
                     users[i]!.cash -= looseCash;
-                    users[i]!.Exp -= looseExp;
+                    users[i]!.exp -= looseExp;
                     battle.log += $"{battle.players[i].name} потерял {looseExp} опыта и {looseCash} монет\n";
+
+                    if (users[i]!.cash < 0)
+                        users[i]!.cash = 0;
+                    
+                    if (users[i]!.exp < 0)
+                        users[i]!.exp = 0;
 
                     string? dropedItem = null;
                     if (Random.Shared.Next(0, 100) < 20)
@@ -156,7 +162,11 @@ public static class AdventureGenerators
                 for (int i = 0; i < battle.players.Length; i++)
                 {
                     if (battle.players[i].stats.hp < 0)
-                        users[i]!.Exp -= users[i]!.Exp / 5;
+                    {
+                        users[i]!.exp -= Random.Shared.Next(0, (int)users[i]!.exp / 10);;
+                        if (users[i]!.exp < 0)
+                            users[i]!.exp = 0;
+                    }
                     else
                     {
                         string? dropedItem = null;
@@ -207,7 +217,7 @@ public static class AdventureGenerators
     {
         id = user.id,
         name = username,
-        fullName = user.GetFullName(username),
+        fullName = await user.GetFullName(username,dataBase),
         stats = await new BattleStats().BattleStatsAsync(user, dataBase),
         inventory = await InventoryToBattleInventory(user, dataBase),
         lvl = user.lvl,

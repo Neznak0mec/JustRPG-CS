@@ -7,82 +7,112 @@ public class Inventory
 {
     [BsonElement("_id")] public string? id { get; set; }
     [BsonElement("interactionType")] public string interactionType { get; set; } = "info";
-    [BsonElement("currentPage")] public int currentPage { get; set; } = -1;
-    [BsonElement("items")] public List<string> items { get; set; } = new List<string>();
+    [BsonElement("current_page")] public int currentPage { get; set; } = 0;
+    
+    [BsonElement("current_item_index")] public int currentItemIndex { get; set; } = 0;
 
-    [BsonElement("currentPageItems")]
-    public string?[] currentPageItems { get; set; } = { null, null, null, null, null };
+    [BsonElement("user_items_as_str")] public string[] userItems { get; set; } = Array.Empty<string>();
 
-    [BsonElement("lastPage")] public int lastPage { get; set; } = 0;
-    [BsonElement("lastUsage")] public long lastUsage { get; set; } = DateTimeOffset.Now.ToUnixTimeSeconds();
-    [BsonIgnore] public DataBase? DataBase = null;
+    [BsonElement("items")] public List<Item> items { get; set; } = new();
 
-    public async Task NextPage()
+    [BsonElement("lastUsage")] public DateTime lastUsage { get; set; } = DateTime.Now;
+
+    public int GetCountOfPages()
     {
-        currentPage++;
-        if (currentPage > lastPage)
-            currentPage = lastPage;
+        return (int)Math.Ceiling((double)items.Count / 5);
+    }
+    
+    public bool IsLastPage()
+    {
+        return currentPage == GetCountOfPages() - 1;
+    }
+    
+    public void IncrementPage()
+    {
+        int nextPage = currentPage + 1;
+        List<Item> itemsOnNextPage = GetItemsOnPage(nextPage);
 
-        await Save();
+        if (itemsOnNextPage.Count > 0)
+        {
+            currentPage = nextPage;
+            currentItemIndex = 0;
+        }
     }
 
-    public async Task PreviousPage()
+    public void DecrementPage()
     {
-        currentPage--;
-
-        if (currentPage < 0)
-            currentPage = 0;
-
-        await Save();
+        if (currentPage > 0)
+        {
+            currentPage--;
+            currentItemIndex = 0;
+        }
     }
 
-    public async Task Reload(List<string> inventory)
+    public void IncrementItemIndex()
+    {
+        List<Item> itemsOnCurrentPage = GetItemsOnPage(currentPage);
+
+        if (currentItemIndex < itemsOnCurrentPage.Count - 1)
+        {
+            currentItemIndex++;
+        }
+        else if (currentItemIndex == 4)
+            IncrementPage();
+    }
+
+    public void DecrementItemIndex()
+    {
+        if (currentItemIndex > 0)
+        {
+            currentItemIndex--;
+        }
+        else if (currentItemIndex == 0)
+            DecrementPage();
+    }
+
+    public async Task Reload(List<string> inventory,DataBase db)
     {
         interactionType = "info";
         currentPage = 0;
-        items = inventory;
-        lastPage = items.Count / 5;
-        lastUsage = DateTimeOffset.Now.ToUnixTimeSeconds();
+        userItems = inventory.ToArray();
 
-        await Save();
+        items.Clear();
+        foreach (var item in userItems)
+        {
+            var itemFromDb = await db.ItemDb.Get(item);
+            if (itemFromDb != null)
+            {
+                items.Add((Item)itemFromDb);
+            }
+        }
+        
+    }
+    
+    public List<Item> GetItemsOnPage(int pageIndex)
+    {
+        List<Item> res = items
+            .Skip(5 * pageIndex).Take(5).ToList();
+       return res;
     }
 
-    public async Task<Item?[]> GetItems(DataBase dataBase)
+    public Item?[] GetItems()
     {
-        Item?[] getItems = { null, null, null, null, null };
-        int counter = 0;
-        foreach (var i in currentPageItems)
+        Item?[] res = {null,null,null,null,null};
+        List<Item> itemsOnCurrentPage = GetItemsOnPage(currentPage);
+        for (int i = 0; i < itemsOnCurrentPage.Count; i++)
         {
-            if (i == null)
-                continue;
-
-            var a = await dataBase.ItemDb.Get(i);
-
-            getItems[counter] = (Item)a!;
-            counter++;
+            res[i] = itemsOnCurrentPage[i];
         }
 
-        return getItems;
+        return res;
     }
 
-    private void UpdatePageItems()
+    public async Task Save(DataBase? db = null)
     {
-        int lastItemIndex = currentPage * 5 + 5;
-        Array.Fill(currentPageItems, null);
-        for (int i = 0, itemIndex = currentPage * 5; itemIndex < lastItemIndex; i++, itemIndex++)
+        if (db != null)
         {
-            if (itemIndex >= items.Count)
-                return;
-            currentPageItems[i] = items[itemIndex];
-        }
-    }
-
-    private async Task Save()
-    {
-        if (DataBase != null)
-        {
-            UpdatePageItems();
-            await DataBase.InventoryDb.Update(this);
+            lastUsage = DateTime.Now;
+            await db.InventoryDb.Update(this);
         }
     }
 }

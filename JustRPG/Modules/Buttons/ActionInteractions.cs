@@ -206,18 +206,17 @@ public class ActionInteractions : InteractionModuleBase<SocketInteractionContext
     {
         Guild guild = (Guild)(await _dataBase.GuildDb.Get(_action!.args[0]))!;
         GuildMember? member = guild.members.FirstOrDefault(x => x.user == (long)Context.User.Id);
-        
+
         User user = (User)(await _dataBase.UserDb.Get(Context.User.Id))!;
-        
+
         if (member == null || user.guildTag != guild.tag)
         {
             await RespondAsync(embed: EmbedCreater.ErrorEmbed("Вы не являетесь участником этой гильдии"),
                 ephemeral: true);
             return;
         }
-        
+
         user.guildTag = null;
-        user.guildEmblem = null;
 
         guild.members.Remove(member);
 

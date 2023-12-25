@@ -1,12 +1,7 @@
 using Discord.Interactions;
-using Discord.WebSocket;
-using JustRPG.Features;
 using JustRPG.Models;
-using JustRPG.Features.Cooldown;
 using JustRPG.Generators;
-using JustRPG.Models;
 using JustRPG.Services;
-using Serilog;
 
 namespace JustRPG.Modules;
 

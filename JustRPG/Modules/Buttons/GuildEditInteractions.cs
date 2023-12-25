@@ -1,5 +1,6 @@
 using Discord.Interactions;
 using Discord.WebSocket;
+using JustRPG.Models;
 using JustRPG.Services;
 
 namespace JustRPG.Modules.Buttons;
@@ -15,9 +16,9 @@ public class GuildEditInteractions: InteractionModuleBase<SocketInteractionConte
         _dataBase = (DataBase)service.GetService(typeof(DataBase))!;
     }
     
-    [ComponentInteraction($"Guild_*_*_edit_*", true)]
-    private async Task GuildMain(string userId, string guildTag,string field)
+    [ComponentInteraction($"Guild|Edit_*_*_symbol", true)]
+    private async Task GuildMain(string userId, string guildTag)
     {
-        
+        Guild guild = (Guild)(await _dataBase.GuildDb.Get(guildTag))!;
     }
 }

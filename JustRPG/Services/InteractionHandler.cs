@@ -30,7 +30,7 @@ namespace JustRPG.Services
             _client.ButtonExecuted += ButtonInteraction;
             _client.SelectMenuExecuted += SelectInteraction;
             _client.ModalSubmitted += ModalInteraction;
-            
+
             _commands.InteractionExecuted += OnInteractionExecuted;
         }
 
@@ -46,28 +46,34 @@ namespace JustRPG.Services
 
         private async Task OnInteractionExecuted(ICommandInfo info, IInteractionContext context, IResult result)
         {
+            
             if (!result.IsSuccess && (result.ErrorReason.StartsWith("Не так быстро") ||
                                       context.User.Id == 426986442632462347))
             {
-                await context.Interaction.RespondAsync(embed: EmbedCreater.ErrorEmbed(result.ErrorReason),
+                await context.Interaction.RespondAsync(embed: EmbedCreater.ErrorEmbed(result.ErrorReason+"\n"+result.Error),
                     ephemeral: true);
             }
             else if (!result.IsSuccess)
             {
                 await context.Interaction.RespondAsync(
                     embed: EmbedCreater.ErrorEmbed("Произошла неизвестная ошибка, попробуйте позже"), ephemeral: true);
+                
                 Log.Debug("{reason}",result.ErrorReason);
+                
+                //todo remove on release
+                await context.Interaction.FollowupAsync(
+                    embed: EmbedCreater.ErrorEmbed(result.ErrorReason + "\n" + result.Error),
+                    ephemeral: true);
             }
         }
 
         private async Task ButtonInteraction(SocketMessageComponent component)
         {
             var context = new SocketInteractionContext<SocketMessageComponent>(_client, component);
-            if (context.Interaction.Data.CustomId.Split('_')[1]==component.User.Id.ToString())
-                    _ = Task.Run(async () => {await Execute(context); });
+            if (context.Interaction.Data.CustomId.Split('_')[1] == component.User.Id.ToString())
+                _ = Task.Run(async () => { await Execute(context); });
             else
-                    await component.RespondAsync(embed: EmbedCreater.ErrorEmbed("Вы не можете с этим взаимодействовать"),
-                                                   ephemeral: true);
+                throw new Exception("Вы не можете с этим взаимодействовать");
 
         }
 
@@ -77,19 +83,18 @@ namespace JustRPG.Services
                 if (context.Interaction.Data.CustomId.Split('_')[1]==component.User.Id.ToString())
                     _ = Task.Run(async () => {await Execute(context); });
                 else
-                    await component.RespondAsync(embed: EmbedCreater.ErrorEmbed("Вы не можете с этим взаимодействовать"),
-                    ephemeral: true);
+                    throw new Exception("Вы не можете с этим взаимодействовать");
         }
 
         private async Task Execute(IInteractionContext ctx)
         {
             try
-            { 
+            {
                 await _commands.ExecuteCommandAsync(ctx, _services);
             }
             catch (Exception e)
             {
-                Log.Debug("{error}",e.ToString());
+                Log.Debug("{command}\n{error}",ctx.Interaction.Token,e.ToString());
             }
         }
 

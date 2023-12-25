@@ -21,10 +21,10 @@ public class Program
     {
         _shareDataBase = new DataBase();
         _client = new DiscordSocketClient(new DiscordSocketConfig()
-            {
-                GatewayIntents = Discord.GatewayIntents.None,
-                AlwaysDownloadUsers = true
-            });
+        {
+            GatewayIntents = Discord.GatewayIntents.None,
+            AlwaysDownloadUsers = false,
+        });
         _background = new Background(_shareDataBase, _client);
 
         using IHost host = Host.CreateDefaultBuilder()
@@ -36,15 +36,15 @@ public class Program
                     .AddSingleton<DataBase>(_shareDataBase)
                     .AddSingleton<Background>(_background)
             ).Build();
-        
+
         Log.Logger = new LoggerConfiguration()
             .MinimumLevel.Verbose()
             .Enrich.FromLogContext()
             .WriteTo.Console()
             .CreateLogger();
-        
+
         _client.Log += LogAsync;
-        
+
         await Task.WhenAll(RunAsync(host), RunBackgroundTaskAsync());
     }
 
@@ -57,13 +57,13 @@ public class Program
     {
         using IServiceScope serviceScope = host.Services.CreateScope();
         IServiceProvider provider = serviceScope.ServiceProvider;
-        
+
         var sCommands = provider.GetRequiredService<InteractionService>();
         await provider.GetRequiredService<InteractionHandler>().InitializeAsync();
-        
+
         sCommands.Log += (LogMessage msg) =>
         {
-            Log.Information("{Msg}",msg.Message);
+            // Log.Information("{Msg}",msg.Message);
             return Task.CompletedTask;
         };
 
@@ -74,12 +74,13 @@ public class Program
             Log.Information("commands are loaded");
         };
 
-        await _client.LoginAsync(TokenType.Bot, Environment.GetEnvironmentVariable("BotToken"));
+        await _client.LoginAsync(TokenType.Bot,
+            Environment.GetEnvironmentVariable("BotToken"));
         await _client.StartAsync();
 
         await Task.Delay(-1);
     }
-    
+
     private static async Task LogAsync(LogMessage message)
     {
         var severity = message.Severity switch

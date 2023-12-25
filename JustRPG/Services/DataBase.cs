@@ -1,10 +1,7 @@
 using System.Text.Json;
 using JustRPG.Services.Collections;
 using JustRPG.Models;
-using JustRPG.Services.Collections;
-using MongoDB.Bson;
 using MongoDB.Driver;
-using Serilog;
 
 namespace JustRPG.Services;
 
@@ -48,6 +45,7 @@ public class DataBase
         using StreamReader r = new StreamReader("json/works.json");
         string json = r.ReadToEnd();
         r.Close();
+
         works = JsonSerializer.Deserialize<List<Work>>(json);
     }
 }

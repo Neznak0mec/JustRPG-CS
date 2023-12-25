@@ -4,7 +4,7 @@ using MongoDB.Driver;
 using Serilog;
 
 namespace JustRPG.Services.Collections;
-
+//todo: switch IMongoDatabase to local cache
 public class InventoryDB : ICollection
 {
     private readonly IMongoCollection<Inventory> _collection;
@@ -37,12 +37,12 @@ public class InventoryDB : ICollection
             temp = res.FirstOrDefault();
         }
         else
-            await CreateObject(temp);
+            temp = (Inventory)(await CreateObject(temp))!;
 
         TimeSpan aTimeSpan = new TimeSpan(0, 0, 5, 0);
-        if (temp!.lastUsage < DateTimeOffset.Now.Subtract(aTimeSpan).ToUnixTimeSeconds())
+        if (((DateTimeOffset)temp!.lastUsage).ToUnixTimeSeconds() < DateTimeOffset.Now.Subtract(aTimeSpan).ToUnixTimeSeconds())
         {
-            await CreateObject(temp);
+            temp = (Inventory)(await CreateObject(temp))!;
         }
 
         return temp;
@@ -59,9 +59,10 @@ public class InventoryDB : ICollection
 
         string userid = temp.id!.Split('_')[2];
         User user = (User)(await _dataBase.UserDb.Get(userid))!;
-        await temp.Reload(user.inventory);
+        await temp.Reload(user.inventory, _dataBase);
+        await temp.Save(_dataBase);
 
-        return null;
+        return temp;
     }
 
     public async Task Update(object? obj)

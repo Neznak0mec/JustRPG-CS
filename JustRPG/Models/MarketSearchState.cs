@@ -10,6 +10,8 @@ public class MarketSearchState
     [BsonElement("current_item_index")] public int currentItemIndex { get; set; } = 0;
     [BsonElement("search_results")] public List<SaleItem> searchResults { get; set; } = new List<SaleItem>();
 
+    [BsonElement("start_page")] public string startPage { get; set; } = "market";
+    
     [BsonElement("item_lvl")] public Tuple<int, int>? itemLvl { get; set; } = null;
     [BsonElement("item_rarity")] public string? itemRarity { get; set; } = null;
     [BsonElement("item_type")] public string? itemType { get; set; } = null;

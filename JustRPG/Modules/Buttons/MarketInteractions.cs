@@ -15,8 +15,8 @@ public class MarketInteractions : InteractionModuleBase<SocketInteractionContext
 
     public MarketInteractions(IServiceProvider service)
     {
-         _client = (DiscordSocketClient)service.GetService(typeof(DiscordSocketClient))!;
-         _dataBase = (DataBase)service.GetService(typeof(DataBase))!;
+        _client = (DiscordSocketClient)service.GetService(typeof(DiscordSocketClient))!;
+        _dataBase = (DataBase)service.GetService(typeof(DataBase))!;
     }
 
     [ComponentInteraction("Market|prewItem_*", true)]
@@ -37,29 +37,53 @@ public class MarketInteractions : InteractionModuleBase<SocketInteractionContext
         await UpdateMessage(search);
     }
 
-    [ComponentInteraction("Market|editPrice_*", true)]
-    private async Task EditPrice(string userId)
+
+    [ComponentInteraction("Market|setPrice_*_*", true)]
+    private async Task SetPrice(string userId, string itemId)
     {
-        SaleItem? saleItem = await GetItem(userId);
+        SaleItem? saleItem = await GetItemById(userId, itemId);
         if (saleItem == null)
             return;
 
         ModalBuilder modalBuilder = new ModalBuilder()
-            .WithTitle($"")
+            .WithTitle($"Продажа {saleItem.itemName}")
             .WithCustomId($"Inventory_SetSellItemPrice_{saleItem.id}")
             .AddTextInput(label: "Цена продажи", placeholder: "Введите цену за которую хотете продать предмет",
                 customId: "price", required: true, minLength: 1);
-        
+
+        await RespondWithModalAsync(modalBuilder.Build());
+    }
+
+    [ComponentInteraction("Market|updatePrice_*", true)]
+    private async Task UpdatePrice(string userId)
+    {
+        SaleItem? saleItem = await GetSelectedItem(userId);
+        if (saleItem == null)
+            return;
+
+        ModalBuilder modalBuilder = new ModalBuilder()
+            .WithTitle($"Продажа {saleItem.itemName}")
+            .WithCustomId($"Inventory_SetSellItemPrice_{saleItem.id}")
+            .AddTextInput(label: "Цена продажи", placeholder: "Введите цену за которую хотете продать предмет",
+                customId: "price", required: true, minLength: 1);
+
         await RespondWithModalAsync(modalBuilder.Build());
     }
 
     [ComponentInteraction("Market|editVisible_*", true)]
     private async Task EditVisible(string userId)
     {
-        SaleItem? saleItem = await GetItem(userId);
+        SaleItem? saleItem = await GetSelectedItem(userId);
         if (saleItem == null)
             return;
 
+        if (saleItem.price <= 0)
+        {
+            await Context.Interaction.RespondAsync(
+                embed: EmbedCreater.ErrorEmbed(
+                    "Невозможно выставить на продажу предмет за бесплатно или с отрицательной ценой"), ephemeral: true);
+            return;
+        }
 
         saleItem.isVisible = !saleItem.isVisible;
         await _dataBase.MarketDb.Update(saleItem);
@@ -73,7 +97,7 @@ public class MarketInteractions : InteractionModuleBase<SocketInteractionContext
     [ComponentInteraction("Market|Remove_*", true)]
     private async Task RemoveItem(string userId)
     {
-        SaleItem? saleItem = await GetItem(userId);
+        SaleItem? saleItem = await GetSelectedItem(userId);
         if (saleItem == null)
             return;
 
@@ -86,6 +110,8 @@ public class MarketInteractions : InteractionModuleBase<SocketInteractionContext
         MarketSlotsSettings search = (await _dataBase.MarketDb.GetSettings(userId))!;
 
         await _dataBase.MarketDb.GetUserSlots(search);
+
+        search.currentItemIndex--;
         await UpdateMessage(search);
     }
 
@@ -125,25 +151,42 @@ public class MarketInteractions : InteractionModuleBase<SocketInteractionContext
         {
             Inventory inventory =
                 (Inventory)(await _dataBase.InventoryDb.Get($"Inventory_{Context.User.Id}_{Context.User.Id}"))!;
-            var items = await inventory.GetItems(_dataBase);
+            var items = inventory.GetItems();
             User user = (User)(await _dataBase.UserDb.Get(Context.User.Id))!;
 
-            await Context.Interaction.UpdateAsync(x =>
+            await Context.Interaction.UpdateAsync(async x =>
             {
-                x.Embed = EmbedCreater.UserInventory(Context.User, user,items);
+                x.Embed = await EmbedCreater.UserInventory(Context.User, user, items,_dataBase);
                 x.Components = ButtonSets.InventoryButtonsSet(Context.User.Id.ToString(), (long)Context.User.Id,
                     inventory, items);
             });
         }
     }
 
-    async Task<SaleItem?> GetItem(string userId)
+    async Task<SaleItem?> GetSelectedItem(string userId)
     {
         SaleItem? saleItem = null;
         MarketSlotsSettings settings = (await _dataBase.MarketDb.GetSettings(userId))!;
         if (settings.searchResults.Count != 0)
         {
             saleItem = settings.searchResults[settings.currentItemIndex];
+        }
+        else
+        {
+            await RespondAsync(embed: EmbedCreater.ErrorEmbed("Предмет не найден"));
+        }
+
+        return saleItem;
+    }
+
+
+    async Task<SaleItem?> GetItemById(string userId, string itemId)
+    {
+        SaleItem? saleItem = null;
+        MarketSlotsSettings settings = (await _dataBase.MarketDb.GetSettings(userId))!;
+        if (settings.searchResults.Count != 0)
+        {
+            saleItem = settings.searchResults.FirstOrDefault(x => x.itemId == itemId);
         }
         else
         {

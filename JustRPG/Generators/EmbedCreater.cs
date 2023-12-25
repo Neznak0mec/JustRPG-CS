@@ -1,6 +1,5 @@
-using System.Net.Sockets;
 using Discord;
-using JustRPG.Models;
+using Discord.WebSocket;
 using JustRPG.Models;
 using JustRPG.Models.SubClasses;
 using JustRPG.Services;
@@ -53,14 +52,14 @@ public class EmbedCreater
         return emb.Build();
     }
 
-    public static Embed UserProfile(User user, IUser member)
+    public static async Task<Embed> UserProfile(User user, IUser member, DataBase dataBase)
     {
         var emb = new EmbedBuilder
         {
-            Title = $"Профиль {user.GetFullName(member.Username)}"
+            Title = $"Профиль {await user.GetFullName(member.Username, dataBase)}"
         };
         emb.AddField($"Уровень", $"{user.lvl}", inline: true)
-            .AddField("Опыт", $"{(int)user.Exp}\\{(int)user.expToLvl}", inline: true)
+            .AddField("Опыт", $"{(int)user.exp}\\{(int)user.expToLvl}", inline: true)
             .AddField("Баланс", $"{user.cash}", inline: true)
             .AddField("Очки рейтинга", $"{user.mmr}", inline: true)
             .AddField(name: "Статы",
@@ -75,7 +74,7 @@ public class EmbedCreater
     {
         var embed = new EmbedBuilder
         {
-            Title = $"Экипировка {user.GetFullName(member.Username)}"
+            Title = $"Экипировка {await user.GetFullName(member.Username, dataBase)}"
         };
         UserEquipment equipment = await user.GetEquipmentAsItems(dataBase!);
 
@@ -109,9 +108,9 @@ public class EmbedCreater
         return embed.Build();
     }
 
-    public static Embed UserInventory(IUser member, User user, Item?[] items)
+    public static async Task<Embed> UserInventory(IUser member, User user, Item?[] items, DataBase dataBase)
     {
-        var emb = new EmbedBuilder { Title = $"Инвентарь {user.GetFullName(member.Username)}" };
+        var emb = new EmbedBuilder { Title = $"Инвентарь {await user.GetFullName(member.Username, dataBase)}" };
         foreach (var item in items)
         {
             if (item == null)
@@ -233,12 +232,12 @@ public class EmbedCreater
         EmbedBuilder embed = new EmbedBuilder
         {
             Title = $"Поиск битвы",
-            Description = "Чем дольше вы ждёте битву тем более сильнее или слабее противник может попасться"
+            Description = "Чем дольше вы ждёте битву тем более сильный или слабый противник может попасться"
         };
         embed.AddField("Ваш mmr", $"```{pvp.mmr}```", inline: true);
         embed.AddField("Время начала поиска", $"<t:{pvp.stratTime}:R>", inline: true);
         if (count != -1)
-            embed.AddField("В поиске на моент начала", $"```{count}```");
+            embed.AddField("Игроков в поиске на момент его начала", $"```{count}```");
 
 
         return embed.Build();
@@ -269,7 +268,13 @@ public class EmbedCreater
             Title = "Настрокйи товаров",
             Description = (items.Count == 0 ? "Вы не выставили предметы на продажу" : null)
         };
-        if (items.Count == 0) return emb.Build();
+
+        if (searchState.currentItemIndex > searchState.searchResults.Count - 1)
+            searchState.currentItemIndex = 0;
+
+        if (items.Count == 0)
+            return emb.Build();
+
         for (int i = 0; i < 5; i++)
         {
             if (i < items.Count)
@@ -287,12 +292,12 @@ public class EmbedCreater
         var builder = new EmbedBuilder()
             .WithTitle($"Гильдия {guild.symbol} [{guild.tag}] {guild.name}")
             .WithThumbnailUrl(guild.logo)
-            .AddField("Глава", $"<@{guild.members.First(x => x.rank == GuildRank.owner).user}>", inline:true)
-            .AddField("Участников", $"{guild.members.Count}/30", inline:true)
-            .AddField("Тег", guild.tag, inline:true);
-        
+            .AddField("Глава", $"<@{guild.members.First(x => x.rank == GuildRank.owner).user}>", inline: true)
+            .AddField("Участников", $"{guild.members.Count}/30", inline: true)
+            .AddField("Тег", guild.tag, inline: true);
+
         if (guild.premium)
-            builder.AddField("Значок", guild.symbol ?? "Не установлен", inline:true);
+            builder.AddField("Значок", guild.symbol ?? "Не установлен", inline: true);
 
         string inviteType = guild.join_type switch
         {
@@ -301,12 +306,12 @@ public class EmbedCreater
             _ => "Закрыт"
         };
 
-        builder.AddField("Тип присоединения", inviteType, inline:true);
+        builder.AddField("Тип присоединения", inviteType, inline: true);
 
         return builder.Build();
     }
 
-    public static Embed GuildMembers(Guild guild)
+    public static async Task<Embed> GuildMembers(Guild guild, DiscordSocketClient client)
     {
         var emb = new EmbedBuilder
         {
@@ -320,27 +325,58 @@ public class EmbedCreater
                 GuildRank.officer => "оффицер",
                 _ => "Участник"
             };
-            emb.AddField($"<@{member.user}>", $"Звание - `{rank}`");
+            var userName = await SecondaryFunctions.GetUserName(member.user, client);
+
+            emb.AddField(userName, $"Звание - `{rank}`");
         }
 
         return emb.Build();
     }
 
-    public static Embed GuildApplications(Guild guild)
+    public static async Task<Embed> GuildApplications(Guild guild, DiscordSocketClient client)
     {
         List<long> users = guild.wantJoin.Where((x, y) => y <= 25).ToList();
         var emb = new EmbedBuilder
         {
             Title = "Заявки на вступление"
         };
-        emb.AddField($"� <@{users[0]}>", "");
-        users.Remove(users[0]);
+
+        if (users.Count == 0)
+            emb.Description = "Заявок нет";
+
         foreach (var user in users)
         {
-            emb.AddField($"<@{user}>", "");
+            emb.AddField(await SecondaryFunctions.GetUserName(user, client), $"id - `{user}`");
         }
+
+        if (guild.wantJoin.Count > 25)
+            emb.Description = $"Отображены первые 25 заявок, скрыто {users.Count - 25}";
 
         return emb.Build();
     }
 
+    public static Embed GuildSettings(Guild guild)
+    {
+        var emb = new EmbedBuilder
+        {
+            Title = $"Настройки гильдии {guild.name}"
+        };
+
+        emb.WithThumbnailUrl(guild.logo)
+            .AddField("Тег", guild.tag)
+            .AddField("Название", guild.name)
+            .AddField("Тип присоединения", guild.join_type switch
+            {
+                JoinType.open => "Открытый",
+                JoinType.invite => "Через заявку",
+                _ => "Закрыт"
+            })
+            .AddField("Глава", $"<@{guild.members.First(x => x.rank == GuildRank.owner).user}>")
+            .AddField("Участников", $"{guild.members.Count}/30")
+            .AddField("Премиум", guild.premium ? "Есть" : "Отсутвует")
+            .AddField("Значок", guild.symbol == "" ? "Не установлен" : guild.symbol);
+        
+        
+        return emb.Build();
+    }
 }

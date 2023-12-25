@@ -28,7 +28,7 @@ public class ProfileСommands : InteractionModuleBase<SocketInteractionContext>
         if (user == null)
             await RespondAsync(embed: EmbedCreater.ErrorEmbed("Данный пользователь не найден"), ephemeral: true);
         else
-            await RespondAsync(embed: EmbedCreater.UserProfile(user, needToFound),
+            await RespondAsync(embed: await EmbedCreater.UserProfile(user, needToFound,_dataBase),
                 components: ButtonSets.ProfileButtonsSet(Context.User.Id.ToString(), user.id.ToString()));
     }
 
@@ -41,7 +41,7 @@ public class ProfileСommands : InteractionModuleBase<SocketInteractionContext>
         int exp = 10 + Random.Shared.Next(0, 2 * user.stats.luck);
         int cash = 10 + Random.Shared.Next(0, 2 * user.stats.luck);
 
-        user.Exp += exp;
+        user.exp += exp;
         user.cash += cash;
         await _dataBase.UserDb.Update(user);
 
@@ -72,30 +72,35 @@ public class ProfileСommands : InteractionModuleBase<SocketInteractionContext>
     {
         if (guildTag == null)
         {
-            User user = (await GetUser(Context.User.Id,true))!;
+            User user = (await GetUser(Context.User.Id, true))!;
             guildTag = user.guildTag;
             if (guildTag == null)
             {
-                await RespondAsync(embed: EmbedCreater.WarningEmbed("Вы не состоите в гильдии. Вы хотите её создать за 10.000<:silver:997889161484828826> ?"), 
-                    components: ButtonSets.GuildCreateComponents(Context.User.Id),ephemeral: true);
+                await RespondAsync(
+                    embed: EmbedCreater.WarningEmbed(
+                        "Вы не состоите в гильдии. Вы хотите её создать за 10.000<:silver:997889161484828826> ?" +
+                        "Название и тег гильдии нельзя изменить, они не должны нарушать правила Discord и не должны быть оскорбительными"),
+                    components: ButtonSets.GuildCreateComponents(Context.User.Id), ephemeral: true);
                 return;
             }
         }
-        
-        if (guildTag.Length is <3 or >4)
+
+        if (guildTag.Length is < 3 or > 4)
         {
-            await RespondAsync(embed:EmbedCreater.WarningEmbed("Тег может состоять только из 3-4х символов"), ephemeral: true);
+            await RespondAsync(embed: EmbedCreater.WarningEmbed("Тег может состоять только из 3-4х символов"),
+                ephemeral: true);
             return;
         }
 
-        var temp = await _dataBase.GuildDb.Get(guildTag);
-        if (temp == null){
-            await RespondAsync(embed:EmbedCreater.WarningEmbed("Гильдия не найдена"));
+        var temp = await _dataBase.GuildDb.Get(guildTag.ToUpper());
+        if (temp == null)
+        {
+            await RespondAsync(embed: EmbedCreater.WarningEmbed("Гильдия не найдена"));
             return;
         }
 
         await RespondAsync(embed: EmbedCreater.GuildEmbed((Guild)temp),
-            components: ButtonSets.GuildComponents((Guild)temp,Context.User.Id));
+            components: ButtonSets.GuildComponents((Guild)temp, Context.User.Id));
     }
 
     private async Task<User?> GetUser(ulong userId, bool create = false)
@@ -103,9 +108,9 @@ public class ProfileСommands : InteractionModuleBase<SocketInteractionContext>
         var tempUser = await _dataBase.UserDb.Get(userId);
         if (tempUser == null && !create)
             return null;
-        else if (tempUser == null && create)
+        if (tempUser == null && create)
             tempUser = await _dataBase.UserDb.CreateObject(userId);
-        
+
         return (User)tempUser!;
     }
 }

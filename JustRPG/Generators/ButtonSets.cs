@@ -23,7 +23,7 @@ public static class ButtonSets
     {
         var select = new SelectMenuBuilder()
             .WithPlaceholder(
-                $"Тип взаимодействия: {(inventory!.interactionType == "info" ? "информация" : inventory.interactionType == "sell" ? "продажа" : inventory.interactionType == "destroy" ? "уничтожть" : "экипировать")}")
+                $"Тип взаимодействия: {(inventory!.interactionType == "info" ? "информация" : inventory.interactionType == "sell" ? "продажа" : inventory.interactionType == "destroy" ? "уничтожить" : "экипировать")}")
             .WithCustomId($"Inventory|InteractionType_{finder}_{userId}")
             .AddOption("Информация", "info")
             .AddOption("Экипировать", "equip")
@@ -34,28 +34,19 @@ public static class ButtonSets
         var builder = new ComponentBuilder()
             .WithButton(label: "⮘", customId: $"Inventory|PrewPage_{finder}_{userId}",
                 disabled: inventory.currentPage == 0, row: 0)
-            .WithButton(label: $"{inventory.currentPage + 1}/{inventory.lastPage + 1}", customId: "null1",
+            .WithButton(label: $"{inventory.currentPage + 1}/{inventory.GetCountOfPages()}", customId: "null1",
                 disabled: true, row: 0)
             .WithButton(label: "➣", customId: $"Inventory|NextPage_{finder}_{userId}",
-                disabled: inventory.currentPage >= inventory.lastPage, row: 0)
+                disabled: inventory.IsLastPage(), row: 0)
             .WithButton(label: "♺", customId: $"Inventory|Reload_{finder}_{userId}")
             .WithSelectMenu(select, row: 1);
 
-        ButtonStyle style;
-
-        switch (inventory.interactionType)
+        ButtonStyle style = inventory.interactionType switch
         {
-            case "info":
-                style = ButtonStyle.Primary;
-                break;
-            case "destroy":
-                style = ButtonStyle.Danger;
-                break;
-            default:
-                style = ButtonStyle.Success;
-                break;
-        }
-
+            "info" => ButtonStyle.Primary,
+            "destroy" => ButtonStyle.Danger,
+            _ => ButtonStyle.Success
+        };
 
         for (int i = 0; i < items.Length; i++)
         {
@@ -69,7 +60,7 @@ public static class ButtonSets
             }
             else if (inventory.interactionType == "info" || finder == userId.ToString())
             {
-                customId = $"Inventory{finder}_{userId}_{inventory.interactionType}_{i}";
+                customId = $"Inventory|{inventory.interactionType}_{finder}_{userId}_{i}";
 
                 if (inventory.interactionType == "equip")
                     disabled = !items[i]!.IsEquippable();
@@ -102,7 +93,7 @@ public static class ButtonSets
     {
         var select = new SelectMenuBuilder()
             .WithPlaceholder("Куда вы хотете отправиться ?")
-            .WithCustomId($"SelectLocation_{userId}_{type}");
+            .WithCustomId($"SelectLocation|{type}_{userId}");
 
         locations.Sort((x, y) => x.lvl - y.lvl);
 
@@ -121,7 +112,8 @@ public static class ButtonSets
             .WithButton(label: "Атака", customId: $"Battle|Attack_{userId}_{battle!.id}", disabled: disableButtons)
             .WithButton(label: "Хил", customId: $"Battle|Heal_{userId}_{battle.id}", disabled: disableButtons,
                 style: ButtonStyle.Success)
-            .WithButton(label: "Побег", customId: $"Battle|Run_{userId}_{battle.id}", disabled: disableButtons || battle.type == BattleType.arena,
+            .WithButton(label: "Побег", customId: $"Battle|Run_{userId}_{battle.id}",
+                disabled: disableButtons || battle.type == BattleType.arena,
                 style: ButtonStyle.Danger);
 
         if (battle.type == BattleType.dungeon)
@@ -229,7 +221,7 @@ public static class ButtonSets
                 disabled: settings.searchResults.Count == 0)
             .WithButton(label: "↓", customId: $"Market|nextItem_{settings.userId}", row: 0,
                 disabled: settings.searchResults.Count == 0)
-            .WithButton(emote: Emoji.Parse(":money_with_wings:"), customId: $"Market|editPrice_{settings.userId}",
+            .WithButton(emote: Emoji.Parse(":money_with_wings:"), customId: $"Market|updatePrice_{settings.userId}",
                 row: 0, disabled: settings.searchResults.Count == 0)
             .WithButton(emote: Emoji.Parse(":eye:"), customId: $"Market|editVisible_{settings.userId}", style:
                 (settings.searchResults.Count == 0 ? ButtonStyle.Success :
@@ -247,11 +239,11 @@ public static class ButtonSets
     public static MessageComponent GuildComponents(Guild guild, ulong userId)
     {
         var builder = new ComponentBuilder();
-        
+
         GuildMember? member = guild.members.FirstOrDefault(x => x.user == (long)userId);
         if (member == null)
         {
-            builder.WithButton(label: "Участники",$"Guild|Members_{userId}_{guild.tag}");
+            builder.WithButton(label: "Участники", $"Guild|Members_{userId}_{guild.tag}");
             switch (guild.join_type)
             {
                 case JoinType.open:
@@ -261,78 +253,49 @@ public static class ButtonSets
                     builder.WithButton("Заявка", $"Guild|Join_{userId}_{guild.tag}");
                     break;
                 default:
-                    builder.WithButton("Вступить", $"Guild|Join_{userId}_{guild.tag}",disabled:true);
+                    builder.WithButton("Вступить", $"Guild|Join_{userId}_{guild.tag}", disabled: true);
                     break;
             }
         }
-        else switch (member.rank)
-        {
-            case GuildRank.warrior:
-                builder.WithButton("Участники",$"Guild|Members_{userId}_{guild.tag}")
-                    .WithButton("Выйти", $"Guild|Leave_{userId}_{guild.tag}", style: ButtonStyle.Danger);
-                break;
-            case GuildRank.officer:
-                builder.WithButton("Участники",$"Guild|Members_{userId}_{guild.tag}")
-                    .WithButton("Заявки", $"Guild|Applications_{userId}_{guild.tag}", disabled: guild.join_type != JoinType.invite)
-                    .WithButton("Выйти", $"Guild|Leave_{userId}_{guild.tag}", style: ButtonStyle.Danger);
-                break;
-            default:
-                builder.WithButton("Участники",$"Guild|Members_{userId}_{guild.tag}")
-                    .WithButton("Заявки", $"Guild|Applications_{userId}_{guild.tag}")
-                    .WithButton("Настройки", $"Guild_{userId}_{guild.tag}_settings");
-                break;
-        }
+        else
+            switch (member.rank)
+            {
+                case GuildRank.warrior:
+                    builder.WithButton("Участники", $"Guild|Members_{userId}_{guild.tag}")
+                        .WithButton("Выйти", $"Guild|Leave_{userId}_{guild.tag}", style: ButtonStyle.Danger);
+                    break;
+                case GuildRank.officer:
+                    builder.WithButton("Участники", $"Guild|Members_{userId}_{guild.tag}")
+                        .WithButton("Заявки", $"Guild|Applications_{userId}_{guild.tag}",
+                            disabled: guild.join_type != JoinType.invite)
+                        .WithButton("Выйти", $"Guild|Leave_{userId}_{guild.tag}", style: ButtonStyle.Danger);
+                    break;
+                default:
+                    builder.WithButton("Участники", $"Guild|Members_{userId}_{guild.tag}")
+                        .WithButton("Заявки", $"Guild|Applications_{userId}_{guild.tag}")
+                        .WithButton("Настройки", $"Guild|Settings_{userId}_{guild.tag}");
+                    break;
+            }
 
         return builder.Build();
     }
-    
-    public static MessageComponent GuildMembers(Guild guild, ulong userId,DiscordSocketClient bot)
+
+    public static MessageComponent GuildMembers(Guild guild, ulong userId, DiscordSocketClient bot)
     {
         var builder = new ComponentBuilder();
-        
-        builder.WithButton("Главная",$"Guild_{userId}_{guild.tag}");
-        
+
+        builder.WithButton("Главная", $"Guild_{userId}_{guild.tag}");
+
         GuildMember? member = guild.members.FirstOrDefault(x => x.user == (long)userId);
         if (member is { rank: GuildRank.officer or GuildRank.owner })
         {
             builder.WithButton("Кикнуть", customId: $"Guild|Kick_{userId}_{guild.tag}");
         }
-        // if (member.rank == GuildRank.owner)
-        // {
-        //     List<SelectMenuOptionBuilder> itemTypeOptions = new List<SelectMenuOptionBuilder>();
-        //     guild.members.Shuffle();
-        //     foreach (var members in guild.members)
-        //     {
-        //         if (member.rank == GuildRank.owner)
-        //             continue;
-        //         var memberr = bot.GetUser((ulong)members.user);
-        //         var option = new SelectMenuOptionBuilder().
-        //             WithLabel(memberr.Username)
-        //             .WithValue($"{memberr.Id}")
-        //             .WithDescription($"{memberr.Id}");
-        //         option.WithDefault(members.rank == GuildRank.officer);
-        //         
-        //         itemTypeOptions.Add(option);
-        //         
-        //     }
-        //
-        //     var selectMenuType = new SelectMenuBuilder()
-        //         .WithCustomId($"Guild|officers_{userId}_{guild.tag}")
-        //         .WithPlaceholder("Выберете офицеров")
-        //         .WithOptions(itemTypeOptions.Take(25).ToList())
-        //         .WithDisabled(itemTypeOptions.Count == 0)
-        //         .WithMinValues(0)
-        //         .WithMaxValues(itemTypeOptions.Count == 0 ? 1 : itemTypeOptions.Count);
-        //
-        //     if (itemTypeOptions.Count == 0)
-        //     {
-        //         selectMenuType.AddOption(new SelectMenuOptionBuilder().WithLabel("null").WithValue("null").WithDescription("null"));
-        //     }
-        //     selectMenuType.WithOptions(itemTypeOptions);
-        //
-        //     builder.WithSelectMenu(selectMenuType);
-        //
-        // }
+
+        if (member is { rank: GuildRank.owner })
+        {
+            builder.WithButton("Оффицер", customId: $"Guild|Officer_{userId}_{guild.tag}");
+        }
 
         return builder.Build();
     }
@@ -341,31 +304,35 @@ public static class ButtonSets
     {
         var builder = new ComponentBuilder();
 
-        builder.WithButton("Тег", $"Guild|Edit_{userId}_{guild.tag}_tag")
-            .WithButton("Название", $"Guild|Edit_{userId}_{guild.tag}_name")
-            .WithButton("Лого", $"Guild|Edit_{userId}_{guild.tag}_logo")
-            .WithButton("Символ", $"Guild|Edit_{userId}_{guild.tag}_symbol")
-            .WithButton("Обновть", $"Guild|Edit_{userId}_{guild.tag}_reload");
-        
+
         var selectMenuType = new SelectMenuBuilder()
             .WithCustomId($"Guild|joinType_{userId}_{guild.tag}")
             .WithPlaceholder("Тип входа");
-        
+
         selectMenuType.AddOption(new SelectMenuOptionBuilder().WithLabel("Открытый").WithValue("open"));
-        selectMenuType.AddOption(new SelectMenuOptionBuilder().WithLabel("Про инвайтам").WithValue("invite"));
+        selectMenuType.AddOption(new SelectMenuOptionBuilder().WithLabel("По инвайтам").WithValue("invite"));
         selectMenuType.AddOption(new SelectMenuOptionBuilder().WithLabel("Закрыт").WithValue("closed"));
-            
-        
-        return  builder.Build();
+
+
+        builder
+            .WithButton("Главная", $"Guild_{userId}_{guild.tag}")
+            .WithButton("Значок", $"Guild|EditSymbol_{userId}_{guild.tag}")
+            .WithSelectMenu(selectMenuType);
+
+        return builder.Build();
     }
-    
+
     public static MessageComponent GuildApplications(Guild guild, ulong userId)
     {
         var builder = new ComponentBuilder();
+        bool listIsEmpty = guild.wantJoin.Count == 0;
 
-        builder.WithButton("Приянть",$"Guild|Accept_{userId}_{guild.tag}")
-            .WithButton("Отклонить",$"Guild|Denied_{userId}_{guild.tag}")
-            .WithButton("Главная",$"Guild_{userId}_{guild.tag}");
+        builder.WithButton("Главная", $"Guild_{userId}_{guild.tag}")
+            .WithButton("Принять", $"Guild|Accept_{userId}_{guild.tag}", disabled: listIsEmpty,
+                style: ButtonStyle.Success)
+            .WithButton("Отклонить", $"Guild|Denied_{userId}_{guild.tag}", disabled: listIsEmpty,
+                style: ButtonStyle.Danger);
+
 
         return builder.Build();
     }

@@ -29,8 +29,8 @@ public class Cooldown : PreconditionAttribute
     public override Task<PreconditionResult> CheckRequirementsAsync(IInteractionContext context,
         ICommandInfo commandInfo, IServiceProvider services)
     {
-        if (context.User.Id == 426986442632462347)
-            return Task.FromResult(PreconditionResult.FromSuccess());
+        // if (context.User.Id == 426986442632462347)
+            // return Task.FromResult(PreconditionResult.FromSuccess());
         
         var key = new CooldownInfo(context.User.Id, commandInfo.Name);
         if (_cooldowns.TryGetValue(key, out DateTime endsAt))
@@ -39,7 +39,7 @@ public class Cooldown : PreconditionAttribute
             if (difference.Ticks > 0)
             {
                 return Task.FromResult(PreconditionResult.FromError(
-                    $"Не так быстро. Вы сможете повторно использовать эту команду через `{(int)difference.TotalSeconds}` секунд"));
+                    $"[]Не так быстро. Вы сможете повторно использовать эту команду через `{(int)difference.TotalSeconds}` секунд"));
             }
 
             var time = DateTime.UtcNow.Add(CooldownLength);

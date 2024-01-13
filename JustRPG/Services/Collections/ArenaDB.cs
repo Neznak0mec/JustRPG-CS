@@ -19,5 +19,7 @@ public class ArenaDB
     public int CountOfFinfPVP() => _findPvps.Count;
 
     public List<FindPVP> GetAllFindPVP() => _findPvps;
+    
+    public bool IsFindPVP(long userId) => _findPvps.Any(x => x.userId == userId);
    
 }

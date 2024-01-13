@@ -59,4 +59,10 @@ public class UserDb : ICollection
 
         _usersIdCache.Add(userId);
     }
+
+    public List<User> GetTopMMR()
+    {
+        var sortDefinition = Builders<User>.Sort.Descending(doc => doc.mmr);
+        return _collection.Find(FilterDefinition<User>.Empty).Sort(sortDefinition).Limit(10).ToList();
+    }
 }

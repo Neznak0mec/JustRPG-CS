@@ -58,15 +58,17 @@ public class EmbedCreater
         {
             Title = $"Профиль {await user.GetFullName(member.Username, dataBase)}"
         };
+        var stats = await new BattleStats().BattleStatsAsync(user, dataBase);
+        
         emb.AddField($"Уровень", $"{user.lvl}", inline: true)
             .AddField("Опыт", $"{(int)user.exp}\\{(int)user.expToLvl}", inline: true)
             .AddField("Баланс", $"{user.cash}", inline: true)
             .AddField("Очки рейтинга", $"{user.mmr}", inline: true)
             .AddField(name: "Статы",
                 value:
-                $"<:health:997889169567260714> : {user.stats.hp} |  <:strength:997889205684420718> : {user.stats.damage} " +
-                $"| <:armor:997889166673186987> : {user.stats.defence} \n<:dexterity:997889168216694854> : {user.stats.speed} " +
-                $"| <:luck:997889165221957642> : {user.stats.luck}");
+                $"<:health:997889169567260714> : {user.stats.hp} + {stats.hp - user.stats.hp} |  <:strength:997889205684420718> : {user.stats.damage} + {stats.damage - user.stats.damage}" +
+                $"| <:armor:997889166673186987> : {user.stats.defence} + {stats.defence - user.stats.defence} \n<:dexterity:997889168216694854> : {user.stats.speed} + {stats.speed - user.stats.speed}" +
+                $"| <:luck:997889165221957642> : {user.stats.luck} + {stats.luck - user.stats.luck}");
         return emb.Build();
     }
 
@@ -375,7 +377,46 @@ public class EmbedCreater
             .AddField("Участников", $"{guild.members.Count}/30")
             .AddField("Премиум", guild.premium ? "Есть" : "Отсутвует")
             .AddField("Значок", guild.symbol == "" ? "Не установлен" : guild.symbol);
+
+
+        return emb.Build();
+    }
+
+    public static Embed HelpEmbed(IUser owner)
+    {
+        var emb = new EmbedBuilder
+        {
+            Title = "**Привет! Я бот Just RPG! Я являюсь игрой в жанре RPG.**",
+            Description =
+                "Благодоря мне вы можете ходить в походы, прокачивать персонажа, выбивать предметы с монстров... " +
+                "Короче почти всё, что можно делать в обычной  RPG \ud83e\udd17\n\n" +
+                "**Если возникли технические шоколадки, либо нужна помощь, свяжитесь с нами на оффициальном сервере поддержки бота:** " +
+                "[Оффициальный сервер бота](https://discord.gg/a8XdEThKzM)\nТак же в нашу команду требуются художники и кодеры," +
+                " так что будем рады любой помощи \ud83d\ude18"
+        };
         
+        emb.WithFooter(text:owner.GlobalName, iconUrl:owner.GetAvatarUrl()!);
+
+        return emb.Build();
+    }
+
+    public static async Task<Embed> TopEmbed(DataBase dataBase,DiscordSocketClient client)
+    {
+        var emb = new EmbedBuilder
+        {
+            Title = "Топ игроков"
+        };
+        List<User> users = dataBase.UserDb.GetTopMMR();
+        for (int i = 0; i < 10; i++)
+        {
+            if (i >= users.Count)
+                break;
+            
+            User dbUser = (User)await dataBase.UserDb.Get(users[i].id);
+            string user = await SecondaryFunctions.GetUserName(dbUser.id, client);
+            string fullName = await dbUser.GetFullName(user, dataBase);
+            emb.AddField($"{i + 1}. {fullName}", $"Очки рейтинга - {users[i].mmr}");
+        }
         
         return emb.Build();
     }

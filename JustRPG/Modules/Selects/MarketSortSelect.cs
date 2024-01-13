@@ -3,6 +3,7 @@ using Discord.WebSocket;
 using JustRPG.Generators;
 using JustRPG.Interfaces;
 using JustRPG.Models;
+using JustRPG.Models.Enums;
 using JustRPG.Services;
 
 namespace JustRPG.Modules.Selects;
@@ -36,21 +37,15 @@ public class MarketSortSelect : InteractionModuleBase<SocketInteractionContext<S
         MarketSearchState search = (await _dataBase.MarketDb.GetSearch(userId))!;
         string res = selected[0];
 
-
-        if (res == "сброс")
-            search.itemRarity = null;
-        else if (res == "обычное")
-            search.itemRarity = "common";
-        else if (res == "необычное")
-            search.itemRarity = "uncommon";
-        else if (res == "редкое")
-            search.itemRarity = "rare";
-        else if (res == "эпическое")
-            search.itemRarity = "epic";
-        else if (res == "легендарное")
-            search.itemRarity = "legendary";
-        else
-            search.itemRarity = null;
+        search.itemRarity = res switch
+        {
+            "обычное" => Rarity.common,
+            "необычное" => Rarity.uncommon,
+            "редкое" => Rarity.rare,
+            "эпическое" => Rarity.epic,
+            "легендарное" => Rarity.legendary,
+            _ => null
+        };
 
         await _dataBase.MarketDb.SearchGetAndUpdate(search);
         await UpdateMessage(search);
@@ -67,17 +62,17 @@ public class MarketSortSelect : InteractionModuleBase<SocketInteractionContext<S
         if (res == "сброс")
             search.itemType = null;
         else if (res == "шлем")
-            search.itemType = "helmet";
+            search.itemType = ItemType.helmet;
         else if (res == "нагрудник")
-            search.itemType = "armor";
+            search.itemType = ItemType.armor;
         else if (res == "перчатки")
-            search.itemType = "gloves";
+            search.itemType = ItemType.gloves;
         else if (res == "штаны")
-            search.itemType = "pants";
+            search.itemType = ItemType.pants;
         else if (res == "оружие")
-            search.itemType = "weapon";
+            search.itemType = ItemType.weapon;
         else if (res == "зелья")
-            search.itemType = "posion";
+            search.itemType = ItemType.potion;
         else
             search.itemType = null;
 

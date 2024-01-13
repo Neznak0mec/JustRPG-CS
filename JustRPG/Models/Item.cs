@@ -23,7 +23,7 @@ public class Item
         if (generated)
             return
                 $"<:health:997889169567260714>: {giveStats!.hp} | <:strength:997889205684420718>: {giveStats.damage} | <:armor:997889166673186987>: {giveStats.defence} \n" +
-                $"<:dexterity:997889168216694854>: {giveStats.luck} | <:crit:997889163552628757>: {giveStats.speed}";
+                $"<:luck:997889165221957642>: {giveStats.luck} | <:dexterity:997889168216694854>: {giveStats.speed}";
         else
             return description;
     }

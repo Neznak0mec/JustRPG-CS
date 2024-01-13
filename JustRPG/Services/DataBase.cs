@@ -25,7 +25,7 @@ public class DataBase
     public DataBase()
     {
         _client = new MongoClient(Environment.GetEnvironmentVariable("DataBaseURL"));
-        _database = _client.GetDatabase("testMMORPG");
+        _database = _client.GetDatabase("MMORPG");
 
         UserDb = new UserDb(_database);
         ItemDb = new ItemDB(_database);

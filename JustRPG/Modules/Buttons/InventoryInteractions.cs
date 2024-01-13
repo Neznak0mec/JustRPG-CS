@@ -2,6 +2,7 @@ using System.ComponentModel;
 using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
+using JustRPG.Exceptions;
 using JustRPG.Generators;
 using JustRPG.Interfaces;
 using JustRPG.Models;
@@ -107,17 +108,13 @@ public class InventoryInteractions : InteractionModuleBase<SocketInteractionCont
             string? idItemToChange = dbUser!.equipment!.GetByType(tempItem.type);
             if (!tempItem.IsEquippable())
             {
-                await RespondAsync(embed: EmbedCreater.ErrorEmbed("Этот предмет нельзя экипировать"),
-                    ephemeral: true);
-                return;
+                throw new UserInteractionException("Этот предмет нельзя экипировать");
             }
 
 
             if (tempItem.lvl > dbUser.lvl)
             {
-                await RespondAsync(embed: EmbedCreater.ErrorEmbed("Этот предмет cлишком высокого уровня для вас"),
-                    ephemeral: true);
-                return;
+                throw new UserInteractionException("Этот предмет cлишком высокого уровня для вас");
             }
 
             action = new Action
@@ -145,20 +142,12 @@ public class InventoryInteractions : InteractionModuleBase<SocketInteractionCont
         }
         else
         {
-            embed = EmbedCreater.ErrorEmbed("Этот предмет не найден, странно 🤔");
-            action = null;
+            throw new UserInteractionException("Этот предмет не найден, странно 🤔");
         }
 
-        if (action != null)
-        {
-            await _dataBase.ActionDb.CreateObject(action);
-            await RespondAsync(embed: embed, components: ButtonSets.AcceptActions(uId, dbUser!.id),
-                ephemeral: true);
-        }
-        else
-        {
-            await RespondAsync(embed: embed, ephemeral: true);
-        }
+        await _dataBase.ActionDb.CreateObject(action);
+        await RespondAsync(embed: embed, components: ButtonSets.AcceptActions(uId, dbUser!.id),
+            ephemeral: true);
     }
 
     [ComponentInteraction("Inventory|sell_*_*_*", true)]
@@ -167,11 +156,7 @@ public class InventoryInteractions : InteractionModuleBase<SocketInteractionCont
         long countOfSaleItems = await _dataBase.MarketDb.GetCountOfUserSlots(Context.User.Id);
         if (countOfSaleItems >= 5)
         {
-            await RespondAsync(
-                embed: EmbedCreater.ErrorEmbed(
-                    "Вы достигли лимита по продаже, одновременно можно выставлять только 5 предметов"),
-                ephemeral: true);
-            return;
+            throw new UserInteractionException("Вы достигли лимита по продаже, одновременно можно выставлять только 5 предметов");
         }
 
         Item item = _inventory!.GetItems()[Convert.ToInt16(idString)]!;
@@ -180,10 +165,7 @@ public class InventoryInteractions : InteractionModuleBase<SocketInteractionCont
 
         if (user.inventory.All(x => x != item.id))
         {
-            await RespondAsync(
-                embed: EmbedCreater.ErrorEmbed("Данный предмет не найден в вашем инвентаре, перезагрузите инвентарь"),
-                ephemeral: true);
-            return;
+            throw new UserInteractionException("Данный предмет не найден в вашем инвентаре, перезагрузите инвентарь");
         }
 
         SaleItem sellItem = new SaleItem()
@@ -211,11 +193,16 @@ public class InventoryInteractions : InteractionModuleBase<SocketInteractionCont
             await _dataBase.UserDb.Update(user);
         }
 
-        await RespondAsync(
+        await _inventory.Reload(user.inventory, _dataBase);
+        _inventory.interactionType = "sell";
+        await _inventory.Save();
+
+        await UpdateMessage(finder, userId);
+        
+        await Context.Interaction.FollowupAsync(
             embed: EmbedCreater.WarningEmbed(
                 "Предмет добавлен в лоты для продажи, но для начала продаж нужно установить цену"),
-            components: new ComponentBuilder()
-                .WithButton(label: "Установить цену", $"Market|setPrice_{user.id}_{item.id}").Build(),
+            components: ButtonSets.SaleItemButtonsSet(user.id, sellItem.id),
             ephemeral: true
         );
     }
@@ -259,10 +246,7 @@ public class InventoryInteractions : InteractionModuleBase<SocketInteractionCont
         }
         else
         {
-            embed = EmbedCreater.ErrorEmbed("Этот предмет не найден, странно 🤔");
-            await Reload(finder, userId);
-            await FollowupAsync(embed: embed);
-            return;
+            throw new UserInteractionException("Этот предмет не найден, странно 🤔");
         }
 
         await _dataBase.ActionDb.CreateObject(action);

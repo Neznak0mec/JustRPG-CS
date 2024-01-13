@@ -45,7 +45,7 @@ public static class AdventureGenerators
     static List<User?> BattleArenaEnd(Battle battle,List<User?> users)
     {
         int loserIndex = users.IndexOf(users.First(x => x!.id == battle.players.First(warrior => warrior.stats.hp <= 0).id));
-        int winnerIndex = users.IndexOf(users.First(x => x!.id == battle.players.First(x => x.stats.hp > 0).id));
+        int winnerIndex = users.IndexOf(users.First(x => x!.id == battle.players.First(warrior => warrior.stats.hp > 0).id));
 
         int mmrDifference = Math.Abs(users[loserIndex]!.mmr - users[winnerIndex]!.mmr);
         int transferPoints = Math.Max(mmrDifference / 2, 5);
@@ -65,153 +65,168 @@ public static class AdventureGenerators
         return users;
     }
 
-    static async Task<List<User?>>  BattleEnd(Battle? battle,List<User?> users, DataBase dataBase)
+    private static async Task<List<User?>> BattleEnd(Battle? battle, List<User?> users, DataBase dataBase)
     {
         switch (battle!.status)
         {
             case BattleStatus.playerWin:
-            {
-                for (int i = 0; i < battle.players.Length; i++)
-                {
-                    if (battle.players[i].stats.hp <= 0)
-                        continue;
-
-                    int countOfDroppedItem = (battle.type == BattleType.dungeon ? 1 : 0);
-                    countOfDroppedItem += GetRandomNumberForDrop();
-                    for (int j = 0; j < countOfDroppedItem; j++)
-                    {
-                        Tuple<string, string>? itemName = SecondaryFunctions.GetRandomKeyValuePair(battle.drop);
-                        if (itemName == null)
-                            break;
-                        Item item = GenerateEquipmentItem(itemName.Item1,
-                            battle.enemies.First().lvl, itemName.Item2);
-                        users[i]!.inventory.Add(item.id);
-
-                        await dataBase.ItemDb.CreateObject(item);
-                        battle.log += $"{battle.players[i].name} получил {item.name} | {item.lvl}\n";
-                    }
-
-                    int exp = Random.Shared.Next(battle.enemies.First().lvl * 3, battle.enemies.First().lvl * 5) + Random.Shared.Next(0, 7 *  users[i]!.stats.luck);
-                    int coins = battle.enemies.First().lvl * 3 + Random.Shared.Next(0, 7 * users[i]!.stats.luck);
-                    users[i]!.exp += exp;
-                    users[i]!.cash += coins;
-
-                    battle.log += $"{battle.players[i].name} получил {exp} опыта и {coins} монет\n";
-                }
-
-                break;
-            }
+                return await HandlePlayerWin(battle, users, dataBase);
             case BattleStatus.playerDead:
-            {
-                for (int i = 0; i < battle.players.Length; i++)
-                {
-                    if (battle.players[i].stats.hp > 0)
-                        continue;
-                    int looseCash = Random.Shared.Next(0, users[i]!.cash / 5);
-                    int looseExp = Random.Shared.Next(0, (int)users[i]!.exp / 5);
-                    users[i]!.cash -= looseCash;
-                    users[i]!.exp -= looseExp;
-                    battle.log += $"{battle.players[i].name} потерял {looseExp} опыта и {looseCash} монет\n";
-
-                    if (users[i]!.cash < 0)
-                        users[i]!.cash = 0;
-                    
-                    if (users[i]!.exp < 0)
-                        users[i]!.exp = 0;
-
-                    string? droppedItem = null;
-                    if (Random.Shared.Next(0, 100) < 40)
-                    {
-                        switch (Random.Shared.Next(0,6))
-                        {
-                            case 1:
-                                droppedItem = users[i]!.equipment.helmet;
-                                users[i]!.equipment.helmet = null;
-                                break;
-                            case 2:
-                                droppedItem = users[i]!.equipment.armor;
-                                users[i]!.equipment.armor = null;
-                                break;
-                            case 3:
-                                droppedItem = users[i]!.equipment.gloves;
-                                users[i]!.equipment.gloves = null;
-                                break;
-                            case 4:
-                                droppedItem = users[i]!.equipment.weapon;
-                                users[i]!.equipment.weapon = null;
-                                break;
-                            case 5:
-                                droppedItem = users[i]!.equipment.pants;
-                                users[i]!.equipment.pants = null;
-                                break;
-                            case 6:
-                                droppedItem = users[i]!.equipment.shoes;
-                                users[i]!.equipment.shoes = null;
-                                break;
-                        }
-                    }
-
-                    if (droppedItem == null) continue;
-                    Item item = (Item)(await dataBase.ItemDb.Get(droppedItem))!;
-                    battle.log += $"{battle.players[i].name} потерял {item.name}\n";
-                }
-
-                break;
-            }
+                return await HandlePlayerDead(battle, users, dataBase);
             case BattleStatus.playerRun:
-                for (int i = 0; i < battle.players.Length; i++)
-                {
-                    if (battle.players[i].stats.hp < 0)
-                    {
-                        users[i]!.exp -= Random.Shared.Next(0, (int)users[i]!.exp / 10);;
-                        if (users[i]!.exp < 0)
-                            users[i]!.exp = 0;
-                    }
-                    else
-                    {
-                        string? dropedItem = null;
-                        if (Random.Shared.Next(0, 100) < 20)
-                        {
-                            switch (Random.Shared.Next(0,6))
-                            {
-                                case 1:
-                                    dropedItem = users[i]!.equipment.helmet;
-                                    users[i]!.equipment.helmet = null;
-                                    break;
-                                case 2:
-                                    dropedItem = users[i]!.equipment.armor;
-                                    users[i]!.equipment.armor = null;
-                                    break;
-                                case 3:
-                                    dropedItem = users[i]!.equipment.gloves;
-                                    users[i]!.equipment.gloves = null;
-                                    break;
-                                case 4:
-                                    dropedItem = users[i]!.equipment.weapon;
-                                    users[i]!.equipment.weapon = null;
-                                    break;
-                                case 5:
-                                    dropedItem = users[i]!.equipment.pants;
-                                    users[i]!.equipment.pants = null;
-                                    break;
-                                case 6:
-                                    dropedItem = users[i]!.equipment.shoes;
-                                    users[i]!.equipment.shoes = null;
-                                    break;
-                            }
-                        }
+                return await HandlePlayerRun(battle, users, dataBase);
+            default:
+                return users;
+        }
+    }
 
-                        if (dropedItem == null) continue;
-                        Item item = (Item)(await dataBase.ItemDb.Get(dropedItem))!;
-                        battle.log += $"{battle.players[i].name} потерял {item.name}\n";
-                    }
+    private static async Task<List<User?>> HandlePlayerWin(Battle battle, List<User?> users, DataBase dataBase)
+    {
+        for (int i = 0; i < battle.players.Length; i++)
+        {
+            if (battle.players[i].stats.hp <= 0)
+                continue;
+
+            int countOfDroppedItem = (battle.type == BattleType.dungeon ? 1 : 0);
+            countOfDroppedItem += GetRandomNumberForDrop();
+            for (int j = 0; j < countOfDroppedItem; j++)
+            {
+                Tuple<string, string>? itemName = SecondaryFunctions.GetRandomKeyValuePair(battle.drop);
+                if (itemName == null)
+                    break;
+                Item item = GenerateEquipmentItem(itemName.Item1,
+                    battle.enemies.First().lvl, itemName.Item2);
+                if (users[i]!.inventory.Count >= 30)
+                {
+                    battle.log += $"У {battle.players[i].name} не хватило места для {item.name} | {item.lvl}\n";
+                    break;
                 }
-                break;
+                users[i]!.inventory.Add(item.id);
+
+                await dataBase.ItemDb.CreateObject(item);
+                battle.log += $"{battle.players[i].name} получил {item.name} | {item.lvl}\n";
+            }
+
+            int exp = Random.Shared.Next(battle.enemies.First().lvl * 3, battle.enemies.First().lvl * 5) + Random.Shared.Next(0, 7 *  users[i]!.stats.luck);
+            int coins = battle.enemies.First().lvl * 3 + Random.Shared.Next(0, 7 * users[i]!.stats.luck);
+            users[i]!.exp += exp;
+            users[i]!.cash += coins;
+
+            battle.log += $"{battle.players[i].name} получил {exp} опыта и {coins} монет\n";
         }
 
         return users;
     }
+    
+    static async Task<List<User?>> HandlePlayerDead(Battle battle, List<User?> users, DataBase dataBase)
+    {
+        for (int i = 0; i < battle.players.Length; i++)
+        {
+            if (battle.players[i].stats.hp > 0)
+                continue;
+            int looseCash = Random.Shared.Next(0, users[i]!.cash / 5);
+            int looseExp = Random.Shared.Next(0, (int)users[i]!.exp / 5);
+            users[i]!.cash -= looseCash;
+            users[i]!.exp -= looseExp;
+            battle.log += $"{battle.players[i].name} потерял {looseExp} опыта и {looseCash} монет\n";
 
+            if (users[i]!.cash < 0)
+                users[i]!.cash = 0;
+
+            if (users[i]!.exp < 0)
+                users[i]!.exp = 0;
+
+            string? droppedItem = null;
+            if (Random.Shared.Next(0, 100) < 40)
+            {
+                switch (Random.Shared.Next(0, 6))
+                {
+                    case 1:
+                        droppedItem = users[i]!.equipment.helmet;
+                        users[i]!.equipment.helmet = null;
+                        break;
+                    case 2:
+                        droppedItem = users[i]!.equipment.armor;
+                        users[i]!.equipment.armor = null;
+                        break;
+                    case 3:
+                        droppedItem = users[i]!.equipment.gloves;
+                        users[i]!.equipment.gloves = null;
+                        break;
+                    case 4:
+                        droppedItem = users[i]!.equipment.weapon;
+                        users[i]!.equipment.weapon = null;
+                        break;
+                    case 5:
+                        droppedItem = users[i]!.equipment.pants;
+                        users[i]!.equipment.pants = null;
+                        break;
+                    case 6:
+                        droppedItem = users[i]!.equipment.shoes;
+                        users[i]!.equipment.shoes = null;
+                        break;
+                }
+            }
+
+            if (droppedItem == null) continue;
+            Item item = (Item)(await dataBase.ItemDb.Get(droppedItem))!;
+            battle.log += $"{battle.players[i].name} потерял {item.name}\n";
+        } 
+        return users;
+    }
+    
+    static async Task<List<User?>> HandlePlayerRun(Battle battle, List<User?> users, DataBase dataBase)
+    {
+        for (int i = 0; i < battle.players.Length; i++)
+        {
+            if (battle.players[i].stats.hp < 0)
+            {
+                users[i]!.exp -= Random.Shared.Next(0, (int)users[i]!.exp / 10);
+                if (users[i]!.exp < 0)
+                    users[i]!.exp = 0;
+            }
+            else
+            {
+                string? droppedItem = null;
+                if (Random.Shared.Next(0, 100) < 20)
+                {
+                    switch (Random.Shared.Next(0, 6))
+                    {
+                        case 1:
+                            droppedItem = users[i]!.equipment.helmet;
+                            users[i]!.equipment.helmet = null;
+                            break;
+                        case 2:
+                            droppedItem = users[i]!.equipment.armor;
+                            users[i]!.equipment.armor = null;
+                            break;
+                        case 3:
+                            droppedItem = users[i]!.equipment.gloves;
+                            users[i]!.equipment.gloves = null;
+                            break;
+                        case 4:
+                            droppedItem = users[i]!.equipment.weapon;
+                            users[i]!.equipment.weapon = null;
+                            break;
+                        case 5:
+                            droppedItem = users[i]!.equipment.pants;
+                            users[i]!.equipment.pants = null;
+                            break;
+                        case 6:
+                            droppedItem = users[i]!.equipment.shoes;
+                            users[i]!.equipment.shoes = null;
+                            break;
+                    }
+                }
+
+                if (droppedItem == null) continue;
+                Item item = (Item)(await dataBase.ItemDb.Get(droppedItem))!;
+                battle.log += $"{battle.players[i].name} потерял {item.name}\n";
+            }
+        }
+        return users;
+    }
+    
     public static async Task<Warrior> GenerateWarriorByUser(User user, string username, DataBase dataBase,
         string? avatarUrl = "") => new()
     {
@@ -290,8 +305,12 @@ public static class AdventureGenerators
             mobStats = new Stats
             {
                 damage = (6 + new Random().Next(10, 14)) * mobLvl,
+                // damage = (6 + new Random().Next(20, 30)) * mobLvl,
                 defence = (7 + new Random().Next(7, 9)) * mobLvl,
+                // defence = (7 + new Random().Next(10, 15)) * mobLvl,
                 hp = (18 + new Random().Next(20, 30)) * mobLvl,
+                // hp = (18 + new Random().Next(30, 50)) * mobLvl,
+                
                 speed = (2 + new Random().Next(2, 5)) * mobLvl,
                 luck = (3 + new Random().Next(2, 6)) * mobLvl
             };
@@ -341,7 +360,7 @@ public static class AdventureGenerators
             {
                 damage = (new Random().Next(1, 5)) * lvl * rarity,
                 defence = (5 + new Random().Next(3, 7)) * lvl * rarity,
-                hp = (25 + new Random().Next(6, 10)) * lvl * rarity,
+                hp = (10 + new Random().Next(6, 10)) * lvl * rarity,
                 speed = (1 + new Random().Next(0, 3)) * lvl * rarity,
                 luck = (new Random().Next(0, 2)) * lvl * rarity
             },
@@ -349,15 +368,15 @@ public static class AdventureGenerators
             {
                 damage = (4 + new Random().Next(1, 5)) * lvl * rarity,
                 defence = (1 + new Random().Next(3, 7)) * lvl * rarity,
-                hp = (2 + new Random().Next(6, 10)) * lvl * rarity,
-                speed = (3 + new Random().Next(0, 3)) * lvl * rarity,
-                luck = (2 + new Random().Next(0, 2)) * lvl * rarity
+                hp = (new Random().Next(2, 5)) * lvl * rarity,
+                speed = (new Random().Next(0, 3)) * lvl * rarity,
+                luck = (new Random().Next(0, 2)) * lvl * rarity
             },
             "gloves" => new Stats()
             {
                 damage = (2 + new Random().Next(1, 5)) * lvl * rarity,
                 defence = (3 + new Random().Next(3, 7)) * lvl * rarity,
-                hp = (5 + new Random().Next(6, 10)) * lvl * rarity,
+                hp = (new Random().Next(6, 10)) * lvl * rarity,
                 speed = (new Random().Next(0, 3)) * lvl * rarity,
                 luck = (5 + new Random().Next(0, 2)) * lvl * rarity
             },
@@ -365,23 +384,23 @@ public static class AdventureGenerators
             {
                 damage = (new Random().Next(1, 5)) * lvl * rarity,
                 defence = (7 + new Random().Next(3, 7)) * lvl * rarity,
-                hp = (10 + new Random().Next(6, 10)) * lvl * rarity,
+                hp = (new Random().Next(6, 10)) * lvl * rarity,
                 speed = (1 + new Random().Next(0, 3)) * lvl * rarity,
                 luck = (new Random().Next(0, 2)) * lvl * rarity
             },
             "shoes" => new Stats()
             {
-                damage = (1 + new Random().Next(1, 5)) * lvl * rarity,
+                damage = ( new Random().Next(1, 5)) * lvl * rarity,
                 defence = (10 + new Random().Next(3, 7)) * lvl * rarity,
-                hp = (5 + new Random().Next(6, 10)) * lvl * rarity,
+                hp = (new Random().Next(6, 10)) * lvl * rarity,
                 speed = (4 + new Random().Next(0, 3)) * lvl * rarity,
                 luck = (new Random().Next(0, 2)) * lvl * rarity
             },
             "helmet" => new Stats()
             {
                 damage = (new Random().Next(1, 5)) * lvl * rarity,
-                defence = (20 + new Random().Next(3, 7)) * lvl * rarity,
-                hp = (10 + new Random().Next(6, 10)) * lvl * rarity,
+                defence = (5 + new Random().Next(3, 7)) * lvl * rarity,
+                hp = (5 + new Random().Next(6, 10)) * lvl * rarity,
                 speed = (new Random().Next(0, 3)) * lvl * rarity,
                 luck = (new Random().Next(0, 2)) * lvl * rarity
             },

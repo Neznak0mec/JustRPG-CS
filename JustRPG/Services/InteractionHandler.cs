@@ -2,6 +2,7 @@ using System.Reflection;
 using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
+using JustRPG.Exceptions;
 using JustRPG.Features.Cooldown;
 using JustRPG.Generators;
 using Serilog;
@@ -46,24 +47,31 @@ namespace JustRPG.Services
 
         private async Task OnInteractionExecuted(ICommandInfo info, IInteractionContext context, IResult result)
         {
-            
-            if (!result.IsSuccess && (result.ErrorReason.StartsWith("Не так быстро") ||
-                                      context.User.Id == 426986442632462347))
+            if (!result.IsSuccess)
             {
-                await context.Interaction.RespondAsync(embed: EmbedCreater.ErrorEmbed(result.ErrorReason+"\n"+result.Error),
-                    ephemeral: true);
-            }
-            else if (!result.IsSuccess)
-            {
-                await context.Interaction.RespondAsync(
-                    embed: EmbedCreater.ErrorEmbed("Произошла неизвестная ошибка, попробуйте позже"), ephemeral: true);
-                
-                Log.Debug("{reason}",result.ErrorReason);
-                
-                //todo remove on release
-                await context.Interaction.FollowupAsync(
-                    embed: EmbedCreater.ErrorEmbed(result.ErrorReason + "\n" + result.Error),
-                    ephemeral: true);
+                if (context.User.Id == 426986442632462347)
+                {
+                    await context.Interaction.RespondAsync(embed: EmbedCreater.ErrorEmbed(result.ErrorReason+"\n"+result.Error),
+                        ephemeral: true);
+                }
+                else if (result.ErrorReason.StartsWith("[]"))
+                {
+                    string error = result.ErrorReason.Substring(2);
+                    await context.Interaction.RespondAsync(
+                        embed: EmbedCreater.ErrorEmbed(error), ephemeral: true);
+                }
+                else if (result.ErrorReason.StartsWith("<>"))
+                {
+                    string error = result.ErrorReason.Substring(2);
+                    await context.Interaction.RespondAsync(
+                        embed: EmbedCreater.WarningEmbed(error), ephemeral: true);
+                }
+                else
+                {
+                    await context.Interaction.RespondAsync(
+                        embed: EmbedCreater.ErrorEmbed("Произошла неизвестная ошибка, попробуйте позже"), ephemeral: true);
+                    Log.Debug("{reason}",result.ErrorReason);
+                }
             }
         }
 
@@ -73,7 +81,7 @@ namespace JustRPG.Services
             if (context.Interaction.Data.CustomId.Split('_')[1] == component.User.Id.ToString())
                 _ = Task.Run(async () => { await Execute(context); });
             else
-                throw new Exception("Вы не можете с этим взаимодействовать");
+                throw new UserInteractionException("Вы не можете с этим взаимодействовать");
 
         }
 
@@ -83,7 +91,7 @@ namespace JustRPG.Services
                 if (context.Interaction.Data.CustomId.Split('_')[1]==component.User.Id.ToString())
                     _ = Task.Run(async () => {await Execute(context); });
                 else
-                    throw new Exception("Вы не можете с этим взаимодействовать");
+                    throw new UserInteractionException("Вы не можете с этим взаимодействовать");
         }
 
         private async Task Execute(IInteractionContext ctx)

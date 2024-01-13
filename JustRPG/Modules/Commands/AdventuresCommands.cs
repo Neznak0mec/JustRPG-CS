@@ -1,4 +1,6 @@
 using Discord.Interactions;
+using JustRPG.Exceptions;
+using JustRPG.Features.Cooldown;
 using JustRPG.Models;
 using JustRPG.Generators;
 using JustRPG.Services;
@@ -14,8 +16,8 @@ public class AdventuresCommands : InteractionModuleBase<SocketInteractionContext
         _dataBase = (DataBase?)service.GetService(typeof(DataBase))!;
     }
 
-//    [Cooldown(300)]
-    [SlashCommand(name: "adventure", description: "...")]
+    [Cooldown(300)]
+    [SlashCommand(name: "adventure", description: "Отправится в небольшой поход")]
     public async Task Adventure()
     {
         var locations =  await _dataBase.LocationsDb.GetAdventuresLocations();
@@ -27,8 +29,8 @@ public class AdventuresCommands : InteractionModuleBase<SocketInteractionContext
             ));
     }
 
-//    [Cooldown(300)]
-    [SlashCommand(name: "dungeon", description: "...")]
+    [Cooldown(300)]
+    [SlashCommand(name: "dungeon", description: "Отправится в ближайшее подземелье")]
     public async Task Dungeon()
     {
         var locations = await _dataBase.LocationsDb.GetDungeons();
@@ -41,9 +43,14 @@ public class AdventuresCommands : InteractionModuleBase<SocketInteractionContext
     }
 
 
-    [SlashCommand(name: "arena", description: "...")]
+    [SlashCommand(name: "arena", description: "Сражаться на арене с другими игроками")]
     public async Task Arena()
     {
+        if (_dataBase.ArenaDb.IsFindPVP((long)Context.User.Id))
+        {
+            throw new UserInteractionException("Вы уже ищете бой");
+        }
+        
         User user = (User)(await _dataBase.UserDb.Get(Context.User.Id))!;
         FindPVP findPvp = new FindPVP()
         {

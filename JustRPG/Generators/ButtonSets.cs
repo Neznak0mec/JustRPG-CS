@@ -79,6 +79,14 @@ public static class ButtonSets
 
         return builder.Build();
     }
+    
+    public static MessageComponent SaleItemButtonsSet(long userid, string itemId)
+    {
+        ComponentBuilder builder =
+            new ComponentBuilder().WithButton(label: "Установить цену", $"Market|setPrice_{userid}_{itemId}");
+        
+        return builder.Build();
+    }
 
     public static MessageComponent AcceptActions(string uid, long userId)
     {

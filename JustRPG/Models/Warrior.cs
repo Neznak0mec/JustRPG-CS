@@ -1,5 +1,6 @@
 using JustRPG.Models.SubClasses;
 using MongoDB.Bson.Serialization.Attributes;
+using Serilog;
 
 namespace JustRPG.Models;
 
@@ -14,14 +15,19 @@ public class Warrior
     [BsonElement("url")] public string url { get; set; }
 
 
-    public double GetDamage(int startDamage)
+    public double GetDamage(int startDamage, int enemySpeed)
     {
 
         int proc = startDamage / 5 * 100;
         double damage = startDamage + Random.Shared.Next(-proc, proc) / 100.0;
 
-        if (Random.Shared.Next(1, 100) < (stats.speed > 75 ? 75 : stats.speed))
+        float chance = (float)stats.speed / (stats.speed + enemySpeed) * 100;
+        if (chance > 50)
+            chance = 50;
+        if (Random.Shared.Next(1, 100) < chance)
+        {
             return -1;
+        }
 
 
         if (stats.defence > 0)
@@ -43,19 +49,22 @@ public class Warrior
     {
         double damage;
         string msg;
-        if (Random.Shared.Next(1, 100) < 1 + (stats.luck > 75 ? 75 : stats.luck))
+        if (Random.Shared.Next(1, 100) < (stats.luck > 60 ? 60 : stats.luck))
         {
-            damage = enemy.GetDamage(stats.damage * 2);
-            msg = $"{name} нанес критический удар {enemy.name}, тем самым нанеся {damage:f2} урона\n";
+            damage = enemy.GetDamage(stats.damage * 2, stats.speed);
+            msg = damage < 0 ?
+                $"{enemy.name} удалось уклониться\n" :
+                $"{name} нанес критический удар {enemy.name}, тем самым нанеся {damage:f2} урона\n";
         }
         else
         {
-            damage = enemy.GetDamage(stats.damage);
-            msg = $"{name} нанёс {damage:f2} урона по {enemy.name}\n";
+            damage = enemy.GetDamage(stats.damage, stats.speed);
+            msg = damage < 0 ?
+                $"{enemy.name} удалось уклониться\n" :
+                $"{name} нанёс {damage:f2} урона по {enemy.name}\n";
         }
 
-        if (damage == -1)
-            msg = $"{enemy.name} удалось уклониться\n";
+       
 
 
         battle.log += msg;

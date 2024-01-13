@@ -50,7 +50,7 @@ public class InventoryDB : ICollection
 
     public async Task<object?> CreateObject(object? id)
     {
-        var temp = (Inventory)id!;
+        Inventory temp = (Inventory)id!;
 
         if (await _collection.CountDocumentsAsync(x => x!.id == temp.id) > 0)
             await _collection.ReplaceOneAsync(x => x!.id == temp.id, temp);

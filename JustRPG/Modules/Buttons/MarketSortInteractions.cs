@@ -1,6 +1,7 @@
 using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
+using JustRPG.Exceptions;
 using JustRPG.Generators;
 using JustRPG.Models;
 using JustRPG.Services;
@@ -100,9 +101,7 @@ public class MarketSortInteractions : InteractionModuleBase<SocketInteractionCon
         }
         catch (Exception)
         {
-            await RespondAsync(embed: EmbedCreater.ErrorEmbed("Предмет не найден, обновите поиск"),
-                ephemeral: true);
-            return;
+            throw new UserInteractionException("Предмет не найден, обновите поиск");
         }
 
         string uId = Guid.NewGuid().ToString();
@@ -126,7 +125,7 @@ public class MarketSortInteractions : InteractionModuleBase<SocketInteractionCon
             ephemeral: true);
     }
 
-    [ComponentInteraction("MarketSort|_nextItem_*", true)]
+    [ComponentInteraction("MarketSort|nextItem_*", true)]
     public async Task NextItem(string userId)
     {
         MarketSearchState search = (await _dataBase.MarketDb.GetSearch(userId))!;

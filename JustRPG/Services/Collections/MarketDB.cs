@@ -66,13 +66,13 @@ public class MarketDB : ICollection
 
         if (searchState.itemLvl != null)
         {
-            var f1 = Builders<SaleItem>.Filter.Gt(x=> x.itemLvl, searchState.itemLvl.Item1);
-            var f2 = Builders<SaleItem>.Filter.Lt(x=> x.itemLvl, searchState.itemLvl.Item2);
-            filter = filter & f1 & f2;
+            var f1 = Builders<SaleItem>.Filter.Gte(x=> x.itemLvl, searchState.itemLvl.Item1);
+            var f2 = Builders<SaleItem>.Filter.Lte(x=> x.itemLvl, searchState.itemLvl.Item2);
+            filter &= f1 & f2;
         }
         else
         {
-            var f1 = Builders<SaleItem>.Filter.Gt(x=> x.itemLvl, 0);
+            var f1 = Builders<SaleItem>.Filter.Gte(x=> x.itemLvl, 0);
             filter &= f1;
         }
 

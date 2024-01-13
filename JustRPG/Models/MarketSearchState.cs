@@ -1,3 +1,4 @@
+using JustRPG.Models.Enums;
 using MongoDB.Bson.Serialization.Attributes;
 
 namespace JustRPG.Models;
@@ -13,8 +14,8 @@ public class MarketSearchState
     [BsonElement("start_page")] public string startPage { get; set; } = "market";
     
     [BsonElement("item_lvl")] public Tuple<int, int>? itemLvl { get; set; } = null;
-    [BsonElement("item_rarity")] public string? itemRarity { get; set; } = null;
-    [BsonElement("item_type")] public string? itemType { get; set; } = null;
+    [BsonElement("item_rarity")] public Rarity? itemRarity { get; set; } = null;
+    [BsonElement("item_type")] public ItemType? itemType { get; set; } = null;
 
     public List<SaleItem> GetItemsOnPage(int pageIndex)
     {

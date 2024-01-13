@@ -92,10 +92,11 @@ public class BattleInteractions : InteractionModuleBase<SocketInteractionContext
     [ComponentInteraction("Battle|Heal_*_*", true)]
     async Task Heal(string userId, string battleId)
     {
-        if (_battle.players[_battle.currentUser].inventory.Any(x => x.Item1 == "fb75ff73-1116-4e95-ae46-8075c4e9a782")){
+        if (_battle.players[_battle.currentUser].inventory.Any(x => x.Item1 == "fb75ff73-1116-4e95-ae46-8075c4e9a782"))
+        {
             _battle.log +=
                 $"{_battle.players[_battle.currentUser].name} восстановил себе {_battle.players[_battle.currentUser].Heal()}";
-            int index = _battle.players[_battle.currentUser].inventory.FindIndex(x=>x.Item1 == "");
+            int index = _battle.players[_battle.currentUser].inventory.FindIndex(x => x.Item1 == "");
             _battle.players[_battle.currentUser].inventory.RemoveAt(index);
         }
         else

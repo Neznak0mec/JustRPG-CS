@@ -32,7 +32,7 @@ public static class SecondaryFunctions
         else
             emoji = "💀";
 
-        return new Tuple<string, string>(emoji, $"{warrior.stats.hp / warrior.stats.MaxHP * 100}%");
+        return new Tuple<string, string>(emoji, $"{warrior.stats.hp / warrior.stats.MaxHP * 100:F2}%");
     }
 
     public static Tuple<string, string>? GetRandomKeyValuePair(Dictionary<string, string> dictionary)

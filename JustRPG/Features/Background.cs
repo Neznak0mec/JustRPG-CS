@@ -46,9 +46,7 @@ public class Background
         DateTimeOffset currentTime = DateTimeOffset.Now;
         List<Battle> battles = (List<Battle>)(await _dataBase.BattlesDb.GetAll())!;
 
-        List<Battle> endedBattles = battles.Where(x => (
-                                                           x.type == BattleType.adventure ||
-                                                           x.type == BattleType.dungeon) &&
+        List<Battle> endedBattles = battles.Where(x => x.type is BattleType.adventure or BattleType.dungeon &&
                                                        x.lastActivity < currentTime.AddSeconds(-60).ToUnixTimeSeconds())
             .ToList();
 
@@ -107,8 +105,7 @@ public class Background
 
     async Task CheckFindingBattles()
     {
-        List<Tuple<FindPVP, FindPVP>> pvpPairs = new List<Tuple<FindPVP, FindPVP>>();
-
+        var pvpPairs = new List<(FindPVP, FindPVP)>();
         int mmrIncrementPerSecond = 1;
         int mmrDifferenceThreshold = 100;
 
@@ -116,30 +113,27 @@ public class Background
 
         for (int i = 0; i < findPvps.Count; i++)
         {
-            FindPVP pvp1 = findPvps[i];
-
             for (int j = i + 1; j < findPvps.Count; j++)
             {
-                FindPVP pvp2 = findPvps[j];
+                var pvp1 = findPvps[i];
+                var pvp2 = findPvps[j];
 
                 int mmrDifference = Math.Abs(pvp1.mmr - pvp2.mmr);
                 int timeDifferenceSeconds = (int)Math.Abs(pvp1.stratTime - pvp2.stratTime);
-
                 int mmrDifferenceAllowed = mmrIncrementPerSecond * timeDifferenceSeconds;
 
                 if (mmrDifference <= mmrDifferenceThreshold + mmrDifferenceAllowed)
                 {
-                    Tuple<FindPVP, FindPVP> pair = new Tuple<FindPVP, FindPVP>(pvp1, pvp2);
-                    pvpPairs.Add(pair);
+                    pvpPairs.Add((pvp1, pvp2));
                 }
             }
         }
 
-        if (pvpPairs.Count != 0)
+        if (pvpPairs.Any())
             await StartBattles(pvpPairs);
     }
 
-    async Task StartBattles(List<Tuple<FindPVP, FindPVP>> pairsPvp)
+    async Task StartBattles(List<(FindPVP, FindPVP)> pairsPvp)
     {
         foreach (var pair in pairsPvp)
         {

@@ -31,8 +31,6 @@ public class BattleStats : Stats
         damage = user.stats.damage;
         defence = user.stats.defence;
         luck = user.stats.luck;
-        MaxDef = user.stats.defence;
-        MaxHP = user.stats.hp;
         speed = user.stats.speed;
 
         UserEquipment eq = await user.GetEquipmentAsItems(dataBase)!;
@@ -42,14 +40,15 @@ public class BattleStats : Stats
         {
             if (i == null) continue;
 
-            hp += i.giveStats.hp;
+            hp += i.giveStats!.hp;
             damage += i.giveStats.damage;
             defence += i.giveStats.defence;
             luck += i.giveStats.luck;
-            MaxDef += i.giveStats.defence;
-            MaxHP += i.giveStats.hp;
             speed += i.giveStats.speed;
         }
+        
+        MaxDef = defence;
+        MaxHP = hp;
 
         return this;
     }

@@ -1,6 +1,7 @@
 using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
+using JustRPG.Exceptions;
 using JustRPG.Generators;
 using JustRPG.Models;
 using JustRPG.Models.Enums;
@@ -37,9 +38,7 @@ public class GuildInteractions : InteractionModuleBase<SocketInteractionContext<
 
         if (member == null)
         {
-            await RespondAsync(embed: EmbedCreater.ErrorEmbed("Вы не являетесь участником этой гильдии"),
-                ephemeral: true);
-            return;
+            throw new UserInteractionException("Вы не являетесь участником этой гильдии");
         }
 
         string actionUid = Guid.NewGuid().ToString();
@@ -72,23 +71,19 @@ public class GuildInteractions : InteractionModuleBase<SocketInteractionContext<
 
         if (user.guildTag == guildTag)
         {
-            await RespondAsync(embed: EmbedCreater.ErrorEmbed("Вы уже участник гильдии другой гильд"),
-                ephemeral: true);
+            throw new UserInteractionException("Вы уже участник гильдии другой гильд");
         }
         else if (guildMember != null)
         {
-            await RespondAsync(embed: EmbedCreater.ErrorEmbed("Вы уже участник гильдии"),
-                ephemeral: true);
+            throw new UserInteractionException("Вы уже участник гильдии");
         }
         else if (guild.members.Count >= 30 || guild.join_type == JoinType.close)
         {
-            await RespondAsync(embed: EmbedCreater.ErrorEmbed("В данную гильдию нельзя вступить. Закрыт набор или она достигла максимального числа участников"),
-                ephemeral: true);
+            throw new UserInteractionException("В данную гильдию нельзя вступить. Закрыт набор или она достигла максимального числа участников");
         }
         else if (guild.wantJoin.Contains((long)Context.User.Id))
         {
-            await RespondAsync(embed: EmbedCreater.ErrorEmbed("Вы уже подали заявку на вступление в эту гильдию"),
-                ephemeral: true);
+            throw new UserInteractionException("Вы уже подали заявку на вступление в эту гильдию");
         }
         else if (guild.join_type == JoinType.open)
         {
@@ -176,24 +171,18 @@ public class GuildInteractions : InteractionModuleBase<SocketInteractionContext<
 
         if (member == null)
         {
-            await RespondAsync(embed: EmbedCreater.ErrorEmbed("Вы не являетесь участником этой гильдии"),
-                ephemeral: true);
-            return;
+            throw new UserInteractionException("Вы не являетесь участником этой гильдии");
         }
 
         if (!guild.premium)
         {
-            await RespondAsync(embed: EmbedCreater.ErrorEmbed("У вашей гильдии нет премиум статуса. Он выдаётся тем кто поддержал разработку бота звонкой монетой)" +
-                                                              "\nЕсли хотите поддержать автора обратитесь на официальном сервере бота или в личные сообщения @neznakomec"),
-                ephemeral: true);
-            return;
+            throw new UserInteractionException("У вашей гильдии нет премиум статуса. Он выдаётся тем кто поддержал разработку бота звонкой монетой)" +
+                "\nЕсли хотите поддержать автора обратитесь на официальном сервере бота или в личные сообщения @neznakomec");
         }
 
         if (member.rank < GuildRank.owner)
         {
-            await RespondAsync(embed: EmbedCreater.ErrorEmbed("У вас недостаточно прав для этого действия"),
-                ephemeral: true);
-            return;
+            throw new UserInteractionException("У вас недостаточно прав для этого действия");
         }
 
         await RespondWithModalAsync<GuildEditSymbolModal>($"Guild|EditSymbol_{guildTag}");

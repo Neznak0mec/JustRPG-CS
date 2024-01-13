@@ -1,6 +1,7 @@
 using System.Text.RegularExpressions;
 using Discord.Interactions;
 using Discord.WebSocket;
+using JustRPG.Exceptions;
 using JustRPG.Generators;
 using JustRPG.Interfaces;
 using JustRPG.Models;
@@ -31,39 +32,30 @@ public class GuildModals : InteractionModuleBase<SocketInteractionContext<Socket
         object? objGuild = await _dataBase.GuildDb.Get(guildTag);
         if (objGuild != null)
         {
-            await RespondAsync(embed: EmbedCreater.ErrorEmbed("Гильдия с таким тегом уже существует"),
-                ephemeral: true);
-            return;
+            throw new UserInteractionException("Гильдия с таким тегом уже существует");
         }
 
         objGuild = await _dataBase.GuildDb.Get(guildName, "name");
         if (objGuild != null)
         {
-            await RespondAsync(embed: EmbedCreater.ErrorEmbed("Гильдия с таким именем уже существует"),
-                ephemeral: true);
-            return;
+            throw new UserInteractionException("Гильдия с таким именем уже существует");
         }
 
         User user = (User)(await _dataBase.UserDb.Get(Context.User.Id))!;
         if (!string.IsNullOrEmpty(user.guildTag))
         {
-            await RespondAsync(embed: EmbedCreater.ErrorEmbed("Вы уже участник гильдии"),
-                ephemeral: true);
-            return;
+            throw new UserInteractionException("Вы уже участник гильдии");
+
         }
 
         if (!Regex.IsMatch(guildTag, @"^[a-zA-Z]+$"))
         {
-            await RespondAsync(embed: EmbedCreater.ErrorEmbed("Тег гильдии может состоять только из английских букв"),
-                ephemeral: true);
-            return;
+            throw new UserInteractionException("Тег гильдии может состоять только из английских букв");
         }
 
         if (user.cash < 10000)
         {
-            await RespondAsync(embed: EmbedCreater.ErrorEmbed("У вас недостаточно средств для создания гильдии"),
-                ephemeral: true);
-            return;
+            throw new UserInteractionException("У вас недостаточно средств для создания гильдии");
         }
 
         Guild guild = new Guild
@@ -84,7 +76,7 @@ public class GuildModals : InteractionModuleBase<SocketInteractionContext<Socket
         await _dataBase.GuildDb.CreateObject(guild);
         await _dataBase.UserDb.Update(user);
 
-        await RespondAsync(embed: EmbedCreater.ErrorEmbed("Вы успешно создали гильдию"),
+        await RespondAsync(embed: EmbedCreater.SuccessEmbed("Вы успешно создали гильдию"),
             ephemeral: true);
     }
 
@@ -98,35 +90,26 @@ public class GuildModals : InteractionModuleBase<SocketInteractionContext<Socket
         }
         catch (Exception e)
         {
-            await RespondAsync(embed: EmbedCreater.ErrorEmbed("Id пользователя должно быть числом"),
-                ephemeral: true);
-            return;
+            throw new UserInteractionException("Id пользователя должно быть числом");
         }
 
         Guild guild = (Guild)(await _dataBase.GuildDb.Get(guildTag))!;
         object? objUser = guild.members.FirstOrDefault(x => x.user == userId);
         if (objUser == null)
         {
-            await RespondAsync(embed: EmbedCreater.ErrorEmbed("Такого пользователя в гильдии нет"),
-                ephemeral: true);
-            return;
+            throw new UserInteractionException("Такого пользователя в гильдии нет");
         }
 
         GuildMember guildMember = (GuildMember)objUser;
         GuildMember? moderator = guild.members.FirstOrDefault(x => x.user == (long)Context.User.Id);
         if (moderator == null)
         {
-            await RespondAsync(embed: EmbedCreater.ErrorEmbed("Вы не являетесь участником этой гильдии"),
-                ephemeral: true);
-            return;
+            throw new UserInteractionException("Вы не являетесь участником этой гильдии");
         }
 
         if (moderator.rank <= guildMember.rank)
         {
-            await RespondAsync(
-                embed: EmbedCreater.ErrorEmbed("Нельзя кикнуть пользователя с таким же рангом как у вас или выше"),
-                ephemeral: true);
-            return;
+            throw new UserInteractionException("Нельзя кикнуть пользователя с таким же рангом как у вас или выше");
         }
 
         guild.members.Remove(guildMember);
@@ -150,9 +133,7 @@ public class GuildModals : InteractionModuleBase<SocketInteractionContext<Socket
         }
         catch (Exception e)
         {
-            await RespondAsync(embed: EmbedCreater.ErrorEmbed("Id пользователя должно быть числом"),
-                ephemeral: true);
-            return;
+            throw new UserInteractionException("Id пользователя должно быть числом");
         }
 
         Guild guild = (Guild)(await _dataBase.GuildDb.Get(guildTag))!;
@@ -163,30 +144,25 @@ public class GuildModals : InteractionModuleBase<SocketInteractionContext<Socket
         {
             guild.wantJoin.Remove(userId);
             await _dataBase.GuildDb.Update(guild);
-            await RespondAsync(embed: EmbedCreater.ErrorEmbed("Пользователь не найден"),
-                ephemeral: true);
+            throw new UserInteractionException("Пользователь не найден");
         }
         else if (((User)user).guildTag != null)
         {
             guild.wantJoin.Remove(userId);
             await _dataBase.GuildDb.Update(guild);
-            await RespondAsync(embed: EmbedCreater.ErrorEmbed("Пользователь уже участник гильдии"),
-                ephemeral: true);
+            throw new UserInteractionException("Пользователь уже участник гильдии");
         }
         else if (member == null)
         {
-            await RespondAsync(embed: EmbedCreater.ErrorEmbed("Вы не участником этой гильдии"),
-                ephemeral: true);
+            throw new UserInteractionException("Вы не участником этой гильдии");
         }
         else if (member.rank < GuildRank.officer)
         {
-            await RespondAsync(embed: EmbedCreater.ErrorEmbed("У вас нет права для этого действия"),
-                ephemeral: true);
+            throw new UserInteractionException("У вас нет права для этого действия");
         }
         else if (guild.join_type is JoinType.close or JoinType.open || guild.members.Count >= 30)
         {
-            await RespondAsync(embed: EmbedCreater.ErrorEmbed("На данный момент нельзя никого принять в гильдию"),
-                ephemeral: true);
+            throw new UserInteractionException("На данный момент нельзя никого принять в гильдию");
         }
         else
         {
@@ -220,9 +196,7 @@ public class GuildModals : InteractionModuleBase<SocketInteractionContext<Socket
         }
         catch (Exception e)
         {
-            await RespondAsync(embed: EmbedCreater.ErrorEmbed("Id пользователя должно быть числом"),
-                ephemeral: true);
-            return;
+            throw new UserInteractionException("Id пользователя должно быть числом");
         }
 
         Guild guild = (Guild)(await _dataBase.GuildDb.Get(guildTag))!;
@@ -231,19 +205,15 @@ public class GuildModals : InteractionModuleBase<SocketInteractionContext<Socket
 
         if (member == null)
         {
-            await RespondAsync(embed: EmbedCreater.ErrorEmbed("Вы не участником этой гильдии"),
-                ephemeral: true);
+            throw new UserInteractionException("Вы не участником этой гильдии");
         }
         else if (member.rank < GuildRank.officer)
         {
-            await RespondAsync(embed: EmbedCreater.ErrorEmbed("У вас нет права для этого действия"),
-                ephemeral: true);
+            throw new UserInteractionException("У вас нет права для этого действия");
         }
         else if (!guild.wantJoin.Contains(userId))
         {
-            await RespondAsync(
-                embed: EmbedCreater.ErrorEmbed("Пользователь не подавал заявку на вступление в гильдию"),
-                ephemeral: true);
+            throw new UserInteractionException("Пользователь не подавал заявку на вступление в гильдию");
         }
         else
         {
@@ -265,9 +235,7 @@ public class GuildModals : InteractionModuleBase<SocketInteractionContext<Socket
         }
         catch (Exception e)
         {
-            await RespondAsync(embed: EmbedCreater.ErrorEmbed("Id пользователя должно быть числом"),
-                ephemeral: true);
-            return;
+            throw new UserInteractionException("Id пользователя должно быть числом");
         }
 
         Guild guild = (Guild)(await _dataBase.GuildDb.Get(guildTag))!;
@@ -277,19 +245,15 @@ public class GuildModals : InteractionModuleBase<SocketInteractionContext<Socket
 
         if (member == null)
         {
-            await RespondAsync(embed: EmbedCreater.ErrorEmbed("Вы не участником этой гильдии"),
-                ephemeral: true);
+            throw new UserInteractionException("Вы не участником этой гильдии");
         }
         else if (member.rank < GuildRank.owner)
         {
-            await RespondAsync(embed: EmbedCreater.ErrorEmbed("У вас нет права для этого действия"),
-                ephemeral: true);
+            throw new UserInteractionException("У вас нет права для этого действия");
         }
         else if (officer == null)
         {
-            await RespondAsync(
-                embed: EmbedCreater.ErrorEmbed("Пользователь не состоит в гильдии"),
-                ephemeral: true);
+            throw new UserInteractionException("Пользователь не состоит в гильдии");
         }
         else if (officer.rank == GuildRank.officer)
         {
@@ -317,20 +281,15 @@ public class GuildModals : InteractionModuleBase<SocketInteractionContext<Socket
 
         if (member == null)
         {
-            await RespondAsync(embed: EmbedCreater.ErrorEmbed("Вы не участником этой гильдии"),
-                ephemeral: true);
+            throw new UserInteractionException("Вы не участником этой гильдии");
         }
         else if (member.rank < GuildRank.owner)
         {
-            await RespondAsync(embed: EmbedCreater.ErrorEmbed("У вас нет права для этого действия"),
-                ephemeral: true);
+            throw new UserInteractionException("У вас нет права для этого действия");
         }
         else if (!guild.premium)
         {
-            await RespondAsync(
-                embed: EmbedCreater.ErrorEmbed(
-                    "У вашей гильдии нет премиум статуса, для его получения обратитесь к @neznakomec"),
-                ephemeral: true);
+            throw new UserInteractionException("У вашей гильдии нет премиум статуса, для его получения обратитесь к @neznakomec");
         }
         else
         {
@@ -338,11 +297,8 @@ public class GuildModals : InteractionModuleBase<SocketInteractionContext<Socket
 
             if (!IsDiscordEmoji(symbol))
             {
-                await RespondAsync(embed: EmbedCreater.ErrorEmbed(
-                        "Значок гильдии должен быть дискорд эмоджи. Пример: <:emoji_name:emoji_id>" +
-                        "\nДля помощи обратитесь за помощью на официальном или на прямую к @neznakomec"),
-                    ephemeral: true);
-                return;
+                throw new UserInteractionException("Значок гильдии должен быть дискорд эмоджи. Пример: <:emoji_name:emoji_id>" +
+                    "\nДля помощи обратитесь за помощью на официальном или на прямую к @neznakomec");
             }
 
             guild.symbol = modal.Symbol;

@@ -69,13 +69,13 @@ public class Program
 
         _client!.Ready += async () =>
         {
-            Log.Information("{CurrentUserId} is logined!", _client.CurrentUser.Id);
+            Log.Information("{CurrentUserId} is login!", _client.CurrentUser.Id);
             await sCommands.RegisterCommandsGloballyAsync();
             Log.Information("commands are loaded");
         };
 
         await _client.LoginAsync(TokenType.Bot,
-            Environment.GetEnvironmentVariable("BotToken"));
+        Environment.GetEnvironmentVariable("BotToken"));
         await _client.StartAsync();
 
         await Task.Delay(-1);

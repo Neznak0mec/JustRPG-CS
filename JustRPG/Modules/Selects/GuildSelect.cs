@@ -1,6 +1,7 @@
 using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
+using JustRPG.Exceptions;
 using JustRPG.Generators;
 using JustRPG.Models;
 using JustRPG.Models.Enums;
@@ -26,16 +27,12 @@ public class GuildSelect : InteractionModuleBase<SocketInteractionContext<Socket
         GuildMember? moderator = guild.members.FirstOrDefault(x => x.user == (long)Context.User.Id);
         if (moderator == null)
         {
-            await RespondAsync(embed: EmbedCreater.ErrorEmbed("Вы не являетесь участником этой гильдии"),
-                ephemeral: true);
-            return; 
+            throw new UserInteractionException("Вы не являетесь участником этой гильдии");
         }
         
         if (moderator.rank < GuildRank.owner)
         {
-            await RespondAsync(embed: EmbedCreater.ErrorEmbed("У вас недостаточно прав для этого действия"),
-                ephemeral: true);
-            return; 
+            throw new UserInteractionException("У вас недостаточно прав для этого действия");
         }
 
         JoinType joinType = selected[0] switch

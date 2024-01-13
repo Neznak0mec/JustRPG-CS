@@ -1,6 +1,7 @@
 using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
+using JustRPG.Exceptions;
 using JustRPG.Generators;
 using JustRPG.Models;
 using JustRPG.Services;
@@ -79,7 +80,7 @@ public class ActionInteractions : InteractionModuleBase<SocketInteractionContext
         }
         else
         {
-            embed = EmbedCreater.ErrorEmbed("Данный предмет не найден в вашем инвентаре");
+            throw new UserInteractionException("Данный предмет не найден в вашем инвентаре");
         }
 
         await Context.Interaction.UpdateAsync(x =>
@@ -120,7 +121,7 @@ public class ActionInteractions : InteractionModuleBase<SocketInteractionContext
         }
         else
         {
-            embed = EmbedCreater.ErrorEmbed("Данный предмет не найден в вашем инвентаре");
+            throw new UserInteractionException("Данный предмет не найден в вашем инвентаре");
         }
 
         await Context.Interaction.UpdateAsync(x =>
@@ -144,7 +145,7 @@ public class ActionInteractions : InteractionModuleBase<SocketInteractionContext
         }
         else
         {
-            embed = EmbedCreater.ErrorEmbed("Данный предмет не найден в вашем инвентаре");
+            throw new UserInteractionException("Данный предмет не найден в вашем инвентаре");
         }
 
         await Context.Interaction.UpdateAsync(x =>
@@ -162,9 +163,7 @@ public class ActionInteractions : InteractionModuleBase<SocketInteractionContext
 
         if (temp == null)
         {
-            await Context.Interaction.UpdateAsync(x =>
-                x.Embed = EmbedCreater.ErrorEmbed("Предмет не найден, возможно он уже был продан или снят с продажи"));
-            return;
+            throw new UserInteractionException("Предмет не найден, возможно он уже был продан или снят с продажи");
         }
 
         item = (SaleItem)(temp);
@@ -172,16 +171,12 @@ public class ActionInteractions : InteractionModuleBase<SocketInteractionContext
 
         if (user.cash < item.price)
         {
-            await Context.Interaction.UpdateAsync(x =>
-                x.Embed = EmbedCreater.ErrorEmbed("У вас недостаточно средств для продажи"));
-            return;
+            throw new UserInteractionException("У вас недостаточно средств для продажи");
         }
 
         if (user.inventory.Count >= 30)
         {
-            await Context.Interaction.UpdateAsync(x =>
-                x.Embed = EmbedCreater.ErrorEmbed("У вас недостаточно места в инвентаре"));
-            return;
+            throw new UserInteractionException("У вас недостаточно места в инвентаре");
         }
 
 
@@ -211,9 +206,7 @@ public class ActionInteractions : InteractionModuleBase<SocketInteractionContext
 
         if (member == null || user.guildTag != guild.tag)
         {
-            await RespondAsync(embed: EmbedCreater.ErrorEmbed("Вы не являетесь участником этой гильдии"),
-                ephemeral: true);
-            return;
+            throw new UserInteractionException("Вы не являетесь участником этой гильдии");
         }
 
         user.guildTag = null;

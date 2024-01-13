@@ -36,7 +36,7 @@ public class ProfileInteractions : InteractionModuleBase<SocketInteractionContex
         var userDb = (User)(await _dataBase.UserDb.Get(toFind))!;
 
         await ResponseMessage(await EmbedCreater.UserEquipmentEmbed(userDb, user, _dataBase),
-            ButtonSets.ProfileButtonsSet(Context.User.Id.ToString(), memberId, "Equipment"));
+            ButtonSets.ProfileButtonsSet(memberId, toFind, "Equipment"));
     }
 
     [ComponentInteraction("Inventory_*_*", true)]
@@ -49,7 +49,7 @@ public class ProfileInteractions : InteractionModuleBase<SocketInteractionContex
         User user = (User)(await _dataBase.UserDb.Get(toFind))!;
 
         await ResponseMessage(await EmbedCreater.UserInventory(member, user,items, _dataBase),
-            ButtonSets.InventoryButtonsSet(Context.User.Id.ToString(), Convert.ToInt64(toFind), inventory, items)
+            ButtonSets.InventoryButtonsSet(memberId, Convert.ToInt64(toFind), inventory, items)
             );
     }
 

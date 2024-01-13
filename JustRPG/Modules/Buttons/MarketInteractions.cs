@@ -1,6 +1,7 @@
 using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
+using JustRPG.Exceptions;
 using JustRPG.Generators;
 using JustRPG.Interfaces;
 using JustRPG.Models;
@@ -79,10 +80,7 @@ public class MarketInteractions : InteractionModuleBase<SocketInteractionContext
 
         if (saleItem.price <= 0)
         {
-            await Context.Interaction.RespondAsync(
-                embed: EmbedCreater.ErrorEmbed(
-                    "Невозможно выставить на продажу предмет за бесплатно или с отрицательной ценой"), ephemeral: true);
-            return;
+            throw new UserInteractionException("Невозможно выставить на продажу предмет за бесплатно или с отрицательной ценой");
         }
 
         saleItem.isVisible = !saleItem.isVisible;
@@ -112,6 +110,8 @@ public class MarketInteractions : InteractionModuleBase<SocketInteractionContext
         await _dataBase.MarketDb.GetUserSlots(search);
 
         search.currentItemIndex--;
+        if (search.currentItemIndex < 0)
+            search.currentItemIndex = 0;
         await UpdateMessage(search);
     }
 
@@ -175,7 +175,7 @@ public class MarketInteractions : InteractionModuleBase<SocketInteractionContext
         }
         else
         {
-            await RespondAsync(embed: EmbedCreater.ErrorEmbed("Предмет не найден"));
+            throw new UserInteractionException("Предмет не найден");
         }
 
         return saleItem;
@@ -184,15 +184,10 @@ public class MarketInteractions : InteractionModuleBase<SocketInteractionContext
 
     async Task<SaleItem?> GetItemById(string userId, string itemId)
     {
-        SaleItem? saleItem = null;
-        MarketSlotsSettings settings = (await _dataBase.MarketDb.GetSettings(userId))!;
-        if (settings.searchResults.Count != 0)
+        SaleItem? saleItem = (SaleItem?)await _dataBase.MarketDb.Get(itemId);
+        if (saleItem == null)
         {
-            saleItem = settings.searchResults.FirstOrDefault(x => x.itemId == itemId);
-        }
-        else
-        {
-            await RespondAsync(embed: EmbedCreater.ErrorEmbed("Предмет не найден"));
+            throw new UserInteractionException("Предмет не найден");
         }
 
         return saleItem;

@@ -30,7 +30,7 @@ public class SelectLocation : InteractionModuleBase<SocketInteractionContext<Soc
             Context.User.Username, _dataBase);
 
         List<Warrior> enemies = new List<Warrior>();
-        for (int i = 0; i < Random.Shared.Next(1, 3); i++)
+        for (int i = 0; i < Random.Shared.Next(2, 4); i++)
         {
             enemies.Add(AdventureGenerators.GenerateMob(location));
         }
@@ -77,7 +77,6 @@ public class SelectLocation : InteractionModuleBase<SocketInteractionContext<Soc
         await ResponseMessage(EmbedCreater.BattleEmbed(newBattle),
             component: ButtonSets.BattleButtonSet(newBattle, (long)Context.User.Id));
         
-        // await Context.Interaction.Message.ModifyAsync(x=> x.Content = "biba");
     }
 
     private async Task ResponseMessage(Embed embed, MessageComponent? component = null)

@@ -1,4 +1,5 @@
 using Discord.Interactions;
+using JustRPG.Exceptions;
 using JustRPG.Features.Cooldown;
 using JustRPG.Generators;
 using JustRPG.Models;
@@ -23,10 +24,10 @@ public class ProfileСommands : InteractionModuleBase<SocketInteractionContext>
     {
         needToFound ??= Context.User;
 
-        User? user = await GetUser(Context.User.Id, Context.User.Id == needToFound.Id);
+        User? user = await GetUser(needToFound.Id, Context.User.Id == needToFound.Id);
 
         if (user == null)
-            await RespondAsync(embed: EmbedCreater.ErrorEmbed("Данный пользователь не найден"), ephemeral: true);
+            throw new UserInteractionException("Данный пользователь не найден");
         else
             await RespondAsync(embed: await EmbedCreater.UserProfile(user, needToFound,_dataBase),
                 components: ButtonSets.ProfileButtonsSet(Context.User.Id.ToString(), user.id.ToString()));

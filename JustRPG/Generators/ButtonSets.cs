@@ -117,10 +117,10 @@ public static class ButtonSets
         bool disableSelectEnemy = false)
     {
         var builder = new ComponentBuilder()
-            .WithButton(label: "Атака", customId: $"Battle|Attack_{userId}_{battle!.id}", disabled: disableButtons)
-            .WithButton(label: "Хил", customId: $"Battle|Heal_{userId}_{battle.id}", disabled: disableButtons,
+            .WithButton(emote: Emoji.Parse(":dagger:"), customId: $"Battle|Attack_{userId}_{battle!.id}", disabled: disableButtons)
+            .WithButton(emote: Emoji.Parse(":heavy_plus_sign:"), customId: $"Battle|Heal_{userId}_{battle.id}", disabled: disableButtons,
                 style: ButtonStyle.Success)
-            .WithButton(label: "Побег", customId: $"Battle|Run_{userId}_{battle.id}",
+            .WithButton(emote: Emoji.Parse(":person_running:"), customId: $"Battle|Run_{userId}_{battle.id}",
                 disabled: disableButtons || battle.type == BattleType.arena,
                 style: ButtonStyle.Danger);
 

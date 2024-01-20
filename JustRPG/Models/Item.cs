@@ -18,34 +18,37 @@ public class Item
 
     [BsonElement("preset")] public string preset { get; set; } = "";
 
+    [BsonIgnore]
+    public string rarityString
+    {
+        get
+        {
+            return rarity switch
+            {
+                Rarity.common => "⬜",
+                Rarity.uncommon => "🟦",
+                Rarity.rare => "🟪",
+                Rarity.epic => "🟨",
+                Rarity.legendary => "🟥",
+                Rarity.impossible => "👾",
+                Rarity.exotic => "🔳",
+                Rarity.prize => "🎁",
+                Rarity.eventt => "✨",
+                _ => "⬜"
+            };
+
+        }
+}
+
     public override string ToString()
     {
         if (generated)
             return
-                $"<:health:997889169567260714>: {giveStats!.hp} | <:strength:997889205684420718>: {giveStats.damage} | <:armor:997889166673186987>: {giveStats.defence} \n" +
-                $"<:luck:997889165221957642>: {giveStats.luck} | <:dexterity:997889168216694854>: {giveStats.speed}";
+                $":heart: : {giveStats!.hp} | :dagger: : {giveStats.damage} | :shield: : {giveStats.defence} \n" +
+                $":four_leaf_clover: : {giveStats.luck} | :zap: : {giveStats.speed} | :gem: : {rarityString}";
         else
             return description;
-    }
-
-    public string ToStringWithRarity()
-    {
-        string res = ToString();
-        res += "| редкость: " +
-               rarity switch
-               {
-                   Rarity.common => "⬜",
-                   Rarity.uncommon => "🟦",
-                   Rarity.rare => "🟪",
-                   Rarity.epic => "🟨",
-                   Rarity.legendary => "🟥",
-                   Rarity.impossible => "👾",
-                   Rarity.exotic => "🔳",
-                   Rarity.prize => "🎁",
-                   Rarity.eventt => "✨",
-                   _ => "⬜"
-               };
-        return res;
+               
     }
 
     public bool IsEquippable()

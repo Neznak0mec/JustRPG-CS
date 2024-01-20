@@ -70,7 +70,7 @@ namespace JustRPG.Services
                 {
                     await context.Interaction.RespondAsync(
                         embed: EmbedCreater.ErrorEmbed("Произошла неизвестная ошибка, попробуйте позже"), ephemeral: true);
-                    Log.Debug("{reason}",result.ErrorReason);
+                    Log.Debug("{reason} - {place}",result.ErrorReason,result.Error.Value);
                 }
             }
         }
@@ -81,7 +81,8 @@ namespace JustRPG.Services
             if (context.Interaction.Data.CustomId.Split('_')[1] == component.User.Id.ToString())
                 _ = Task.Run(async () => { await Execute(context); });
             else
-                throw new UserInteractionException("Вы не можете с этим взаимодействовать");
+                await context.Interaction.RespondAsync(
+                    embed: EmbedCreater.ErrorEmbed("Вы не можете с этим взаимодействовать"), ephemeral: true);
 
         }
 
@@ -91,7 +92,8 @@ namespace JustRPG.Services
                 if (context.Interaction.Data.CustomId.Split('_')[1]==component.User.Id.ToString())
                     _ = Task.Run(async () => {await Execute(context); });
                 else
-                    throw new UserInteractionException("Вы не можете с этим взаимодействовать");
+                    await context.Interaction.RespondAsync(
+                        embed: EmbedCreater.ErrorEmbed("Вы не можете с этим взаимодействовать"), ephemeral: true);
         }
 
         private async Task Execute(IInteractionContext ctx)

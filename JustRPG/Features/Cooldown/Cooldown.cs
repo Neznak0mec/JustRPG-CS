@@ -31,6 +31,9 @@ public class Cooldown : PreconditionAttribute
     {
         // if (context.User.Id == 426986442632462347)
             // return Task.FromResult(PreconditionResult.FromSuccess());
+        #if DEBUG
+            return Task.FromResult(PreconditionResult.FromSuccess());
+        #endif
         
         var key = new CooldownInfo(context.User.Id, commandInfo.Name);
         if (_cooldowns.TryGetValue(key, out DateTime endsAt))

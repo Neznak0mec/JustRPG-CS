@@ -14,7 +14,10 @@ public class ArenaDB
 
     public void AppFindPVP(FindPVP findPvp) => _findPvps.Add(findPvp);
 
-    public void DeletFindPVP(long userId) => _findPvps = _findPvps.Where(x => x.userId != userId).ToList();
+    public void DeletFindPVP(long userId)
+    {
+        _findPvps.RemoveAll(x => x.userId == userId);
+    }
 
     public int CountOfFinfPVP() => _findPvps.Count;
 
@@ -22,4 +25,11 @@ public class ArenaDB
     
     public bool IsFindPVP(long userId) => _findPvps.Any(x => x.userId == userId);
    
+    public FindPVP? Get(long userId) => _findPvps.FirstOrDefault(x => x.userId == userId);
+    
+    public void Update(FindPVP findPvp)
+    {
+        var index = _findPvps.FindIndex(x => x.userId == findPvp.userId);
+        _findPvps[index] = findPvp;
+    }
 }

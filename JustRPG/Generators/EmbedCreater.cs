@@ -66,9 +66,9 @@ public class EmbedCreater
             .AddField("Очки рейтинга", $"{user.mmr}", inline: true)
             .AddField(name: "Статы",
                 value:
-                $"<:health:997889169567260714> : {user.stats.hp} + {stats.hp - user.stats.hp} |  <:strength:997889205684420718> : {user.stats.damage} + {stats.damage - user.stats.damage}" +
-                $"| <:armor:997889166673186987> : {user.stats.defence} + {stats.defence - user.stats.defence} \n<:dexterity:997889168216694854> : {user.stats.speed} + {stats.speed - user.stats.speed}" +
-                $"| <:luck:997889165221957642> : {user.stats.luck} + {stats.luck - user.stats.luck}");
+                $":heart: : {user.stats.hp} + {stats.hp - user.stats.hp} |  :dagger: : {user.stats.damage} + {stats.damage - user.stats.damage}" +
+                $"| :shield: : {user.stats.defence} + {stats.defence - user.stats.defence} \n:zap: : {user.stats.speed} + {stats.speed - user.stats.speed}" +
+                $"| :four_leaf_clover: : {user.stats.luck} + {stats.luck - user.stats.luck}");
         return emb.Build();
     }
 
@@ -80,33 +80,19 @@ public class EmbedCreater
         };
         UserEquipment equipment = await user.GetEquipmentAsItems(dataBase!);
 
-        embed.AddField(equipment.helmet == null ? "Шлем" : $"Шлем - {equipment.helmet!.name}",
+        embed.AddField(equipment.helmet == null ? "Шлем" : $"Шлем - {equipment.helmet!.name} | {equipment.helmet!.lvl}",
                 equipment.helmet == null ? "Не надето" : equipment.helmet!.ToString(), true)
-            .AddField(equipment.armor == null ? "Нагрудник" : $"Нагрудник - {equipment.armor!.name}",
+            .AddField(equipment.armor == null ? "Нагрудник" : $"Нагрудник - {equipment.armor!.name} | {equipment.armor!.lvl}",
                 equipment.armor == null ? "Не надето" : equipment.armor!.ToString(), true)
-            .AddField(equipment.pants == null ? "Штаны" : $"Штаны - {equipment.pants!.name}",
+            .AddField(equipment.pants == null ? "Штаны" : $"Штаны - {equipment.pants!.name} | {equipment.pants!.lvl}",
                 equipment.pants == null ? "Не надето" : equipment.pants!.ToString(), true)
-            .AddField(equipment.shoes == null ? "Ботинки" : $"Ботинки - {equipment.shoes!.name}",
+            .AddField(equipment.shoes == null ? "Ботинки" : $"Ботинки - {equipment.shoes!.name} | {equipment.shoes!.lvl}",
                 equipment.shoes == null ? "Не надето" : equipment.shoes!.ToString(), true)
-            .AddField(equipment.gloves == null ? "Перчатки" : $"Перчатки - {equipment.gloves!.name}",
+            .AddField(equipment.gloves == null ? "Перчатки" : $"Перчатки - {equipment.gloves!.name} | {equipment.gloves!.lvl}",
                 equipment.gloves == null ? "Не надето" : equipment.gloves!.ToString(), true)
-            .AddField(equipment.weapon == null ? "Оружие" : $"Оружие - {equipment.weapon!.name}",
+            .AddField(equipment.weapon == null ? "Оружие" : $"Оружие - {equipment.weapon!.name} | {equipment.weapon!.lvl}",
                 equipment.weapon == null ? "Не надето" : equipment.weapon!.ToString(), true);
 
-        return embed.Build();
-    }
-
-    public static Embed UpSkills()
-    {
-        var embed = new EmbedBuilder
-        {
-            Title = "Прокачка навыков",
-            Description = "Уровень навыка не может превышать уровень персонажа\n" +
-                          "<:health:997889169567260714> - увеличивается только за счёт экипировки\n" +
-                          "<:armor:997889166673186987> - принимают на себя весь урон с его частичным уменьшением\n" +
-                          "<:dexterity:997889168216694854> - увеличивает вероятность уклонения\n" +
-                          "<:luck:997889165221957642> - увеличивает получаемый опыт и монеты\n"
-        };
         return embed.Build();
     }
 
@@ -167,7 +153,6 @@ public class EmbedCreater
         return embed.Build();
     }
 
-
     public static Embed SelectAdventureEmbed()
     {
         EmbedBuilder embed = new EmbedBuilder
@@ -191,8 +176,8 @@ public class EmbedCreater
                 selectedEnemy = battle.enemies[battle.selectedEnemy];
                 break;
             case BattleType.arena:
-                currentWarrior = battle.players[battle.currentUser];
-                selectedEnemy = battle.players[battle.currentUser == 1 ? 0 : 1];
+                currentWarrior = battle.players[0];
+                selectedEnemy = battle.players[1];
                 break;
             default:
                 return ErrorEmbed("wha ?");
@@ -213,18 +198,18 @@ public class EmbedCreater
         if (!gameEnded)
         {
             embed.AddField($"{currentWarrior.fullName} - {currentWarrior.lvl}",
-                $"<:health:997889169567260714> - {progressBar(currentWarrior.stats.hp, currentWarrior.stats.MaxHP)}\n " +
-                $"<:armor:997889166673186987> - {progressBar(currentWarrior.stats.defence, currentWarrior.stats.MaxDef)}\n" +
-                $"<:strength:997764094125953054> - {currentWarrior.stats.damage}");
+                $":heart: - {progressBar(currentWarrior.stats.hp, currentWarrior.stats.MaxHP)}\n " +
+                $":shield: - {progressBar(currentWarrior.stats.defence, currentWarrior.stats.MaxDef)}\n" +
+                $":dagger: - {currentWarrior.stats.damage}");
 
             embed.AddField($"{selectedEnemy.fullName} - {selectedEnemy.lvl}",
-                $"<:health:997889169567260714> - {progressBar(selectedEnemy.stats.hp, selectedEnemy.stats.MaxHP)}\n " +
-                $"<:armor:997889166673186987> - {progressBar(selectedEnemy.stats.defence, selectedEnemy.stats.MaxDef)}\n" +
-                $"<:strength:997764094125953054> - {selectedEnemy.stats.damage}");
+                $":heart: - {progressBar(selectedEnemy.stats.hp, selectedEnemy.stats.MaxHP)}\n " +
+                $":shield: - {progressBar(selectedEnemy.stats.defence, selectedEnemy.stats.MaxDef)}\n" +
+                $":dagger: - {selectedEnemy.stats.damage}");
         }
 
         if (battle.log != "")
-            embed.AddField("Логи", $"```{battle.log}```");
+            embed.AddField("Логи", $">>> {battle.log}");
 
         return embed.Build();
     }
@@ -241,6 +226,7 @@ public class EmbedCreater
         if (count != -1)
             embed.AddField("Игроков в поиске на момент его начала", $"```{count}```");
 
+        embed.WithFooter("Может возникнуть ошибка вечного поиска. Проблема будет решена в ближайшее время");
 
         return embed.Build();
     }

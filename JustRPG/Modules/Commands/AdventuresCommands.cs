@@ -46,25 +46,43 @@ public class AdventuresCommands : InteractionModuleBase<SocketInteractionContext
     [SlashCommand(name: "arena", description: "Сражаться на арене с другими игроками")]
     public async Task Arena()
     {
+        FindPVP findPvp;
+        long count;
         if (_dataBase.ArenaDb.IsFindPVP((long)Context.User.Id))
         {
-            throw new UserInteractionException("Вы уже ищете бой");
+            findPvp = _dataBase.ArenaDb.Get((long)Context.User.Id)!;
+            
+            count = _dataBase.ArenaDb.CountOfFinfPVP();
+
+            await findPvp.msgLocation.ModifyOriginalResponseAsync(x =>
+            {
+                x.Embed = EmbedCreater.WarningEmbed("Вы начали новый поиск, этот поиск был отменен");
+                x.Components = null;
+            });
+            
+            findPvp.msgLocation = Context.Interaction;
+            _dataBase.ArenaDb.Update(findPvp);
+            
+            await Context.Interaction.RespondAsync(embed: EmbedCreater.FindPvp(findPvp, count+1),
+                components: ButtonSets.CancelFindPvp(Context.User.Id));
+            return;
         }
         
         User user = (User)(await _dataBase.UserDb.Get(Context.User.Id))!;
-        FindPVP findPvp = new FindPVP()
+        findPvp = new FindPVP()
         {
             mmr = user.mmr,
             stratTime = ((DateTimeOffset)DateTime.Now).ToUnixTimeSeconds(),
+            msgLocation = Context.Interaction,
             userId = Convert.ToInt64(Context.User.Id)
         };
 
-        long count = _dataBase.ArenaDb.CountOfFinfPVP();
+        count = _dataBase.ArenaDb.CountOfFinfPVP();
+        
+        _dataBase.ArenaDb.AppFindPVP(findPvp);
 
         await RespondAsync(embed: EmbedCreater.FindPvp(findPvp, count),
             components: ButtonSets.CancelFindPvp(Context.User.Id));
 
-        findPvp.msgLocation = Context.Interaction;
-        _dataBase.ArenaDb.AppFindPVP(findPvp);
     }
 }

@@ -1,3 +1,4 @@
+using Discord.WebSocket;
 using JustRPG.Models.Enums;
 
 namespace JustRPG.Models;
@@ -14,7 +15,7 @@ public class Battle
     public short currentUser { get; set; } = 0;
     public long lastActivity { get; set; }
     public Dictionary<string, string> drop { get; set; }
-    public List<object> originalInteraction {get;set;}
+    public List<SocketInteraction> originalInteraction {get;set;}
     public string log { get; set; } = "";
 }
 

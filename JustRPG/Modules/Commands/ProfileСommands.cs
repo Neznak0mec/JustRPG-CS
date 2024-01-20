@@ -96,7 +96,8 @@ public class ProfileСommands : InteractionModuleBase<SocketInteractionContext>
         var temp = await _dataBase.GuildDb.Get(guildTag.ToUpper());
         if (temp == null)
         {
-            await RespondAsync(embed: EmbedCreater.WarningEmbed("Гильдия не найдена"));
+            await RespondAsync(embed: EmbedCreater.WarningEmbed("Гильдия не найдена"),
+                ephemeral: true);
             return;
         }
 
@@ -107,10 +108,14 @@ public class ProfileСommands : InteractionModuleBase<SocketInteractionContext>
     private async Task<User?> GetUser(ulong userId, bool create = false)
     {
         var tempUser = await _dataBase.UserDb.Get(userId);
-        if (tempUser == null && !create)
-            return null;
-        if (tempUser == null && create)
-            tempUser = await _dataBase.UserDb.CreateObject(userId);
+        switch (tempUser)
+        {
+            case null when !create:
+                return null;
+            case null when create:
+                tempUser = await _dataBase.UserDb.CreateObject(userId);
+                break;
+        }
 
         return (User)tempUser!;
     }

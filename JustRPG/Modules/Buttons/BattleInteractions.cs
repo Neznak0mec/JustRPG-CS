@@ -48,7 +48,7 @@ public class BattleInteractions : InteractionModuleBase<SocketInteractionContext
 
             if (_battle.enemies.All(x => x.stats.hp <= 0))
             {
-                _battle.log += "Вы победили\n";
+                _battle.log += ":crown:Вы победили\n";
                 _battle.status = BattleStatus.playerWin;
                 await UpdateBattle(true);
                 return;
@@ -62,7 +62,7 @@ public class BattleInteractions : InteractionModuleBase<SocketInteractionContext
             
             if (user.stats.hp <= 0)
             {
-                _battle.log += "Вы проиграли\n";
+                _battle.log += ":skull_crossbones:Вы проиграли\n";
                 _battle.status = BattleStatus.playerDead;
                 await UpdateBattle(true);
                 return;
@@ -78,7 +78,7 @@ public class BattleInteractions : InteractionModuleBase<SocketInteractionContext
 
             if (_battle.players.Any(x => x.stats.hp <= 0))
             {
-                _battle.log += $"{_battle.players[_battle.currentUser].name} побеждает\n";
+                _battle.log += $":crown:`{_battle.players[_battle.currentUser].name}` побеждает\n";
                 await UpdateBattle(true);
                 return;
             }
@@ -95,14 +95,14 @@ public class BattleInteractions : InteractionModuleBase<SocketInteractionContext
         if (_battle.players[_battle.currentUser].inventory.Any(x => x.Item1 == "fb75ff73-1116-4e95-ae46-8075c4e9a782"))
         {
             _battle.log +=
-                $"{_battle.players[_battle.currentUser].name} восстановил себе {_battle.players[_battle.currentUser].Heal()}";
-            int index = _battle.players[_battle.currentUser].inventory.FindIndex(x => x.Item1 == "");
+                $":heart:`{_battle.players[_battle.currentUser].name}` восстановил себе `{_battle.players[_battle.currentUser].Heal()}`\n";
+            int index = _battle.players[_battle.currentUser].inventory.FindIndex(x => x.Item1 == "fb75ff73-1116-4e95-ae46-8075c4e9a782");
             _battle.players[_battle.currentUser].inventory.RemoveAt(index);
         }
         else
         {
             _battle.log +=
-                $"Покапавшись в сумке {_battle.players[_battle.currentUser].name} не нашёл у себя зелье для восстановления ";
+                $":school_satchel:Покапавшись в сумке `{_battle.players[_battle.currentUser].name}` не нашёл у себя зелье для восстановления \n";
         }
 
         if (_battle.type is BattleType.adventure or BattleType.dungeon)
@@ -118,7 +118,7 @@ public class BattleInteractions : InteractionModuleBase<SocketInteractionContext
             
             if (user.stats.hp <= 0)
             {
-                _battle.log += "Вы проиграли\n";
+                _battle.log += ":person_running:Вы проиграли\n";
                 _battle.status = BattleStatus.playerDead;
                 await UpdateBattle(true);
                 return;
@@ -141,13 +141,13 @@ public class BattleInteractions : InteractionModuleBase<SocketInteractionContext
 
             if (Random.Shared.Next(1, 100) < 1 + user.stats.luck)
             {
-                _battle.log += "Вы успешно сбежали\n";
+                _battle.log += ":person_running:Вы успешно сбежали\n";
                 _battle.status = BattleStatus.playerRun;
                 await UpdateBattle(true);
                 return;
             }
             else
-                _battle.log += "Вам не удалось сбежать\n";
+                _battle.log += ":person_running:Вам не удалось сбежать\n";
 
             if (_battle.type == BattleType.adventure)
                 enemy.Attack(_battle,user);
@@ -157,7 +157,7 @@ public class BattleInteractions : InteractionModuleBase<SocketInteractionContext
             
             if (user.stats.hp <= 0)
             {
-                _battle.log += "Вы проиграли\n";
+                _battle.log += ":skull_crossbones:Вы проиграли\n";
                 _battle.status = BattleStatus.playerDead;
                 await UpdateBattle(true);
                 return;
@@ -171,13 +171,13 @@ public class BattleInteractions : InteractionModuleBase<SocketInteractionContext
 
             if (Random.Shared.Next(1, 100) < 1 + user.stats.luck)
             {
-                _battle.log += $"{_battle.players[_battle.currentUser].name} успешно сбежал\n";
+                _battle.log += $":person_running:`{_battle.players[_battle.currentUser].name}` успешно сбежал\n";
                 _battle.status = BattleStatus.playerRun;
                 await UpdateBattle(true);
                 return;
             }
             else
-                _battle.log += $"{_battle.players[_battle.currentUser].name} не удалось сбежать\n";
+                _battle.log += $":person_running:`{_battle.players[_battle.currentUser].name}` не удалось сбежать\n";
         }
 
         await UpdateBattle();
@@ -187,7 +187,7 @@ public class BattleInteractions : InteractionModuleBase<SocketInteractionContext
     async Task SelectEnemy(string userId, string battleId,string[] selected)
     {
         _battle.selectedEnemy = Convert.ToInt16(selected[0]);
-        _battle.log += $"{_battle.players[_battle.currentUser].name} изменил цель на {_battle.enemies[_battle.selectedEnemy].name}";
+        _battle.log += $":dart:`{_battle.players[_battle.currentUser].name}` изменил цель на `{_battle.enemies[_battle.selectedEnemy].name}`";
         await UpdateBattle(disableSelectEnemy:true);
     }
     
@@ -197,7 +197,7 @@ public class BattleInteractions : InteractionModuleBase<SocketInteractionContext
             _battle.currentUser = (short)(_battle.currentUser == 1 ? 0 : 1);
 
         if (gameEnded){
-            await AdventureGenerators.Reward(_battle,_dataBase);
+            await BattleMaster.Reward(_battle,_dataBase);
         }
         else
             await _dataBase.BattlesDb.Update(_battle);

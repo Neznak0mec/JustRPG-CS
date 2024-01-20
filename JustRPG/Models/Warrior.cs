@@ -21,9 +21,9 @@ public class Warrior
         int proc = startDamage / 5 * 100;
         double damage = startDamage + Random.Shared.Next(-proc, proc) / 100.0;
 
-        float chance = (float)stats.speed / (stats.speed + enemySpeed) * 100;
-        if (chance > 50)
-            chance = 50;
+        float chance = (float)stats.speed / (stats.speed + enemySpeed) * 100 * 0.3f;
+        if (chance > 30)
+            chance = 30;
         if (Random.Shared.Next(1, 100) < chance)
         {
             return -1;
@@ -49,33 +49,30 @@ public class Warrior
     {
         double damage;
         string msg;
-        if (Random.Shared.Next(1, 100) < (stats.luck > 60 ? 60 : stats.luck))
+        if (Random.Shared.Next(1, 100) < (stats.luck*0.3 > 30 ? 30 : stats.luck))
         {
             damage = enemy.GetDamage(stats.damage * 2, stats.speed);
             msg = damage < 0 ?
-                $"{enemy.name} удалось уклониться\n" :
-                $"{name} нанес критический удар {enemy.name}, тем самым нанеся {damage:f2} урона\n";
+                $":person_running:`{enemy.name}` удалось уклониться\n" :
+                $":dagger:`{name}` нанес критический удар `{enemy.name}`, тем самым нанеся `{damage:f2}` урона\n";
         }
         else
         {
             damage = enemy.GetDamage(stats.damage, stats.speed);
             msg = damage < 0 ?
-                $"{enemy.name} удалось уклониться\n" :
-                $"{name} нанёс {damage:f2} урона по {enemy.name}\n";
+                $":person_running:`{enemy.name}` удалось уклониться\n" :
+                $":dagger:`{name}` нанёс `{damage:f2}` урона по `{enemy.name}`\n";
         }
-
-       
-
 
         battle.log += msg;
     }
 
     public double Heal()
     {
-        double procents = stats.MaxHP / 4;
-        stats.hp += procents;
+        double percent = stats.MaxHP *0.33;
+        stats.hp += percent;
         if (stats.hp > stats.MaxHP)
             stats.hp = stats.MaxHP;
-        return procents;
+        return percent;
     }
 }

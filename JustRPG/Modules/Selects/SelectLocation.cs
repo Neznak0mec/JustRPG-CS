@@ -26,13 +26,13 @@ public class SelectLocation : InteractionModuleBase<SocketInteractionContext<Soc
     {
         Location location = await _dataBase.LocationsDb.Get(Context.Interaction.Data.Values.ToArray()[0]);
         Warrior mainPlayer =
-            await AdventureGenerators.GenerateWarriorByUser((User)(await _dataBase.UserDb.Get(userId))!,
+            await BattleGenerators.GenerateWarriorByUser((User)(await _dataBase.UserDb.Get(userId))!,
             Context.User.Username, _dataBase);
 
         List<Warrior> enemies = new List<Warrior>();
         for (int i = 0; i < Random.Shared.Next(2, 4); i++)
         {
-            enemies.Add(AdventureGenerators.GenerateMob(location));
+            enemies.Add(BattleGenerators.GenerateMob(location));
         }
 
         Battle newBattle = new Battle
@@ -42,7 +42,7 @@ public class SelectLocation : InteractionModuleBase<SocketInteractionContext<Soc
             drop = location.drops,
             players = new[] { mainPlayer },
             enemies = enemies.ToArray(),
-            originalInteraction = new List<object> {Context},
+            originalInteraction = new List<SocketInteraction> {Context.Interaction},
             log = "-"
         };
 
@@ -58,7 +58,7 @@ public class SelectLocation : InteractionModuleBase<SocketInteractionContext<Soc
     {
         Location location = await _dataBase.LocationsDb.Get(Context.Interaction.Data.Values.ToArray()[0]);
         Warrior mainPlayer =
-            await AdventureGenerators.GenerateWarriorByUser((User)(await _dataBase.UserDb.Get(Context.User.Id))!,
+            await BattleGenerators.GenerateWarriorByUser((User)(await _dataBase.UserDb.Get(Context.User.Id))!,
             Context.User.Username, _dataBase);
 
         Battle newBattle = new Battle
@@ -67,15 +67,15 @@ public class SelectLocation : InteractionModuleBase<SocketInteractionContext<Soc
             type = BattleType.adventure,
             drop = location.drops,
             players = new[] { mainPlayer },
-            originalInteraction = new List<object> {Context},
-            enemies = new[] { AdventureGenerators.GenerateMob(location) },
+            originalInteraction = new List<SocketInteraction> {Context.Interaction},
+            enemies = new[] { BattleGenerators.GenerateMob(location) },
             log = "-"
         };
-
-        await _dataBase.BattlesDb.CreateObject(newBattle);
-
+        
         await ResponseMessage(EmbedCreater.BattleEmbed(newBattle),
             component: ButtonSets.BattleButtonSet(newBattle, (long)Context.User.Id));
+
+        await _dataBase.BattlesDb.CreateObject(newBattle);
         
     }
 

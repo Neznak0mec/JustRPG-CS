@@ -46,7 +46,7 @@ public class GuildInteractions : InteractionModuleBase<SocketInteractionContext<
         Action action = new Action
         {
             id = "Action_" + actionUid,
-            date = DateTimeOffset.Now.ToUnixTimeSeconds(),
+            date = DateTime.Now,
             type = "GuildLeave",
             userId = (long)Context.User.Id,
             args = new[]
@@ -55,7 +55,7 @@ public class GuildInteractions : InteractionModuleBase<SocketInteractionContext<
             }
         };
 
-        await _dataBase.ActionDb.CreateObject(action);
+        _dataBase.ActionDb.CreateObject(action);
         Embed embed =
             EmbedCreater.WarningEmbed($"Вы уверены что хотите покинуть гильдию?");
         await RespondAsync(embed: embed, components: ButtonSets.AcceptActions(actionUid, (long)Context.User.Id),

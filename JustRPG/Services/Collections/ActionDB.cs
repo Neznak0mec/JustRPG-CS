@@ -5,37 +5,43 @@ using Action = JustRPG.Models.Action;
 
 namespace JustRPG.Services.Collections;
 
-public class ActionDB : ICollection
+public class ActionDB
 {
-    private readonly IMongoCollection<Action> _collection;
+    private readonly List<Action?> _collection;
 
     public ActionDB(IMongoDatabase mongoDatabase)
     {
-        _collection = mongoDatabase.GetCollection<Action>("interactions");
+        _collection = new List<Action?>();
+        
     }
 
-    public async Task<object?> Get(object val, string key = "_id")
+    public Action? Get(string key)
     {
-        var filterAction = Builders<Action>.Filter.Eq(key, val);
-        var res = await _collection.FindAsync(filterAction);
-        return await res.FirstOrDefaultAsync();
+        return _collection.FirstOrDefault(x=> x.id == key);
+
     }
 
-    public async Task<object?> CreateObject(object? id)
+    public Action CreateObject(Action id)
     {
-        await _collection.InsertOneAsync((Action)id!);
+        _collection.Add(id);
         return id;
     }
 
-    public async Task Update(object? obj)
+    public Action Update(Action obj)
     {
-        Action? temp = (Action)obj!;
-        FilterDefinition<Action> filterAction = Builders<Action>.Filter.Eq("id", temp.id)!;
-        await _collection.ReplaceOneAsync(filterAction, temp);
+        var index = _collection.FindIndex(x => x!.id == obj.id);
+        _collection[index] = obj;
+        return obj;
     }
 
-    public async Task Delete(string id)
+    public void Delete(string id)
     {
-        await _collection.DeleteOneAsync(x => x.id == id);
+        _collection.RemoveAll(x => x!.id == id);
+    }
+    
+    //autoremove old actions
+    public void RemoveOldActions()
+    {
+        _collection.RemoveAll(x => DateTimeOffset.Now - x!.date > TimeSpan.FromMinutes(5));
     }
 }

@@ -120,7 +120,7 @@ public class InventoryInteractions : InteractionModuleBase<SocketInteractionCont
             action = new Action
             {
                 id = "Action_" + uId,
-                date = DateTimeOffset.Now.ToUnixTimeSeconds(),
+                date = DateTime.Now,
                 userId = dbUser.id,
                 type = "Equip",
                 args = new[]
@@ -145,7 +145,7 @@ public class InventoryInteractions : InteractionModuleBase<SocketInteractionCont
             throw new UserInteractionException("Этот предмет не найден, странно 🤔");
         }
 
-        await _dataBase.ActionDb.CreateObject(action);
+        _dataBase.ActionDb.CreateObject(action);
         await RespondAsync(embed: embed, components: ButtonSets.AcceptActions(uId, dbUser!.id),
             ephemeral: true);
     }
@@ -175,7 +175,7 @@ public class InventoryInteractions : InteractionModuleBase<SocketInteractionCont
             itemId = item.id,
             price = -1,
             dateListed = DateTimeOffset.Now.ToUnixTimeSeconds(),
-            itemDescription = item.ToStringWithRarity(),
+            itemDescription = item.ToString(),
             isVisible = false,
 
             itemName = $"{item.name} | {item.lvl} lvl",
@@ -234,7 +234,7 @@ public class InventoryInteractions : InteractionModuleBase<SocketInteractionCont
             action = new Action
             {
                 id = "Action_" + uId,
-                date = DateTimeOffset.Now.ToUnixTimeSeconds(),
+                date = DateTime.Now,
                 type = "Destroy",
                 userId = (long)Context.User.Id,
                 args = new[]
@@ -249,7 +249,7 @@ public class InventoryInteractions : InteractionModuleBase<SocketInteractionCont
             throw new UserInteractionException("Этот предмет не найден, странно 🤔");
         }
 
-        await _dataBase.ActionDb.CreateObject(action);
+        _dataBase.ActionDb.CreateObject(action);
         await RespondAsync(embed: embed,
             components: ButtonSets.AcceptActions(uId, (long)Context.User.Id), ephemeral: true);
     }

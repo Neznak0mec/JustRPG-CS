@@ -25,7 +25,11 @@ public class ActionInteractions : InteractionModuleBase<SocketInteractionContext
     public override async Task<Task> BeforeExecuteAsync(ICommandInfo command)
     {
         var buttonInfo = Context.Interaction.Data.CustomId.Split('_');
-        _action = (Action)(await _dataBase.ActionDb.Get($"Action_{buttonInfo[2]}"))!;
+        _action = _dataBase.ActionDb.Get($"Action_{buttonInfo[2]}");
+        if (_action == null)
+        {
+            throw new UserInteractionException("Действие не найдено. Создайте новое действие");
+        }
         _dbUser = (User)(await _dataBase.UserDb.Get(Convert.ToUInt64(buttonInfo[1])))!;
         return base.BeforeExecuteAsync(command);
     }

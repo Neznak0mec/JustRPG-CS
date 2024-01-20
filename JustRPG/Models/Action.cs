@@ -8,5 +8,5 @@ public class Action
     [BsonElement("args")] public string[] args { get; set; }
     [BsonElement("type")] public string type { get; set; }
     [BsonElement("userId")] public long userId { get; set; }
-    [BsonElement("date")] public long date { get; set; }
+    [BsonElement("date")] public DateTime date { get; set; }
 }

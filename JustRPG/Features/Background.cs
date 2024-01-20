@@ -38,6 +38,8 @@ public class Background
             catch
             {
             }
+
+            _dataBase.ActionDb.RemoveOldActions();
         }
     }
 

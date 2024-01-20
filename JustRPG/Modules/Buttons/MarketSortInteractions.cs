@@ -109,7 +109,7 @@ public class MarketSortInteractions : InteractionModuleBase<SocketInteractionCon
         Action action = new Action
         {
             id = "Action_" + uId,
-            date = DateTimeOffset.Now.ToUnixTimeSeconds(),
+            date = DateTime.Now,
             type = "MarketBuy",
             userId = (long)Context.User.Id,
             args = new[]
@@ -118,7 +118,7 @@ public class MarketSortInteractions : InteractionModuleBase<SocketInteractionCon
             }
         };
 
-        await _dataBase.ActionDb.CreateObject(action);
+        _dataBase.ActionDb.CreateObject(action);
         Embed embed =
             EmbedCreater.WarningEmbed($"Вы уверены что хотите купить `{item.itemName}` за `{item.price}`<:silver:997889161484828826>?");
         await RespondAsync(embed: embed, components: ButtonSets.AcceptActions(uId, (long)Context.User.Id),

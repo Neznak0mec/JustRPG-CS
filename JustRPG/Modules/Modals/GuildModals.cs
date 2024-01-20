@@ -23,10 +23,10 @@ public class GuildModals : InteractionModuleBase<SocketInteractionContext<Socket
         _dataBase = (DataBase)service.GetService(typeof(DataBase))!;
     }
 
-    [ModalInteraction("Guild|Create")]
+    [ModalInteraction("Guild|CreateModal")]
     private async Task GuildCreate(GuildCreateModal modal)
     {
-        string guildName = modal.Name;
+        string guildName = modal.GuildName;
         string guildTag = modal.Tag;
 
         object? objGuild = await _dataBase.GuildDb.Get(guildTag);
@@ -66,7 +66,7 @@ public class GuildModals : InteractionModuleBase<SocketInteractionContext<Socket
                 { new GuildMember() { rank = GuildRank.owner, user = (long)Context.User.Id } },
             name = guildName,
             symbol = "",
-            tag = guildTag,
+            tag = guildTag.ToUpper(),
             wantJoin = new List<long>()
         };
 

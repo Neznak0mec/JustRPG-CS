@@ -69,7 +69,7 @@ public class GuildInteractions : InteractionModuleBase<SocketInteractionContext<
         GuildMember? guildMember = guild.members.FirstOrDefault(x => x.user == (long)Context.User.Id);
         User user = (User)(await _dataBase.UserDb.Get(Context.User.Id))!;
 
-        if (user.guildTag == guildTag)
+        if (user.guildTag != null)
         {
             throw new UserInteractionException("Вы уже участник гильдии другой гильд");
         }
@@ -160,7 +160,14 @@ public class GuildInteractions : InteractionModuleBase<SocketInteractionContext<
     [ComponentInteraction("Guild|Create_*", true)]
     private async Task GuildCreate(string userId)
     {
-        await RespondWithModalAsync<GuildCreateModal>("Guild|Create");
+        ModalBuilder modalBuilder = new ModalBuilder()
+            .WithTitle($"Создание Гильдии")
+            .WithCustomId($"Guild|CreateModal")
+            .AddTextInput(label: "Имя Гильдии", placeholder: "Придумайте имя гильдии",
+                customId: "name", required: true, minLength:3 ,maxLength: 20)
+            .AddTextInput(label: "Тег гильдии", placeholder: "Введите тег гильдии (Только английские буквы)",
+                customId: "tag", required: true, minLength:3 ,maxLength: 4);
+        await RespondWithModalAsync(modalBuilder.Build());
     }
     
     [ComponentInteraction($"Guild|EditSymbol_*_*", true)]

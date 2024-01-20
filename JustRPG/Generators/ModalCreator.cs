@@ -20,12 +20,12 @@ public class SellItemModal : IModal
 public class GuildCreateModal : IModal
 {
     //custom id - Guild_Create
-    public string Title { get; } = "Создание Гильдии";
+    public string Title { get; set; } = "Создание Гильдии";
 
     [InputLabel("Имя Гильдии")]
     [ModalTextInput("name",minLength:3 ,maxLength: 20,placeholder:"Придумайте имя гильдии")]
     [RequiredInput()]
-    public string Name { get; set; }
+    public string GuildName { get; set; }
 
     [InputLabel("Тег гильдии")]
     [ModalTextInput("tag", minLength: 3, maxLength: 4,

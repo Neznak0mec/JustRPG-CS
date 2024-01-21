@@ -172,11 +172,12 @@ public static class ButtonSets
             "нагрудник",
             "перчатки",
             "штаны",
+            "ботинки",
             "оружие",
             "зелья"
         };
 
-        var levelOptions = Enumerable.Range(1, 50)
+        var levelOptions = Enumerable.Range(1, 65)
             .GroupBy(x => (x - 1) / 5)
             .Select(g => new { range = $"{g.First()}-{g.Last()}" })
             .ToArray();

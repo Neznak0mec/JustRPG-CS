@@ -58,24 +58,17 @@ public class MarketSortSelect : InteractionModuleBase<SocketInteractionContext<S
         MarketSearchState search = (await _dataBase.MarketDb.GetSearch(userId))!;
         string res = selected[0];
 
-
-        if (res == "сброс")
-            search.itemType = null;
-        else if (res == "шлем")
-            search.itemType = ItemType.helmet;
-        else if (res == "нагрудник")
-            search.itemType = ItemType.armor;
-        else if (res == "перчатки")
-            search.itemType = ItemType.gloves;
-        else if (res == "штаны")
-            search.itemType = ItemType.pants;
-        else if (res == "оружие")
-            search.itemType = ItemType.weapon;
-        else if (res == "зелья")
-            search.itemType = ItemType.potion;
-        else
-            search.itemType = null;
-
+        search.itemType = res switch
+        {
+            "шлем" => ItemType.helmet,
+            "нагрудник" => ItemType.armor,
+            "перчатки" => ItemType.gloves,
+            "штаны" => ItemType.pants,
+            "ботинки" => ItemType.shoes,
+            "оружие" => ItemType.weapon,
+            "зелья" => ItemType.potion,
+            _ => null
+        };
 
         await _dataBase.MarketDb.SearchGetAndUpdate(search);
         await UpdateMessage(search);

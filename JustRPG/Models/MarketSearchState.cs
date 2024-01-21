@@ -20,7 +20,7 @@ public class MarketSearchState
     public List<SaleItem> GetItemsOnPage(int pageIndex)
     {
         List<SaleItem> res = searchResults
-            .Skip(5 * pageIndex).ToList();
+            .Skip(5 * pageIndex).Take(5).ToList();
 
         return res;
     }

@@ -102,7 +102,7 @@ public static class BattleMaster
                     int countOfDrop = battle.enemies.Length + 1 - drop.Count;
                     for (int j = 0; j < countOfDrop; j++)
                     {
-                        drop.Add((battle.enemies[0].lvl, 1));
+                        drop.Add((1, battle.enemies[0].lvl));
                     }
                 }
             }

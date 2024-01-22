@@ -268,7 +268,7 @@ public class EmbedCreater
             if (i < items.Count)
                 emb.AddField(
                     (searchState.currentItemIndex == i ? "💠 " : "") +
-                    $"{items[i].itemName} | {items[i].price}<:silver:997889161484828826>",
+                    $"{items[i].itemName} | {(items[i].price == -1 ? "не установлено" : items[i].price)}<:silver:997889161484828826>",
                     items[i].itemDescription);
         }
 

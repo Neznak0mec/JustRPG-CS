@@ -40,7 +40,7 @@ public class InventoryModals : InteractionModuleBase<SocketInteractionContext<So
         saleItem.isVisible = true;
         await _dataBase.MarketDb.Update(saleItem);
 
-        await RespondAsync(embed: EmbedCreater.SuccessEmbed($"Цена на предмет успешно изменена на {price}"),
+        await RespondAsync(embed: EmbedCreater.SuccessEmbed($"Цена на предмет успешно изменена на {price}, за его продажу вы получите {price-(int)(price*0.05)} монет"),
             ephemeral: true);
     }
 

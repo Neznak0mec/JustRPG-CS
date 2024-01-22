@@ -188,7 +188,7 @@ public class ActionInteractions : InteractionModuleBase<SocketInteractionContext
         user.inventory.Add(item.itemId);
 
         User seller = (User)(await _dataBase.UserDb.Get(item.userId))!;
-        seller.cash += item.price;
+        seller.cash += item.price - (int)(item.price * 0.05);
 
         await _dataBase.UserDb.Update(user);
         await _dataBase.UserDb.Update(seller);

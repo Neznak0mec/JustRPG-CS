@@ -45,9 +45,14 @@ public class MarketInteractions : InteractionModuleBase<SocketInteractionContext
         SaleItem? saleItem = await GetItemById(userId, itemId);
         if (saleItem == null)
             return;
+        
+        string title = $"Продажа {saleItem}";
+        if (title.Length > 45)
+            title = string.Concat(title.AsSpan(0, 42), "...");
+        
 
         ModalBuilder modalBuilder = new ModalBuilder()
-            .WithTitle($"Продажа {saleItem.itemName}")
+            .WithTitle(title)
             .WithCustomId($"Inventory_SetSellItemPrice_{saleItem.id}")
             .AddTextInput(label: "Цена продажи", placeholder: "Введите цену за которую хотете продать предмет",
                 customId: "price", required: true, minLength: 1);
@@ -61,9 +66,13 @@ public class MarketInteractions : InteractionModuleBase<SocketInteractionContext
         SaleItem? saleItem = await GetSelectedItem(userId);
         if (saleItem == null)
             return;
+        
+        string title = $"Продажа {saleItem}";
+        if (title.Length > 45)
+            title = string.Concat(title.AsSpan(0, 42), "...");
 
         ModalBuilder modalBuilder = new ModalBuilder()
-            .WithTitle($"Продажа {saleItem.itemName}")
+            .WithTitle(title)
             .WithCustomId($"Inventory_SetSellItemPrice_{saleItem.id}")
             .AddTextInput(label: "Цена продажи", placeholder: "Введите цену за которую хотете продать предмет",
                 customId: "price", required: true, minLength: 1);
@@ -101,6 +110,12 @@ public class MarketInteractions : InteractionModuleBase<SocketInteractionContext
 
         await _dataBase.MarketDb.Delete(saleItem);
         User user = (User)(await _dataBase.UserDb.Get(userId))!;
+        
+        if (user.inventory.Count >= 30)
+        {
+            throw new UserInteractionException("У вас недостаточно места в инвентаре");
+        }
+        
         user.inventory.Add(saleItem.itemId);
 
         await _dataBase.UserDb.Update(user);

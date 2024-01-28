@@ -59,7 +59,7 @@ public class EmbedCreater
             Title = $"Профиль {await user.GetFullName(member.Username, dataBase)}"
         };
         var stats = await new BattleStats().BattleStatsAsync(user, dataBase);
-        
+
         emb.AddField($"Уровень", $"{user.lvl}", inline: true)
             .AddField("Опыт", $"{(int)user.exp}\\{(int)user.expToLvl}", inline: true)
             .AddField("Баланс", $"{user.cash}", inline: true)
@@ -82,30 +82,52 @@ public class EmbedCreater
 
         embed.AddField(equipment.helmet == null ? "Шлем" : $"Шлем - {equipment.helmet!.name} | {equipment.helmet!.lvl}",
                 equipment.helmet == null ? "Не надето" : equipment.helmet!.ToString(), true)
-            .AddField(equipment.armor == null ? "Нагрудник" : $"Нагрудник - {equipment.armor!.name} | {equipment.armor!.lvl}",
+            .AddField(
+                equipment.armor == null ? "Нагрудник" : $"Нагрудник - {equipment.armor!.name} | {equipment.armor!.lvl}",
                 equipment.armor == null ? "Не надето" : equipment.armor!.ToString(), true)
             .AddField(equipment.pants == null ? "Штаны" : $"Штаны - {equipment.pants!.name} | {equipment.pants!.lvl}",
                 equipment.pants == null ? "Не надето" : equipment.pants!.ToString(), true)
-            .AddField(equipment.shoes == null ? "Ботинки" : $"Ботинки - {equipment.shoes!.name} | {equipment.shoes!.lvl}",
+            .AddField(
+                equipment.shoes == null ? "Ботинки" : $"Ботинки - {equipment.shoes!.name} | {equipment.shoes!.lvl}",
                 equipment.shoes == null ? "Не надето" : equipment.shoes!.ToString(), true)
-            .AddField(equipment.gloves == null ? "Перчатки" : $"Перчатки - {equipment.gloves!.name} | {equipment.gloves!.lvl}",
+            .AddField(
+                equipment.gloves == null
+                    ? "Перчатки"
+                    : $"Перчатки - {equipment.gloves!.name} | {equipment.gloves!.lvl}",
                 equipment.gloves == null ? "Не надето" : equipment.gloves!.ToString(), true)
-            .AddField(equipment.weapon == null ? "Оружие" : $"Оружие - {equipment.weapon!.name} | {equipment.weapon!.lvl}",
+            .AddField(
+                equipment.weapon == null ? "Оружие" : $"Оружие - {equipment.weapon!.name} | {equipment.weapon!.lvl}",
                 equipment.weapon == null ? "Не надето" : equipment.weapon!.ToString(), true);
 
         return embed.Build();
     }
 
-    public static async Task<Embed> UserInventory(IUser member, User user, Item?[] items, DataBase dataBase)
+    public static async Task<Embed> UserInventory(IUser member, User user, Inventory inventory, DataBase dataBase)
     {
         var emb = new EmbedBuilder { Title = $"Инвентарь {await user.GetFullName(member.Username, dataBase)}" };
-        foreach (var item in items)
+        Item?[] items = inventory.GetItems();
+        for (int i = 0; i < 5; i++)
         {
-            if (item == null)
+            if (items[i] == null)
+            {
                 emb.AddField("Пусто", "Слот не занят");
-            else
-                emb.AddField($"{item.lvl} | {item.name}", item.ToString());
+                continue;
+            }
+
+            string title = inventory.currentItemIndex == i ? $":diamond_shape_with_a_dot_inside: `{items[i]!.lvl} | {items[i]!.name}`" : $"{items[i]!.lvl} | {items[i]!.name}";
+            emb.AddField(title, $">>> {items[i]!}");
+
+            if (inventory.currentItemIndex == i && inventory.interactionType == "equip" && inventory.items[i].IsEquippable())
+            {
+                UserEquipment equipment = await user.GetEquipmentAsItems(dataBase);
+                Item? equippedItem = equipment.GetEquippedItemByType(inventory.items[i].type);
+
+                if (equippedItem != null)
+                    emb.AddField($":scales: Сейчас надето `{equippedItem.lvl} | {equippedItem.name}`", $">>> {equippedItem}");
+            }
         }
+        
+        emb.WithFooter($"Страница {inventory.currentPage + 1}/{inventory.GetCountOfPages()}");
 
         return emb.Build();
     }
@@ -380,13 +402,13 @@ public class EmbedCreater
                 "[Оффициальный сервер бота](https://discord.gg/a8XdEThKzM)\nТак же в нашу команду требуются художники и кодеры," +
                 " так что будем рады любой помощи \ud83d\ude18"
         };
-        
-        emb.WithFooter(text:owner.GlobalName, iconUrl:owner.GetAvatarUrl()!);
+
+        emb.WithFooter(text: owner.GlobalName, iconUrl: owner.GetAvatarUrl()!);
 
         return emb.Build();
     }
 
-    public static async Task<Embed> TopEmbed(DataBase dataBase,DiscordSocketClient client)
+    public static async Task<Embed> TopEmbed(DataBase dataBase, DiscordSocketClient client)
     {
         var emb = new EmbedBuilder
         {
@@ -397,13 +419,13 @@ public class EmbedCreater
         {
             if (i >= users.Count)
                 break;
-            
+
             User dbUser = (User)await dataBase.UserDb.Get(users[i].id);
             string user = await SecondaryFunctions.GetUserName(dbUser.id, client);
             string fullName = await dbUser.GetFullName(user, dataBase);
             emb.AddField($"{i + 1}. {fullName}", $"Очки рейтинга - {users[i].mmr}");
         }
-        
+
         return emb.Build();
     }
 }

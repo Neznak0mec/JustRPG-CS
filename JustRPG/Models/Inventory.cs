@@ -37,6 +37,11 @@ public class Inventory
             currentPage = nextPage;
             currentItemIndex = 0;
         }
+        if (currentItemIndex == GetItems().Count(x => x!=null) - 1)
+        {
+            currentItemIndex = 0;
+            currentPage = 0;
+        }
     }
 
     public void DecrementPage()
@@ -45,6 +50,12 @@ public class Inventory
         {
             currentPage--;
             currentItemIndex = 0;
+        }
+        if (currentPage == 0)
+        {
+            currentItemIndex = items.Count - 1;
+            currentPage = GetCountOfPages() - 1;
+            
         }
     }
 
@@ -56,7 +67,7 @@ public class Inventory
         {
             currentItemIndex++;
         }
-        else if (currentItemIndex == 4)
+        else if (currentItemIndex == 4 || currentItemIndex == GetItems().Count(x => x!=null) - 1)
             IncrementPage();
     }
 
@@ -73,8 +84,8 @@ public class Inventory
     public async Task Reload(List<string> inventory,DataBase db)
     {
         interactionType = "info";
-        currentPage = 0;
         userItems = inventory.ToArray();
+        
 
         items.Clear();
         foreach (var item in userItems)
@@ -85,7 +96,8 @@ public class Inventory
                 items.Add((Item)itemFromDb);
             }
         }
-        
+        if (currentPage > GetCountOfPages() - 1)
+            currentPage = GetCountOfPages() - 1;
     }
     
     public List<Item> GetItemsOnPage(int pageIndex)

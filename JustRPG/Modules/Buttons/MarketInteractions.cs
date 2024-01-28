@@ -169,7 +169,7 @@ public class MarketInteractions : InteractionModuleBase<SocketInteractionContext
             var items = inventory.GetItems();
             User user = (User)(await _dataBase.UserDb.Get(Context.User.Id))!;
 
-            var embed = await EmbedCreater.UserInventory(Context.User, user, items, _dataBase);
+            var embed = await EmbedCreater.UserInventory(Context.User, user, inventory, _dataBase);
             
             await Context.Interaction.UpdateAsync(x =>
             {

@@ -31,14 +31,21 @@ public static class ButtonSets
             .AddOption("Уничтожить", "destroy")
             .WithDisabled(finder != userId.ToString());
 
+        IEmote emote = inventory.interactionType switch
+        {
+            "info" => Emoji.Parse(":identification_card:"),
+            "destroy" => Emoji.Parse(":wastebasket:"),
+            "sell" => Emoji.Parse(":scales:"),
+                _ => Emoji.Parse(":shirt:")
+        };
+
         var builder = new ComponentBuilder()
-            .WithButton(label: "⮘", customId: $"Inventory|PrewPage_{finder}_{userId}",
-                disabled: inventory.currentPage == 0, row: 0)
-            .WithButton(label: $"{inventory.currentPage + 1}/{inventory.GetCountOfPages()}", customId: "null1",
-                disabled: true, row: 0)
-            .WithButton(label: "➣", customId: $"Inventory|NextPage_{finder}_{userId}",
-                disabled: inventory.IsLastPage(), row: 0)
-            .WithButton(label: "♺", customId: $"Inventory|Reload_{finder}_{userId}")
+            .WithButton(label: "←", customId: $"Inventory|prewPage_{finder}_{userId}", row: 0)
+            .WithButton(label: "↑", customId: $"Inventory|prewItem_{finder}_{userId}", row: 0)
+            .WithButton(emote: emote, customId: $"Inventory|interact_{finder}_{userId}", row: 0)
+            .WithButton(label: "↓", customId: $"Inventory|nextItem_{finder}_{userId}", row: 0)
+            .WithButton(label: "→", customId: $"Inventory|nextPage_{finder}_{userId}", row: 0)
+
             .WithSelectMenu(select, row: 1);
 
         ButtonStyle style = inventory.interactionType switch
@@ -48,34 +55,11 @@ public static class ButtonSets
             _ => ButtonStyle.Success
         };
 
-        for (int i = 0; i < items.Length; i++)
-        {
-            string customId;
-            bool disabled = false;
-
-            if (items[i] == null)
-            {
-                customId = $"null-{Guid.NewGuid()}";
-                disabled = true;
-            }
-            else if (inventory.interactionType == "info" || finder == userId.ToString())
-            {
-                customId = $"Inventory|{inventory.interactionType}_{finder}_{userId}_{i}";
-
-                if (inventory.interactionType == "equip")
-                    disabled = !items[i]!.IsEquippable();
-            }
-            else
-            {
-                continue;
-            }
-
-            builder.WithButton(label: $"{i + 1}", customId: customId, style: style, disabled: disabled, row: 2);
-        }
-
-        builder.WithButton(label: "Назад к профилю", customId: $"Equipment_{finder}_{userId}", row: 3)
+        builder
+            .WithButton(label: "Назад к профилю", customId: $"Profile_{finder}_{userId}", row: 3)
             .WithButton(emote: Emoji.Parse(":tools:"), label: "🛒",
-                customId: $"Inventory|OpenSlotsSettings_{finder}_{userId}", row: 3);
+                customId: $"Inventory|OpenSlotsSettings_{finder}_{userId}", row: 3)
+            .WithButton(label: "♺", customId: $"Inventory|Reload_{finder}_{userId}");
 
         return builder.Build();
     }

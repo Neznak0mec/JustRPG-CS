@@ -48,7 +48,7 @@ public class ProfileInteractions : InteractionModuleBase<SocketInteractionContex
         var items = inventory.GetItems();
         User user = (User)(await _dataBase.UserDb.Get(toFind))!;
 
-        await ResponseMessage(await EmbedCreater.UserInventory(member, user,items, _dataBase),
+        await ResponseMessage(await EmbedCreater.UserInventory(member, user,inventory, _dataBase),
             ButtonSets.InventoryButtonsSet(memberId, Convert.ToInt64(toFind), inventory, items)
             );
     }

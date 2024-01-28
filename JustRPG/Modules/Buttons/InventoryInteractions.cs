@@ -33,17 +33,31 @@ public class InventoryInteractions : InteractionModuleBase<SocketInteractionCont
         return base.BeforeExecuteAsync(command);
     }
 
-    [ComponentInteraction("Inventory|PrewPage_*_*", true)]
+    [ComponentInteraction("Inventory|prewPage_*_*", true)]
     private async Task PreviousPage(string finder, string userId)
     {
         _inventory!.DecrementPage();
         await UpdateMessage(finder, userId);
     }
 
-    [ComponentInteraction("Inventory|NextPage_*_*", true)]
+    [ComponentInteraction("Inventory|nextPage_*_*", true)]
     private async Task NextPage(string finder, string userId)
     {
         _inventory!.IncrementPage();
+        await UpdateMessage(finder, userId);
+    }
+
+    [ComponentInteraction("Inventory|prewItem_*_*", true)]
+    private async Task PreviousItem(string finder, string userId)
+    {
+        _inventory!.DecrementItemIndex();
+        await UpdateMessage(finder, userId);
+    }
+
+    [ComponentInteraction("Inventory|nextItem_*_*", true)]
+    private async Task NextItem(string finder, string userId)
+    {
+        _inventory!.IncrementItemIndex();
         await UpdateMessage(finder, userId);
     }
 
@@ -70,7 +84,7 @@ public class InventoryInteractions : InteractionModuleBase<SocketInteractionCont
         var member = _client.GetUser(Convert.ToUInt64(userId));
         var items = _inventory!.GetItems();
         
-        var embed = await EmbedCreater.UserInventory(member!, dbUser!, items, _dataBase);
+        var embed = await EmbedCreater.UserInventory(member!, dbUser!, _inventory, _dataBase);
 
         await Context.Interaction.UpdateAsync(x =>
             {
@@ -82,20 +96,38 @@ public class InventoryInteractions : InteractionModuleBase<SocketInteractionCont
         await _inventory.Save(_dataBase);
     }
 
-    [ComponentInteraction("Inventory|info_*_*_*", true)]
-    private async Task ItemInfo(string finder, string userId, string idString)
-    {
-        Item item = _inventory!.GetItems()[Convert.ToInt16(idString)]!;
 
-        await RespondAsync(embed: EmbedCreater.ItemInfo(item), ephemeral: true);
+    [ComponentInteraction("Inventory|interact_*_*", true)]
+    private async Task Interact(string finder, string userId)
+    {
+        switch (_inventory.interactionType)
+        {
+            case "info":
+                await ItemInfo(finder,userId);
+                break;
+            case "equip":
+                await EquipItem(finder, userId);
+                break;
+            case "sell":
+                await SellItem(finder, userId);
+                break;
+            case "destroy":
+                await DestroyItem(finder, userId);
+                break;
+        }
     }
 
-    [ComponentInteraction("Inventory|equip_*_*_*", true)]
-    private async Task EquipItem(string finder, string userId, string idString)
+    private async Task ItemInfo(string finder, string userId)
+    {
+        Item? item = (Item?)await _dataBase.ItemDb.Get(_inventory.userItems[_inventory.currentItemIndex]);
+        await RespondAsync(embed: EmbedCreater.ItemInfo(item!), ephemeral: true);
+    }
+
+    private async Task EquipItem(string finder, string userId)
     {
         var dbUser = (User)(await _dataBase.UserDb.Get(Convert.ToUInt64(userId)))!;
 
-        Item? item = _inventory!.GetItems()[Convert.ToInt16(idString)];
+        Item? item = (Item?)await _dataBase.ItemDb.Get(_inventory.userItems[_inventory.currentItemIndex]);
         Item? itemToChange = null;
         Embed embed;
         Action? action;
@@ -150,8 +182,7 @@ public class InventoryInteractions : InteractionModuleBase<SocketInteractionCont
             ephemeral: true);
     }
 
-    [ComponentInteraction("Inventory|sell_*_*_*", true)]
-    private async Task SellItem(string finder, string userId, string idString)
+    private async Task SellItem(string finder, string userId)
     {
         long countOfSaleItems = await _dataBase.MarketDb.GetCountOfUserSlots(Context.User.Id);
         if (countOfSaleItems >= 5)
@@ -159,7 +190,7 @@ public class InventoryInteractions : InteractionModuleBase<SocketInteractionCont
             throw new UserInteractionException("Вы достигли лимита по продаже, одновременно можно выставлять только 5 предметов");
         }
 
-        Item item = _inventory!.GetItems()[Convert.ToInt16(idString)]!;
+        Item item = (Item)(await _dataBase.ItemDb.Get(_inventory.userItems[_inventory.currentItemIndex]))!;
 
         User user = (User)(await _dataBase.UserDb.Get(Context.User.Id))!;
 
@@ -207,25 +238,15 @@ public class InventoryInteractions : InteractionModuleBase<SocketInteractionCont
         );
     }
 
-    [ComponentInteraction("Inventory|destroy_*_*_*", true)]
-    private async Task DestroyItem(string finder, string userId, string idString)
+    private async Task DestroyItem(string finder, string userId)
     {
-        var dbUser = (User)(await _dataBase.UserDb.Get(Convert.ToUInt64(userId)))!;
-
-        var itemId = _inventory!.GetItems()[Convert.ToInt16(idString)];
-        object? item = null;
+        Item? item = null;
         Embed embed;
         Action? action;
 
         string uId = Guid.NewGuid().ToString();
 
-        if (itemId == null)
-        {
-            await _inventory.Reload(dbUser!.inventory, _dataBase);
-            await _inventory.Save(_dataBase);
-        }
-        else
-            item = _inventory!.GetItems()[Convert.ToInt16(idString)]!;
+        item = (Item?)await _dataBase.ItemDb.Get(_inventory.userItems[_inventory.currentItemIndex]);
 
         if (item != null)
         {

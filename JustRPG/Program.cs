@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Serilog;
 using Serilog.Events;
+using DotNetEnv;
 
 namespace JustRPG;
 
@@ -19,6 +20,7 @@ public class Program
 
     private async Task MainAsync()
     {
+        Env.Load(".env");
         _shareDataBase = new DataBase();
         _client = new DiscordSocketClient(new DiscordSocketConfig()
         {
@@ -61,11 +63,7 @@ public class Program
         var sCommands = provider.GetRequiredService<InteractionService>();
         await provider.GetRequiredService<InteractionHandler>().InitializeAsync();
 
-        sCommands.Log += (LogMessage msg) =>
-        {
-            // Log.Information("{Msg}",msg.Message);
-            return Task.CompletedTask;
-        };
+        sCommands.Log += (LogMessage msg) => Task.CompletedTask;
 
         _client!.Ready += async () =>
         {
@@ -74,10 +72,13 @@ public class Program
             Log.Information("commands are loaded");
         };
 
-        await _client.LoginAsync(TokenType.Bot,
-        Environment.GetEnvironmentVariable("BotToken"));
+        #if DEBUG
+            await _client.LoginAsync(TokenType.Bot, Env.GetString("BotToken-OpenTest"));
+        #else
+            await _client.LoginAsync(TokenType.Bot, Env.GetString("BotToken"));
+        #endif
+        
         await _client.StartAsync();
-
         await Task.Delay(-1);
     }
 

@@ -1,4 +1,5 @@
 using System.Text.Json;
+using DotNetEnv;
 using JustRPG.Services.Collections;
 using JustRPG.Models;
 using MongoDB.Driver;
@@ -24,7 +25,7 @@ public class DataBase
 
     public DataBase()
     {
-        _client = new MongoClient(Environment.GetEnvironmentVariable("DataBaseURL"));
+        _client = new MongoClient(Env.GetString("DataBaseURL"));
         # if DEBUG
         _database = _client.GetDatabase("testMMORPG");
         #else

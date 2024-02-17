@@ -1,3 +1,4 @@
+using JustRPG.Features;
 using JustRPG.Models.Enums;
 using JustRPG.Models.SubClasses;
 using MongoDB.Bson.Serialization.Attributes;
@@ -18,34 +19,12 @@ public class Item
 
     [BsonElement("preset")] public string preset { get; set; } = "";
 
-    [BsonIgnore]
-    public string rarityString
-    {
-        get
-        {
-            return rarity switch
-            {
-                Rarity.common => "⬜",
-                Rarity.uncommon => "🟦",
-                Rarity.rare => "🟪",
-                Rarity.epic => "🟨",
-                Rarity.legendary => "🟥",
-                Rarity.impossible => "👾",
-                Rarity.exotic => "🔳",
-                Rarity.prize => "🎁",
-                Rarity.eventt => "✨",
-                _ => "⬜"
-            };
-
-        }
-}
-
     public override string ToString()
     {
         if (generated)
             return
                 $":heart: : {giveStats!.hp} | :dagger: : {giveStats.damage} | :shield: : {giveStats.defence} \n" +
-                $":four_leaf_clover: : {giveStats.luck} | :zap: : {giveStats.speed} | :gem: : {rarityString}";
+                $":four_leaf_clover: : {giveStats.luck} | :zap: : {giveStats.speed} | :gem: : {SecondaryFunctions.GetRarityColoredEmoji(rarity)}";
         else
             return description;
                

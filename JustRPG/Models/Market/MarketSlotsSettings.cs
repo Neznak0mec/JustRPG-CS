@@ -8,7 +8,7 @@ public class MarketSlotsSettings
     [BsonElement("user_id")] public ulong userId { get; set; }
     [BsonElement("current_item_index")] public int currentItemIndex { get; set; } = 0;
     [BsonElement("search_results")] public List<SaleItem> searchResults { get; set; } = new List<SaleItem>();
-    [BsonElement("start_page")] public string startPage { get; set; }
+    [BsonElement("start_page")] public string startPage { get; set; } = "market";
 
 
     public void IncrementItemIndex()

@@ -15,6 +15,7 @@ public class BattleInteractions : InteractionModuleBase<SocketInteractionContext
     private readonly DataBase _dataBase;
 
     private Battle _battle;
+    private User User;
 
     public BattleInteractions(IServiceProvider service)
     {
@@ -24,6 +25,9 @@ public class BattleInteractions : InteractionModuleBase<SocketInteractionContext
     
     public override async Task<Task> BeforeExecuteAsync(ICommandInfo command)
     {
+        // User = (await _dataBase.UserDb.Get(Context.User.Id))!;
+        // LanguageExtensions.UseLanguage(User.language);
+        
         var buttonInfo = Context.Interaction.Data.CustomId.Split('_');
         object? temp = _dataBase.BattlesDb.Get(buttonInfo[2]);
         if (temp == null){

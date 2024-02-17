@@ -4,7 +4,7 @@ using MongoDB.Driver;
 
 namespace JustRPG.Services.Collections;
 
-public class MarketDB : ICollection
+public class MarketDB
 {
     private readonly IMongoCollection<SaleItem> _collection;
     private readonly IMongoCollection<MarketSearchState> _interaction;
@@ -17,13 +17,13 @@ public class MarketDB : ICollection
         _settings = mongoDatabase.GetCollection<MarketSlotsSettings>("interactions");
     }
 
-    public async Task<object?> Get(object val, string key = "id")
+    public async Task<SaleItem?> Get(object val, string key = "id")
     {
         FilterDefinition<SaleItem> filterItem = Builders<SaleItem>.Filter.Eq(key, val);
         return await (await _collection.FindAsync(filterItem)).FirstOrDefaultAsync();
     }
 
-    public async Task<object?> CreateObject(object? id)
+    public async Task<SaleItem?> CreateObject(SaleItem? id)
     {
         await _collection.InsertOneAsync((SaleItem)id!);
         return id;
@@ -92,7 +92,7 @@ public class MarketDB : ICollection
         filter &= f5;
 
         var res = await _collection.FindAsync(filter);
-        searchState.searchResults = res.ToList();
+        searchState.Items = res.ToList();
 
         FilterDefinition<MarketSearchState> filterItem = Builders<MarketSearchState>.Filter.Eq("id", searchState.id);
         await _interaction.ReplaceOneAsync(filterItem, searchState);

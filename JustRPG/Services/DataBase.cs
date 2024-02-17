@@ -33,11 +33,11 @@ public class DataBase
 
         UserDb = new UserDb(_database);
         ItemDb = new ItemDB(_database);
-        InventoryDb = new InventoryDB(_database, this);
+        InventoryDb = new InventoryDB(this);
         GuildDb = new GuildDB(_database);
         ActionDb = new ActionDB(_database);
         LocationsDb = new LocationsDB(_database);
-        BattlesDb = new BattlesDB(_database);
+        BattlesDb = new BattlesDB();
         ArenaDb = new ArenaDB(_database);
         MarketDb = new MarketDB(_database);
 

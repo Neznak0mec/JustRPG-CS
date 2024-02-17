@@ -25,41 +25,36 @@ public class Background
         while (true)
         {
             await Task.Delay(5000);
-            try
+
+            var tasks = new List<Task>
             {
-                await CheckFindingBattles();
-            }
-            catch (Exception e)
-            {
-                Log.Error(e.ToString());
-            }
-            
-            try
-            {
-                await CancelFindPVP();
-            }
-            catch (Exception e)
-            {
-                Log.Error(e.ToString());
-            }
+                CheckFindingBattles(),
+                CancelFindPVP(),
+                CheckBattleToEnd(),
+                ClearCahes()
+            };
 
             try
             {
-                await CheckBattleToEnd();
+                await Task.WhenAll(tasks);
             }
-            catch(Exception e)
+            catch (Exception e)
             {
-                Log.Error(e.ToString());
+                Console.WriteLine(e);
             }
-
-            _dataBase.ActionDb.RemoveOldActions();
         }
+    }
+    
+    private async Task ClearCahes()
+    {
+        _dataBase.InventoryDb.ClearCache();
+        _dataBase.ActionDb.ClearCache();
     }
 
     private async Task CheckBattleToEnd()
     {
         DateTimeOffset currentTime = DateTimeOffset.Now;
-        List<Battle> battles = (List<Battle>)(await _dataBase.BattlesDb.GetAll())!;
+        List<Battle> battles = (List<Battle>)(_dataBase.BattlesDb.GetAll())!;
 
         List<Battle> endedBattles = battles.Where(x => (x.type is BattleType.adventure or BattleType.dungeon) &&
                                                        x.lastActivity < currentTime.AddSeconds(-60).ToUnixTimeSeconds())
@@ -79,7 +74,7 @@ public class Background
             }
             catch (Exception e)
             {
-                // ignored
+                Log.Error("{error}", e.ToString());
             }
         }
     }
@@ -219,7 +214,7 @@ public class Background
                 log = "-"
             };
 
-            await _dataBase.BattlesDb.CreateObject(battle);
+            _dataBase.BattlesDb.CreateObject(battle);
 
             var modifyTasks = battle.originalInteraction.Select(async msg =>
             {
@@ -245,7 +240,6 @@ public class Background
     async Task CancelFindPVP()
     {
         var findPvps = _dataBase.ArenaDb.GetAllFindPVP().ToArray();
-        //cancel find pvp if time of start more than 5 minutes
         
         foreach (var i in findPvps.Where(i => i.stratTime < DateTimeOffset.Now.AddMinutes(-5).ToUnixTimeSeconds()))
         {

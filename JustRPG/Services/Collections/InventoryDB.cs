@@ -1,74 +1,109 @@
 using JustRPG.Interfaces;
 using JustRPG.Models;
-using MongoDB.Driver;
-using Serilog;
 
 namespace JustRPG.Services.Collections;
-//todo: switch IMongoDatabase to local cache
-public class InventoryDB : ICollection
+
+public class InventoryDB
 {
-    private readonly IMongoCollection<Inventory> _collection;
+    private readonly LocalCache<Inventory> _cache;
     private readonly DataBase _dataBase;
 
-    public InventoryDB(IMongoDatabase mongoDatabase, DataBase dataBase)
+    public InventoryDB(DataBase dataBase)
     {
+        _cache = new LocalCache<Inventory>();
         _dataBase = dataBase;
-        _collection = mongoDatabase.GetCollection<Inventory>("interactions");
     }
 
-    public async Task<object?> Get(object val, string key = "id")
+    public async Task<Inventory?> Get(string id)
     {
-        FilterDefinition<Inventory> filterInventory = Builders<Inventory>.Filter.Eq(key, val);
-
-        if (key != "id")
+        Inventory temp;
+        if (_cache.Exists(id))
         {
-            var res = await _collection.FindAsync(filterInventory);
-            return res.FirstOrDefault();
+            temp = _cache.Get(id)!;
+            if (temp.itemLvl != null)
+            {
+                temp.Items = temp.Items
+                    .Where(item => item.lvl >= temp.itemLvl.Item1 && item.lvl <= temp.itemLvl.Item2)
+                    .ToList();
+            }
+
+            if (temp.itemRarity != null)
+            {
+                temp.Items = temp.Items
+                    .Where(item => item.rarity == temp.itemRarity.Value)
+                    .ToList();
+            }
+
+            if (temp.itemType != null)
+            {
+                temp.Items = temp.Items
+                    .Where(item => item.type == temp.itemType.Value)
+                    .ToList();
+            }
+
+            return temp;
         }
 
 
-        Inventory? temp = new Inventory
+        User user = (User)(await _dataBase.UserDb.Get(id.Split('_')[2]))!;
+        temp = new Inventory
         {
-            id = val.ToString()
+            id = id,
+            userId = user.id
         };
-        if (await _collection.CountDocumentsAsync(x => x!.id == temp.id) > 0)
-        {
-            var res = await _collection.FindAsync(filterInventory);
-            temp = res.FirstOrDefault();
-        }
-        else
-            temp = (Inventory)(await CreateObject(temp))!;
+        await temp.Reload(_dataBase);
+
+        _cache.Add(temp.id, temp);
 
         TimeSpan aTimeSpan = new TimeSpan(0, 0, 5, 0);
-        if (((DateTimeOffset)temp!.lastUsage).ToUnixTimeSeconds() < DateTimeOffset.Now.Subtract(aTimeSpan).ToUnixTimeSeconds())
+        if (((DateTimeOffset)temp!.lastUsage).ToUnixTimeSeconds() <
+            DateTimeOffset.Now.Subtract(aTimeSpan).ToUnixTimeSeconds())
         {
-            temp = (Inventory)(await CreateObject(temp))!;
+            temp = await CreateObject(temp);
         }
 
         return temp;
     }
 
-    public async Task<object?> CreateObject(object? id)
+    public async Task<Inventory> CreateObject(Inventory inventory)
     {
-        Inventory temp = (Inventory)id!;
+        if (_cache.Exists(inventory.id!))
+        {
+            _cache.Remove(inventory.id!);
+        }
 
-        if (await _collection.CountDocumentsAsync(x => x!.id == temp.id) > 0)
-            await _collection.ReplaceOneAsync(x => x!.id == temp.id, temp);
-        else
-            await _collection.InsertOneAsync(temp);
+        _cache.Add(inventory.id!, inventory);
 
-        string userid = temp.id!.Split('_')[2];
+        string userid = inventory.id!.Split('_')[2];
         User user = (User)(await _dataBase.UserDb.Get(userid))!;
-        await temp.Reload(user.inventory, _dataBase);
-        await temp.Save(_dataBase);
+        await inventory.Reload(_dataBase);
 
-        return temp;
+        return inventory;
     }
 
-    public async Task Update(object? obj)
+    public void Update(Inventory inventory)
     {
-        Inventory? temp = (Inventory)obj!;
-        FilterDefinition<Inventory> filterInventory = Builders<Inventory>.Filter.Eq("id", temp.id)!;
-        await _collection.ReplaceOneAsync(filterInventory, temp);
+        _cache.Add(inventory.id!, inventory);
+    }
+
+    public void ClearCache()
+    {
+        List<Inventory?> temp = _dataBase.InventoryDb.GetList();
+        foreach (var inventory in temp)
+        {
+            if (inventory == null)
+                continue;
+            TimeSpan aTimeSpan = new TimeSpan(0, 0, 5, 0);
+            if (((DateTimeOffset)inventory.lastUsage).ToUnixTimeSeconds() <
+                DateTimeOffset.Now.Subtract(aTimeSpan).ToUnixTimeSeconds())
+            {
+                _cache.Remove(inventory.id);
+            }
+        }
+    }
+
+    private List<Inventory?> GetList()
+    {
+        return _cache.GetAll();
     }
 }

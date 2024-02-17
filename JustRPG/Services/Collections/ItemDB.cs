@@ -4,7 +4,7 @@ using MongoDB.Driver;
 
 namespace JustRPG.Services.Collections;
 
-public class ItemDB : ICollection
+public class ItemDB
 {
     private readonly IMongoCollection<Item> _collection;
 
@@ -13,13 +13,13 @@ public class ItemDB : ICollection
         _collection = mongoDatabase.GetCollection<Item>("items");
     }
 
-    public async Task<object?> Get(object val, string key = "id")
+    public async Task<Item?> Get(object val, string key = "id")
     {
         FilterDefinition<Item> filterItem = Builders<Item>.Filter.Eq(key, val);
         return await (await _collection.FindAsync(filterItem)).FirstOrDefaultAsync();
     }
 
-    public async Task<object?> CreateObject(object? id)
+    public async Task<Item?> CreateObject(object? id)
     {
         Item temp = (Item)id!;
         await _collection.InsertOneAsync(temp);

@@ -4,49 +4,44 @@ using MongoDB.Driver;
 
 namespace JustRPG.Services.Collections;
 
-public class BattlesDB : ICollection
+public class BattlesDB
 {
-    private List<Battle> _collection;
+    private LocalCache<Battle> _collection;
 
-    public BattlesDB(IMongoDatabase mongoDatabase)
+    public BattlesDB()
     {
-        _collection = new List<Battle>();
+        _collection = new LocalCache<Battle>();
     }
 
-    public Task<object?> Get(object val, string key = "_id")
+    public Battle? Get(string val)
     {
-        Battle temp = _collection.First(x => x.id == (string)val);
-        temp.log = "";
-        return Task.FromResult<object?>(temp);
+        return _collection.Get(val);
     }
 
-    public Task<object?> GetAll()
+    public List<Battle?> GetAll()
     {
-        return Task.FromResult<object?>(_collection);
+        return _collection.GetAll();
     }
 
-    public Task<object?> CreateObject(object? id)
+    public Battle? CreateObject(Battle battle)
     {
-        Battle temp = (Battle)id!;
-        temp.lastActivity = DateTimeOffset.Now.ToUnixTimeSeconds();
-        _collection.Add(temp);
-        return Task.FromResult(id);
+        battle.lastActivity = DateTimeOffset.Now.ToUnixTimeSeconds();
+        _collection.Add(battle.id,battle);
+        return battle;
     }
 
 
-    public Task Update(object? obj)
+    public Task Update(Battle battle)
     {
-        Battle temp = (Battle)obj!;
-        temp.lastActivity = DateTimeOffset.Now.ToUnixTimeSeconds();
-        _collection.Remove(_collection.First(x => x.id == temp.id));
-        _collection.Add(temp);
+        battle.lastActivity = DateTimeOffset.Now.ToUnixTimeSeconds();
+        _collection.Add(battle.id,battle);
         return Task.CompletedTask;
     }
 
     public Task Delete(object? obj)
     {
         Battle temp = (Battle)obj!;
-        _collection.Remove(_collection.First(x => x.id == temp.id));
+        _collection.Remove(temp.id);
         return Task.CompletedTask;
     }
 }

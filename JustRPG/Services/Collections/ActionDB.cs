@@ -7,41 +7,48 @@ namespace JustRPG.Services.Collections;
 
 public class ActionDB
 {
-    private readonly List<Action?> _collection;
+    private readonly LocalCache<Action?> _collection;
 
     public ActionDB(IMongoDatabase mongoDatabase)
     {
-        _collection = new List<Action?>();
+        _collection = new LocalCache<Action?>();
         
     }
 
     public Action? Get(string key)
     {
-        return _collection.FirstOrDefault(x=> x.id == key);
+        
+        return _collection.Get(key);
 
     }
 
-    public Action CreateObject(Action id)
+    public Action CreateObject(Action action)
     {
-        _collection.Add(id);
-        return id;
+        _collection.Add(action.id,action);
+        return action;
     }
 
     public Action Update(Action obj)
     {
-        var index = _collection.FindIndex(x => x!.id == obj.id);
-        _collection[index] = obj;
+        _collection.Add(obj.id,obj);
         return obj;
     }
 
     public void Delete(string id)
     {
-        _collection.RemoveAll(x => x!.id == id);
+        _collection.Remove(id);
     }
     
-    //autoremove old actions
-    public void RemoveOldActions()
+    public void ClearCache()
     {
-        _collection.RemoveAll(x => DateTimeOffset.Now - x!.date > TimeSpan.FromMinutes(5));
+        TimeSpan aTimeSpan = new TimeSpan(0, 0, 5, 0);
+        foreach (var action in _collection.GetAll())
+        {
+            if (((DateTimeOffset)action!.date).ToUnixTimeSeconds() < DateTimeOffset.Now.Subtract(aTimeSpan).ToUnixTimeSeconds())
+            {
+                _collection.Remove(action.id);
+            }
+        }
+        
     }
 }

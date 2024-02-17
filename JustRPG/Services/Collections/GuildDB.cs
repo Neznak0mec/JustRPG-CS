@@ -4,7 +4,7 @@ using MongoDB.Driver;
 
 namespace JustRPG.Services.Collections;
 
-public class GuildDB : ICollection
+public class GuildDB
 {
     private readonly IMongoCollection<Guild> _collection;
 
@@ -13,22 +13,21 @@ public class GuildDB : ICollection
         _collection = mongoDatabase.GetCollection<Guild>("guilds");
     }
 
-    public async Task<object?> Get(object val, string key = "_id")
+    public async Task<Guild?> Get(object val, string key = "_id")
     {
         FilterDefinition<Guild> filterAction = Builders<Guild>.Filter.Eq(key, val);
         return await (await _collection!.FindAsync(filterAction)).FirstOrDefaultAsync();
     }
 
-    public async Task<object?> CreateObject(object? id)
+    public async Task<Guild?> CreateObject(Guild? id)
     {
-        await _collection.InsertOneAsync((Guild)id!);
+        await _collection.InsertOneAsync(id!);
         return id;
     }
 
-    public async Task Update(object? obj)
+    public async Task Update(Guild obj)
     {
-        Guild? temp = (Guild)obj!;
-        FilterDefinition<Guild> filterGuild = Builders<Guild>.Filter.Eq("_id", temp.tag);
-        await _collection.ReplaceOneAsync(filterGuild!, temp);
+        FilterDefinition<Guild> filterGuild = Builders<Guild>.Filter.Eq("_id", obj.tag);
+        await _collection.ReplaceOneAsync(filterGuild!, obj);
     }
 }

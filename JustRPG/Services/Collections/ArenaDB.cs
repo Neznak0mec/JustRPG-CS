@@ -5,31 +5,30 @@ namespace JustRPG.Services.Collections;
 
 public class ArenaDB
 {
-    private List<FindPVP> _findPvps;
+    private LocalCache<FindPVP> _findPvps;
 
     public ArenaDB(IMongoDatabase mongoDatabase)
     {
-        _findPvps = new List<FindPVP>();
+        _findPvps = new LocalCache<FindPVP>();
     }
 
-    public void AppFindPVP(FindPVP findPvp) => _findPvps.Add(findPvp);
+    public void AppFindPVP(FindPVP findPvp) => _findPvps.Add(findPvp.userId.ToString(),findPvp);
 
     public void DeletFindPVP(long userId)
     {
-        _findPvps.RemoveAll(x => x.userId == userId);
+        _findPvps.Remove(userId.ToString());
     }
 
-    public int CountOfFinfPVP() => _findPvps.Count;
+    public int CountOfFinfPVP() => _findPvps.GetAll().Count;
 
-    public List<FindPVP> GetAllFindPVP() => _findPvps;
+    public List<FindPVP> GetAllFindPVP() => _findPvps.GetAll();
     
     public bool IsFindPVP(long userId) => _findPvps.Any(x => x.userId == userId);
    
-    public FindPVP? Get(long userId) => _findPvps.FirstOrDefault(x => x.userId == userId);
+    public FindPVP? Get(long userId) => _findPvps.Get(userId.ToString());
     
     public void Update(FindPVP findPvp)
     {
-        var index = _findPvps.FindIndex(x => x.userId == findPvp.userId);
-        _findPvps[index] = findPvp;
+        _findPvps.Add(findPvp.userId.ToString(),findPvp);
     }
 }

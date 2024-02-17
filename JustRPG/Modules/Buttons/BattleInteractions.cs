@@ -25,7 +25,7 @@ public class BattleInteractions : InteractionModuleBase<SocketInteractionContext
     public override async Task<Task> BeforeExecuteAsync(ICommandInfo command)
     {
         var buttonInfo = Context.Interaction.Data.CustomId.Split('_');
-        object? temp = await _dataBase.BattlesDb.Get(buttonInfo[2]);
+        object? temp = _dataBase.BattlesDb.Get(buttonInfo[2]);
         if (temp == null){
             await WrongInteraction("Боя не существует или он завершился");
             return Task.CompletedTask;

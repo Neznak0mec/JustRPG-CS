@@ -47,7 +47,7 @@ public class SelectLocation : InteractionModuleBase<SocketInteractionContext<Soc
         };
 
 
-        await _dataBase.BattlesDb.CreateObject(newBattle);
+        _dataBase.BattlesDb.CreateObject(newBattle);
 
         await ResponseMessage(EmbedCreater.BattleEmbed(newBattle),
             component: ButtonSets.BattleButtonSet(newBattle, Convert.ToInt64(userId)));
@@ -75,7 +75,7 @@ public class SelectLocation : InteractionModuleBase<SocketInteractionContext<Soc
         await ResponseMessage(EmbedCreater.BattleEmbed(newBattle),
             component: ButtonSets.BattleButtonSet(newBattle, (long)Context.User.Id));
 
-        await _dataBase.BattlesDb.CreateObject(newBattle);
+        _dataBase.BattlesDb.CreateObject(newBattle);
         
     }
 

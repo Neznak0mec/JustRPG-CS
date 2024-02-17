@@ -66,7 +66,7 @@ public class InventoryInteractions : InteractionModuleBase<SocketInteractionCont
     {
         var dbUser = (User)(await _dataBase.UserDb.Get(Convert.ToUInt64(userId)))!;
 
-        await _inventory.Reload(dbUser!.inventory, _dataBase);
+        await _inventory.Reload(_dataBase);
         await UpdateMessage(finder, userId);
     }
 
@@ -119,7 +119,7 @@ public class InventoryInteractions : InteractionModuleBase<SocketInteractionCont
 
     private async Task ItemInfo(string finder, string userId)
     {
-        Item? item = (Item?)await _dataBase.ItemDb.Get(_inventory.userItems[_inventory.currentItemIndex]);
+        Item? item = (Item?)await _dataBase.ItemDb.Get(_inventory.userItems[_inventory.CurrentItemIndex]);
         await RespondAsync(embed: EmbedCreater.ItemInfo(item!), ephemeral: true);
     }
 
@@ -127,7 +127,7 @@ public class InventoryInteractions : InteractionModuleBase<SocketInteractionCont
     {
         var dbUser = (User)(await _dataBase.UserDb.Get(Convert.ToUInt64(userId)))!;
 
-        Item? item = (Item?)await _dataBase.ItemDb.Get(_inventory.userItems[_inventory.currentItemIndex]);
+        Item? item = (Item?)await _dataBase.ItemDb.Get(_inventory.userItems[_inventory.CurrentItemIndex]);
         Item? itemToChange = null;
         Embed embed;
         Action? action;
@@ -190,7 +190,7 @@ public class InventoryInteractions : InteractionModuleBase<SocketInteractionCont
             throw new UserInteractionException("Вы достигли лимита по продаже, одновременно можно выставлять только 5 предметов");
         }
 
-        Item item = (Item)(await _dataBase.ItemDb.Get(_inventory.userItems[_inventory.currentItemIndex]))!;
+        Item item = (Item)(await _dataBase.ItemDb.Get(_inventory.userItems[_inventory.CurrentItemIndex]))!;
 
         User user = (User)(await _dataBase.UserDb.Get(Context.User.Id))!;
 
@@ -224,9 +224,9 @@ public class InventoryInteractions : InteractionModuleBase<SocketInteractionCont
             await _dataBase.UserDb.Update(user);
         }
 
-        await _inventory.Reload(user.inventory, _dataBase);
+        await _inventory.Reload(_dataBase);
         _inventory.interactionType = "sell";
-        await _inventory.Save();
+        await _inventory.Save(_dataBase);
 
         await UpdateMessage(finder, userId);
         
@@ -246,7 +246,7 @@ public class InventoryInteractions : InteractionModuleBase<SocketInteractionCont
 
         string uId = Guid.NewGuid().ToString();
 
-        item = (Item?)await _dataBase.ItemDb.Get(_inventory.userItems[_inventory.currentItemIndex]);
+        item = (Item?)await _dataBase.ItemDb.Get(_inventory.userItems[_inventory.CurrentItemIndex]);
 
         if (item != null)
         {
@@ -293,5 +293,13 @@ public class InventoryInteractions : InteractionModuleBase<SocketInteractionCont
             x.Embed = EmbedCreater.MarketSettingsPage(marketSettings);
             x.Components = ButtonSets.MarketSettingComponents(marketSettings);
         });
+    }
+    
+    
+    [ComponentInteraction("Inventory|SortMenu_*_*", true)]
+    private async Task OpenSortMenu(string userId, string idString)
+    {
+        _inventory.showSortSelections = !_inventory.showSortSelections;
+        await UpdateMessage(userId, idString);
     }
 }

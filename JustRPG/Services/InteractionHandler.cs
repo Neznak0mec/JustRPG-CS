@@ -70,7 +70,7 @@ namespace JustRPG.Services
                 {
                     await context.Interaction.RespondAsync(
                         embed: EmbedCreater.ErrorEmbed("Произошла неизвестная ошибка, попробуйте позже"), ephemeral: true);
-                    Log.Debug("{reason} - {place}",result.ErrorReason,result.Error.Value);
+                    Log.Debug("{reason}",result.ErrorReason);
                 }
             }
         }

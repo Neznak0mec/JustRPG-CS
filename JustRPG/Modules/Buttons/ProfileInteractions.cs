@@ -47,10 +47,11 @@ public class ProfileInteractions : InteractionModuleBase<SocketInteractionContex
             (Inventory)(await _dataBase.InventoryDb.Get($"Inventory_{memberId}_{toFind}"))!;
         var items = inventory.GetItems();
         User user = (User)(await _dataBase.UserDb.Get(toFind))!;
+        
+        var embed = await EmbedCreater.UserInventory(member, user, inventory, _dataBase);
+        var component = ButtonSets.InventoryButtonsSet(memberId, Convert.ToInt64(toFind), inventory, items);
 
-        await ResponseMessage(await EmbedCreater.UserInventory(member, user,inventory, _dataBase),
-            ButtonSets.InventoryButtonsSet(memberId, Convert.ToInt64(toFind), inventory, items)
-            );
+        await ResponseMessage(embed, component);
     }
 
     private async Task ResponseMessage(Embed embed, MessageComponent component)

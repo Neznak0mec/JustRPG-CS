@@ -117,13 +117,13 @@ public static class BattleMaster
             
                 if (users[i]!.inventory.Count >= 30)
                 {
-                    battle.log += $":school_satchel:У `{battle.players[i].name}` не хватило места для `{item.name} {item.rarityString} | {item.lvl}`\n";
+                    battle.log += $":school_satchel:У `{battle.players[i].name}` не хватило места для `{item.name} {SecondaryFunctions.GetRarityColoredEmoji(item.rarity)} | {item.lvl}`\n";
                     break;
                 }
                 users[i]!.inventory.Add(item.id);
 
                 await dataBase.ItemDb.CreateObject(item);
-                battle.log += $":school_satchel:`{battle.players[i].name}` получил `{item.name} {item.rarityString} | {item.lvl}`\n";
+                battle.log += $":school_satchel:`{battle.players[i].name}` получил `{item.name} {SecondaryFunctions.GetRarityColoredEmoji(item.rarity)} | {item.lvl}`\n";
             }
             
             

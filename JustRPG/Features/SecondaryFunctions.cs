@@ -1,6 +1,7 @@
 using Discord;
 using Discord.WebSocket;
 using JustRPG.Models;
+using JustRPG.Models.Enums;
 
 namespace JustRPG.Features;
 
@@ -80,5 +81,22 @@ public static class SecondaryFunctions
         userName ??= $"{socketUser.Username}#{socketUser.Discriminator}";
 
         return userName;
+    }
+    
+    public static string GetRarityColoredEmoji(Rarity? rarity)
+    {
+        return rarity switch
+        {
+            Rarity.common => "⬜",
+            Rarity.uncommon => "🟦",
+            Rarity.rare => "🟪",
+            Rarity.epic => "🟨",
+            Rarity.legendary => "🟥",
+            Rarity.impossible => "👾",
+            Rarity.exotic => "🔳",
+            Rarity.prize => "🎁",
+            Rarity.eventt => "✨",
+            _ => "⬜"
+        };
     }
 }

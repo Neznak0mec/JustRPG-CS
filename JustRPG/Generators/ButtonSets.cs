@@ -21,32 +21,13 @@ public static class ButtonSets
 
     public static MessageComponent InventoryButtonsSet(string finder, long userId, Inventory? inventory, Item?[] items)
     {
-        var select = new SelectMenuBuilder()
-            .WithPlaceholder(
-                $"Тип взаимодействия: {(inventory!.interactionType == "info" ? "информация" : inventory.interactionType == "sell" ? "продажа" : inventory.interactionType == "destroy" ? "уничтожить" : "экипировать")}")
-            .WithCustomId($"Inventory|InteractionType_{finder}_{userId}")
-            .AddOption("Информация", "info")
-            .AddOption("Экипировать", "equip")
-            .AddOption("Продать", "sell")
-            .AddOption("Уничтожить", "destroy")
-            .WithDisabled(finder != userId.ToString());
-
         IEmote emote = inventory.interactionType switch
         {
             "info" => Emoji.Parse(":identification_card:"),
             "destroy" => Emoji.Parse(":wastebasket:"),
             "sell" => Emoji.Parse(":scales:"),
-                _ => Emoji.Parse(":shirt:")
+            _ => Emoji.Parse(":shirt:")
         };
-
-        var builder = new ComponentBuilder()
-            .WithButton(label: "←", customId: $"Inventory|prewPage_{finder}_{userId}", row: 0)
-            .WithButton(label: "↑", customId: $"Inventory|prewItem_{finder}_{userId}", row: 0)
-            .WithButton(emote: emote, customId: $"Inventory|interact_{finder}_{userId}", row: 0)
-            .WithButton(label: "↓", customId: $"Inventory|nextItem_{finder}_{userId}", row: 0)
-            .WithButton(label: "→", customId: $"Inventory|nextPage_{finder}_{userId}", row: 0)
-
-            .WithSelectMenu(select, row: 1);
 
         ButtonStyle style = inventory.interactionType switch
         {
@@ -55,20 +36,96 @@ public static class ButtonSets
             _ => ButtonStyle.Success
         };
 
+
+        var builder = new ComponentBuilder()
+            .WithButton(label: "←", customId: $"Inventory|prewPage_{finder}_{userId}", row: 0)
+            .WithButton(label: "↑", customId: $"Inventory|prewItem_{finder}_{userId}", row: 0)
+            .WithButton(emote: emote, customId: $"Inventory|interact_{finder}_{userId}", style: style, row: 0)
+            .WithButton(label: "↓", customId: $"Inventory|nextItem_{finder}_{userId}", row: 0)
+            .WithButton(label: "→", customId: $"Inventory|nextPage_{finder}_{userId}", row: 0);
+
+        if (inventory.showSortSelections)
+        {
+            var rarityOptions = new[]
+            {
+                "сброс",
+                "обычное",
+                "необычное",
+                "редкое",
+                "эпическое",
+                "легендарное",
+            };
+
+            var itemTypeOptions = new[]
+            {
+                "сброс",
+                "шлем",
+                "нагрудник",
+                "перчатки",
+                "штаны",
+                "ботинки",
+                "оружие",
+                "зелья"
+            };
+
+            var levelOptions = Enumerable.Range(1, 65)
+                .GroupBy(x => (x - 1) / 5)
+                .Select(g => new { range = $"{g.First()}-{g.Last()}" })
+                .ToArray();
+
+            var selectMenuLvl = new SelectMenuBuilder()
+                .WithCustomId($"Inventory|byLvl_{finder}_{userId}")
+                .WithPlaceholder("Выберете уровень предмета")
+                .WithOptions(levelOptions.Select(x =>
+                    new SelectMenuOptionBuilder().WithLabel($"Уровень {x.range}").WithValue($"{x.range}")).ToList());
+
+            var selectMenuRaty = new SelectMenuBuilder()
+                .WithCustomId($"Inventory|byRaty_{finder}_{userId}")
+                .WithPlaceholder("Выберете редкость предмета")
+                .WithOptions(rarityOptions.Select(x =>
+                    new SelectMenuOptionBuilder().WithLabel(x).WithValue($"{x}")).ToList());
+
+            var selectMenuType = new SelectMenuBuilder()
+                .WithCustomId($"Inventory|byType_{finder}_{userId}")
+                .WithPlaceholder("Выберете тип предмета")
+                .WithOptions(itemTypeOptions.Select(x =>
+                    new SelectMenuOptionBuilder().WithLabel(x).WithValue($"{x}")).ToList());
+
+            builder.WithSelectMenu(selectMenuLvl, row: 1)
+                .WithSelectMenu(selectMenuRaty, row: 2)
+                .WithSelectMenu(selectMenuType, row: 3);
+        }
+        else
+        {
+            var select = new SelectMenuBuilder()
+                .WithPlaceholder(
+                    $"Тип взаимодействия: {(inventory!.interactionType == "info" ? "информация" : inventory.interactionType == "sell" ? "продажа" : inventory.interactionType == "destroy" ? "уничтожить" : "экипировать")}")
+                .WithCustomId($"Inventory|InteractionType_{finder}_{userId}")
+                .AddOption("Информация", "info")
+                .AddOption("Экипировать", "equip")
+                .AddOption("Продать", "sell")
+                .AddOption("Уничтожить", "destroy")
+                .WithDisabled(finder != userId.ToString());
+
+            builder.WithSelectMenu(select, row: 1);
+        }
+
+
         builder
-            .WithButton(label: "Назад к профилю", customId: $"Profile_{finder}_{userId}", row: 3)
+            .WithButton(emote: Emoji.Parse(":back:"), customId: $"Profile_{finder}_{userId}", row: 2)
             .WithButton(emote: Emoji.Parse(":tools:"), label: "🛒",
-                customId: $"Inventory|OpenSlotsSettings_{finder}_{userId}", row: 3)
-            .WithButton(label: "♺", customId: $"Inventory|Reload_{finder}_{userId}");
+                customId: $"Inventory|OpenSlotsSettings_{finder}_{userId}", row: 2)
+            .WithButton(emote: Emoji.Parse(":compression:"), customId: $"Inventory|SortMenu_{finder}_{userId}", row: 2)
+            .WithButton(label: "♺", customId: $"Inventory|Reload_{finder}_{userId}", row: 2);
 
         return builder.Build();
     }
-    
+
     public static MessageComponent SaleItemButtonsSet(long userid, string itemId)
     {
         ComponentBuilder builder =
             new ComponentBuilder().WithButton(label: "Установить цену", $"Market|setPrice_{userid}_{itemId}");
-        
+
         return builder.Build();
     }
 
@@ -101,8 +158,10 @@ public static class ButtonSets
         bool disableSelectEnemy = false)
     {
         var builder = new ComponentBuilder()
-            .WithButton(emote: Emoji.Parse(":dagger:"), customId: $"Battle|Attack_{userId}_{battle!.id}", disabled: disableButtons)
-            .WithButton(emote: Emoji.Parse(":heavy_plus_sign:"), customId: $"Battle|Heal_{userId}_{battle.id}", disabled: disableButtons,
+            .WithButton(emote: Emoji.Parse(":dagger:"), customId: $"Battle|Attack_{userId}_{battle!.id}",
+                disabled: disableButtons)
+            .WithButton(emote: Emoji.Parse(":heavy_plus_sign:"), customId: $"Battle|Heal_{userId}_{battle.id}",
+                disabled: disableButtons,
                 style: ButtonStyle.Success)
             .WithButton(emote: Emoji.Parse(":person_running:"), customId: $"Battle|Run_{userId}_{battle.id}",
                 disabled: disableButtons || battle.type == BattleType.arena,

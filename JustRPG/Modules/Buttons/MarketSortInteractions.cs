@@ -46,7 +46,7 @@ public class MarketSortInteractions : InteractionModuleBase<SocketInteractionCon
     {
         MarketSearchState search = (await _dataBase.MarketDb.GetSearch(userId))!;
         await _dataBase.MarketDb.SearchGetAndUpdate(search);
-        search.searchResults.Sort((x, y) => x.price - y.price);
+        search.Items.Sort((x, y) => x.price - y.price);
         await UpdateMessage(search);
     }
 
@@ -55,7 +55,7 @@ public class MarketSortInteractions : InteractionModuleBase<SocketInteractionCon
     {
         MarketSearchState search = (await _dataBase.MarketDb.GetSearch(userId))!;
         await _dataBase.MarketDb.SearchGetAndUpdate(search);
-        search.searchResults.Sort((x, y) => y.price - x.price);
+        search.Items.Sort((x, y) => y.price - x.price);
         await UpdateMessage(search);
     }
 
@@ -63,8 +63,8 @@ public class MarketSortInteractions : InteractionModuleBase<SocketInteractionCon
     public async Task ReloadPage(string userId)
     {
         MarketSearchState search = (await _dataBase.MarketDb.GetSearch(userId))!;
-        search.currentPage = 0;
-        search.currentItemIndex = 0;
+        search.CurrentPage = 0;
+        search.CurrentItemIndex = 0;
         search.itemLvl = null;
         search.itemRarity = null;
         search.itemType = null;
@@ -97,7 +97,7 @@ public class MarketSortInteractions : InteractionModuleBase<SocketInteractionCon
         SaleItem item;
         try
         {
-            item = search.GetItemsOnPage(search.currentPage)[search.currentItemIndex];
+            item = search.GetItemsOnPage(search.CurrentPage)[search.CurrentItemIndex];
         }
         catch (Exception)
         {

@@ -114,20 +114,32 @@ public class EmbedCreater
                 continue;
             }
 
-            string title = inventory.currentItemIndex == i ? $":diamond_shape_with_a_dot_inside: `{items[i]!.lvl} | {items[i]!.name}`" : $"{items[i]!.lvl} | {items[i]!.name}";
+            string title = inventory.CurrentItemIndex == i
+                ? $":diamond_shape_with_a_dot_inside: `{items[i]!.lvl} | {items[i]!.name}`"
+                : $"{items[i]!.lvl} | {items[i]!.name}";
             emb.AddField(title, $">>> {items[i]!}");
 
-            if (inventory.currentItemIndex == i && inventory.interactionType == "equip" && inventory.items[i].IsEquippable())
+            if (inventory.CurrentItemIndex == i && inventory.interactionType == "equip" &&
+                inventory.Items[i].IsEquippable())
             {
                 UserEquipment equipment = await user.GetEquipmentAsItems(dataBase);
-                Item? equippedItem = equipment.GetEquippedItemByType(inventory.items[i].type);
+                Item? equippedItem = equipment.GetEquippedItemByType(inventory.Items[i].type);
 
                 if (equippedItem != null)
-                    emb.AddField($":scales: Сейчас надето `{equippedItem.lvl} | {equippedItem.name}`", $">>> {equippedItem}");
+                    emb.AddField($":scales: Сейчас надето `{equippedItem.lvl} | {equippedItem.name}`",
+                        $">>> {equippedItem}");
             }
         }
-        
-        emb.WithFooter($"Страница {inventory.currentPage + 1}/{inventory.GetCountOfPages()}");
+
+
+        string footer = $"Страница {inventory.CurrentPage + 1}/{inventory.GetCountOfPages()}\n" +
+                        (inventory.itemLvl != null
+                            ? $" | Сортировка по {inventory.itemLvl?.Item1}-{inventory.itemLvl?.Item2} уровню\n"
+                            : "") +
+                        (inventory.itemRarity != null ? $" | редкость - {SecondaryFunctions.GetRarityColoredEmoji(inventory.itemRarity!)}\n" : "") +
+                        (inventory.itemType != null ? $" | тип - {inventory.itemType}" : "");
+        emb.WithFooter(footer);
+
 
         return emb.Build();
     }
@@ -256,14 +268,14 @@ public class EmbedCreater
     public static Embed MarketPage(MarketSearchState searchState)
     {
         var emb = new EmbedBuilder { Title = "Маркет" };
-        List<SaleItem> items = searchState.GetItemsOnPage(searchState.currentPage);
+        List<SaleItem> items = searchState.GetItemsOnPage(searchState.CurrentPage);
         for (int i = 0; i < 5; i++)
         {
             if (i >= items.Count)
                 emb.AddField("-", "-");
             else
                 emb.AddField(
-                    (searchState.currentItemIndex == i ? "💠 " : "") +
+                    (searchState.CurrentItemIndex == i ? "💠 " : "") +
                     $"{items[i].itemName} | {items[i].price}<:silver:997889161484828826>", items[i].itemDescription);
         }
 

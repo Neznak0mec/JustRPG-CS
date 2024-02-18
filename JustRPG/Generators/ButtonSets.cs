@@ -397,4 +397,25 @@ public static class ButtonSets
 
         return builder.Build();
     }
+
+    public static MessageComponent SelectRewardsComponents(ulong userId, BattleResultDrop resultDrop,bool end = false)
+    {
+        var builder = new ComponentBuilder();
+
+        builder.WithButton(label: "↑", customId: $"SelectRewards|prewItem_{userId}_{resultDrop.id}", row: 0, disabled: end)
+            .WithButton(emote: Emoji.Parse(":pushpin:"), customId: $"SelectRewards|Select_{userId}_{resultDrop.id}", row: 0, disabled: end)
+            .WithButton(label: "↓", customId: $"SelectRewards|nextItem_{userId}_{resultDrop.id}", row: 0, disabled: end)
+            .WithButton(emote: Emoji.Parse(":heavy_check_mark:"), customId: $"SelectRewards|Complete_{userId}_{resultDrop.id}", row: 1,style: ButtonStyle.Success, disabled: end);
+        
+        return builder.Build();
+    }
+
+    public static MessageComponent StartSelectRewards(ulong userId)
+    {
+        var builder = new ComponentBuilder();
+
+        builder.WithButton(emote: Emoji.Parse(":gem:"), customId: $"Battle|StartSelectReward_{userId}_a", style: ButtonStyle.Success);
+
+        return builder.Build();
+    }
 }

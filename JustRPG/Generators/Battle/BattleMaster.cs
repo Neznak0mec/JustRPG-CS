@@ -3,6 +3,7 @@ using JustRPG.Models;
 using JustRPG.Models.Enums;
 using JustRPG.Models.SubClasses;
 using JustRPG.Services;
+using Serilog;
 
 namespace JustRPG.Generators;
 
@@ -82,6 +83,8 @@ public static class BattleMaster
 
     private static async Task<List<User?>> HandlePlayerWin(Battle battle, List<User?> users, DataBase dataBase)
     {
+        List<BattleResultDrop> results = new List<BattleResultDrop>();
+        
         for (int i = 0; i < battle.players.Length; i++)
         {
             if (battle.players[i].stats.hp <= 0)
@@ -107,6 +110,8 @@ public static class BattleMaster
                 }
             }
 
+            List<Item> items = new List<Item>();
+            
             foreach (var rarity in drop)
             {
                 Tuple<string, string>? itemName = SecondaryFunctions.GetRandomKeyValuePair(battle.drop);
@@ -115,17 +120,20 @@ public static class BattleMaster
                 Item item = BattleGenerators.GenerateEquipmentItem(itemName.Item1,
                     rarity.Item2, itemName.Item2, rarity.Item1);
             
-                if (users[i]!.inventory.Count >= 30)
-                {
-                    battle.log += $":school_satchel:У `{battle.players[i].name}` не хватило места для `{item.name} {SecondaryFunctions.GetRarityColoredEmoji(item.rarity)} | {item.lvl}`\n";
-                    break;
-                }
-                users[i]!.inventory.Add(item.id);
+                // if (users[i]!.inventory.Count >= 30)
+                // {
+                //     battle.log += $":school_satchel:У `{battle.players[i].name}` не хватило места для `{item.name} {SecondaryFunctions.GetRarityColoredEmoji(item.rarity)} | {item.lvl}`\n";
+                //     break;
+                // }
+                // users[i]!.inventory.Add(item.id);
 
                 await dataBase.ItemDb.CreateObject(item);
-                battle.log += $":school_satchel:`{battle.players[i].name}` получил `{item.name} {SecondaryFunctions.GetRarityColoredEmoji(item.rarity)} | {item.lvl}`\n";
+                items.Add(item);
+                
+                battle.log += $":school_satchel:`{battle.players[i].name}` нашёл `{item.name} {SecondaryFunctions.GetRarityColoredEmoji(item.rarity)} | {item.lvl}`\n";
             }
             
+            results.Add(new BattleResultDrop(users[i]!, items));
             
             
             int countOfDroppedItem = BattleGenerators.GetRandomNumberForDrop();
@@ -151,6 +159,10 @@ public static class BattleMaster
             battle.log += $":gift:`{battle.players[i].name}` получил `{exp}` опыта и `{coins}` монет\n";
         }
 
+        foreach (var result in results)
+            dataBase.BattlesDb.AddDrop(result);
+    
+
         return users;
     }
     
@@ -173,7 +185,7 @@ public static class BattleMaster
                 users[i]!.exp = 0;
 
             string? droppedItem = null;
-            if (Random.Shared.Next(0, 100) < 40)
+            if (Random.Shared.Next(0, 100) < 20)
             {
                 switch (Random.Shared.Next(0, 6))
                 {
@@ -224,7 +236,7 @@ public static class BattleMaster
             else
             {
                 string? droppedItem = null;
-                if (Random.Shared.Next(0, 100) < 20)
+                if (Random.Shared.Next(0, 100) < 5)
                 {
                     switch (Random.Shared.Next(0, 6))
                     {

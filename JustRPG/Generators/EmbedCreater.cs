@@ -440,4 +440,51 @@ public class EmbedCreater
 
         return emb.Build();
     }
+
+    public static async Task<Embed?> SelectRewardsEmbed(BattleResultDrop drop,DataBase dataBase,bool end = false)
+    {
+        var emb = new EmbedBuilder
+        {
+            Title = "Выбор награды"
+        };
+        if (end)
+        {
+            emb.Description = "Выбранные награды были отправлены в инвентарь";
+            for (int i = 0; i < drop.Items.Count; i++)
+            {
+                if (drop.selectedItems.Contains(i))
+                {
+                    
+                    Item item = drop.Items[i];
+                    emb.AddField($"{item.name} | {item.lvl}", $">>> {drop.Items[i]}");
+                }
+            }
+            return emb.Build();
+        }
+
+        for (int i = 0; i < drop.Items.Count; i++)
+        {
+            string itemName = drop.Items[i].name;
+            if (drop.selectedItems.Contains(i))
+                itemName = "\ud83d\udccc " + itemName;
+            if (i == drop.CurrentItemIndex)
+                itemName = "💠 " + itemName;
+            emb.AddField(itemName, $">>> {drop.Items[i]}");
+            
+            if (drop.CurrentItemIndex == i &&
+                drop.Items[i].IsEquippable())
+            {
+                User user = dataBase.UserDb.Get(drop.userId).Result!;
+                UserEquipment equipment = await user.GetEquipmentAsItems(dataBase);
+                Item? equippedItem = equipment.GetEquippedItemByType(drop.Items[i].type);
+
+                if (equippedItem != null)
+                    emb.AddField($":scales: Сейчас надето `{equippedItem.lvl} | {equippedItem.name}`",
+                        $">>> {equippedItem}");
+            }
+            
+        }
+
+        return emb.Build();
+    }
 }

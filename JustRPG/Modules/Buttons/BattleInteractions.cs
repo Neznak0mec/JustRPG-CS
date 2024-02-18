@@ -36,6 +36,7 @@ public class BattleInteractions : InteractionModuleBase<SocketInteractionContext
         }
         else{
             _battle = (Battle)temp;
+            _battle.log = "";
             return base.BeforeExecuteAsync(command);
         }
     }
@@ -208,8 +209,14 @@ public class BattleInteractions : InteractionModuleBase<SocketInteractionContext
         
 
         Embed embed = EmbedCreater.BattleEmbed(_battle, gameEnded);
-        MessageComponent component = ButtonSets.BattleButtonSet(_battle,(long)_battle.players[_battle.currentUser].id!, gameEnded, disableSelectEnemy);
-        
+        MessageComponent component;
+        if (gameEnded && _battle.status == BattleStatus.playerWin && _battle.type != BattleType.arena)
+            component = ButtonSets.StartSelectRewards((ulong)_battle.players[_battle.currentUser].id!);
+        else
+            component
+                = ButtonSets.BattleButtonSet(_battle, (long)_battle.players[_battle.currentUser].id!, gameEnded,
+                    disableSelectEnemy);
+
 
         await Context.Interaction.UpdateAsync(x =>
         {

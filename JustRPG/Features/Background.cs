@@ -191,8 +191,8 @@ public class Background
             User u1 = (User)u1Task.Result!;
             User u2 = (User)u2Task.Result!;
 
-            var w1Task = BattleGenerators.GenerateWarriorByUser(u1, m1.Username, _dataBase, m1.GetAvatarUrl());
-            var w2Task = BattleGenerators.GenerateWarriorByUser(u2, m2.Username, _dataBase, m2.GetAvatarUrl());
+            var w1Task = BattleGenerators.GenerateWarriorFromUser(u1, m1.Username, _dataBase, m1.GetAvatarUrl());
+            var w2Task = BattleGenerators.GenerateWarriorFromUser(u2, m2.Username, _dataBase, m2.GetAvatarUrl());
 
             await Task.WhenAll(w1Task, w2Task);
 

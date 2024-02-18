@@ -8,7 +8,7 @@ namespace JustRPG.Generators;
 
 public class BattleGenerators
 {
-     public static async Task<Warrior> GenerateWarriorByUser(User user, string username, DataBase dataBase,
+     public static async Task<Warrior> GenerateWarriorFromUser(User user, string username, DataBase dataBase,
         string? avatarUrl = "") => new()
     {
         id = user.id,

@@ -26,7 +26,7 @@ public class SelectLocation : InteractionModuleBase<SocketInteractionContext<Soc
     {
         Location location = await _dataBase.LocationsDb.Get(Context.Interaction.Data.Values.ToArray()[0]);
         Warrior mainPlayer =
-            await BattleGenerators.GenerateWarriorByUser((User)(await _dataBase.UserDb.Get(userId))!,
+            await BattleGenerators.GenerateWarriorFromUser((User)(await _dataBase.UserDb.Get(userId))!,
             Context.User.Username, _dataBase);
 
         List<Warrior> enemies = new List<Warrior>();
@@ -58,7 +58,7 @@ public class SelectLocation : InteractionModuleBase<SocketInteractionContext<Soc
     {
         Location location = await _dataBase.LocationsDb.Get(Context.Interaction.Data.Values.ToArray()[0]);
         Warrior mainPlayer =
-            await BattleGenerators.GenerateWarriorByUser((User)(await _dataBase.UserDb.Get(Context.User.Id))!,
+            await BattleGenerators.GenerateWarriorFromUser((User)(await _dataBase.UserDb.Get(Context.User.Id))!,
             Context.User.Username, _dataBase);
 
         Battle newBattle = new Battle
